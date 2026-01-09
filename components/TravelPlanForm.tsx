@@ -3,10 +3,10 @@ import { View, Text, Pressable } from "react-native";
 import { Controller, Control, FieldErrors } from "react-hook-form";
 import { z } from "zod";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Input, Button } from "@/design-system";
+import { Input } from "@/design-system";
 import { TravelPlan } from "@/types/travelPlan";
 import { LocationSearchInput } from "./LocationSearchInput";
-
+import { ActiveTravelPlanBanner } from "./ActiveTravelPlanBanner";
 // Travel plan schema
 export const travelPlanSchema = z.object({
   destination: z
@@ -23,6 +23,7 @@ export const travelPlanSchema = z.object({
     .int()
     .min(1, "Minimum 1 day")
     .max(31, "Maximum 31 days"),
+  text: z.string().max(300, "Message is too long").optional(),
 });
 
 export type TravelPlanFormData = z.infer<typeof travelPlanSchema>;
@@ -32,8 +33,6 @@ interface TravelPlanFormProps {
   errors: FieldErrors<TravelPlanFormData>;
   activeTravelPlan: TravelPlan | null;
   isEditingActivePlan: boolean;
-  onEditActivePlan: () => void;
-  onDeleteActivePlan: () => void;
   onCancelEdit: () => void;
 }
 
@@ -42,52 +41,10 @@ export function TravelPlanForm({
   errors,
   activeTravelPlan,
   isEditingActivePlan,
-  onEditActivePlan,
-  onDeleteActivePlan,
   onCancelEdit,
 }: TravelPlanFormProps) {
   return (
     <>
-      {/* Active Travel Plan Banner */}
-      {activeTravelPlan && !isEditingActivePlan && (
-        <View className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-          <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-base font-semibold text-purple-900">
-              Active Travel Plan
-            </Text>
-            <Text className="text-xs text-purple-700">
-              {new Date(activeTravelPlan.start_date).toLocaleDateString()} -{" "}
-              {new Date(activeTravelPlan.end_date).toLocaleDateString()}
-            </Text>
-          </View>
-
-          <Text className="text-lg font-medium text-gray-900 mb-1">
-            {activeTravelPlan.destination_name}
-          </Text>
-          <Text className="text-sm text-gray-600 mb-4">
-            {activeTravelPlan.duration_days} days
-          </Text>
-
-          <View className="flex-row gap-2">
-            <Button
-              variant="secondary"
-              onPress={onEditActivePlan}
-              className="flex-1"
-            >
-              Edit
-            </Button>
-            <Button
-              variant="secondary"
-              onPress={onDeleteActivePlan}
-              className="flex-1"
-            >
-              Delete
-            </Button>
-          </View>
-        </View>
-      )}
-
-      {/* Show form only when creating new plan or editing active plan */}
       {(isEditingActivePlan || !activeTravelPlan) && (
         <>
           {isEditingActivePlan && (
@@ -161,6 +118,26 @@ export function TravelPlanForm({
                   </Text>
                 )}
               </View>
+            )}
+          />
+
+          {/* Custom Message */}
+          <Controller
+            control={control}
+            name="text"
+            render={({ field }) => (
+              <Input
+                label="Message (optional)"
+                placeholder="Add a note about your trip..."
+                multiline
+                maxLength={300}
+                showCharacterCount
+                value={field.value || ""}
+                onChangeText={field.onChange}
+                error={errors.text?.message}
+                className="min-h-[120px]"
+                textAlignVertical="top"
+              />
             )}
           />
         </>

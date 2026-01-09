@@ -35,11 +35,7 @@ export const ScreenHeader = React.memo<ScreenHeaderProps>(
           <View className="w-[60px]" />
         )}
         <Heading className="text-xl font-bold">{title}</Heading>
-        {rightComponent ? (
-          rightComponent
-        ) : (
-          <View className="w-[60px]" />
-        )}
+        {rightComponent ? rightComponent : <View className="w-[60px]" />}
       </View>
     );
   }

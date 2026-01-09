@@ -34,14 +34,23 @@ export function LocationSearchInput({
   const [query, setQuery] = useState(value?.name || "");
   const [results, setResults] = useState<LocationResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
   const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showDropdown = results.length > 0;
+
+  // Sync query with value prop (for form reset scenarios)
+  useEffect(() => {
+    const newQuery = value?.name || "";
+    if (newQuery !== query) {
+      setQuery(newQuery);
+    }
+  }, [value?.name]); // Remove query from deps to prevent loops
 
   // Debounced search
   useEffect(() => {
+    // Don't search if query is empty or matches the selected value
     if (!query.trim() || query === value?.name) {
       setResults([]);
-      setShowDropdown(false);
       return;
     }
 
@@ -51,24 +60,18 @@ export function LocationSearchInput({
     }
 
     // Set new debounce timeout
-    debounceTimeout.current = setTimeout(async () => {
-      await searchLocations(query);
-    }, 400); // 400ms debounce
+    debounceTimeout.current = setTimeout(() => {
+      searchLocations(query);
+    }, 400);
 
     return () => {
       if (debounceTimeout.current) {
         clearTimeout(debounceTimeout.current);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query]);
+  }, [query, value?.name]);
 
   const searchLocations = async (searchQuery: string) => {
-    if (!MAPBOX_ACCESS_TOKEN) {
-      console.error("Mapbox access token not configured");
-      return;
-    }
-
     setIsLoading(true);
     try {
       const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
@@ -83,24 +86,18 @@ export function LocationSearchInput({
 
       const data = await response.json();
 
-      if (data.features && data.features.length > 0) {
-        const locations: LocationResult[] = data.features.map(
-          (feature: any) => ({
-            id: feature.id,
-            place_name: feature.place_name,
-            center: feature.center,
-          })
-        );
-        setResults(locations);
-        setShowDropdown(true);
-      } else {
-        setResults([]);
-        setShowDropdown(false);
-      }
+      const locations: LocationResult[] = data.features?.map(
+        (feature: any) => ({
+          id: feature.id,
+          place_name: feature.place_name,
+          center: feature.center,
+        })
+      ) || [];
+
+      setResults(locations);
     } catch (err) {
       console.error("Error searching locations:", err);
       setResults([]);
-      setShowDropdown(false);
     } finally {
       setIsLoading(false);
     }
@@ -108,7 +105,7 @@ export function LocationSearchInput({
 
   const handleSelectLocation = (location: LocationResult) => {
     setQuery(location.place_name);
-    setShowDropdown(false);
+    setResults([]);
     onChange({
       name: location.place_name,
       longitude: location.center[0],
@@ -121,7 +118,6 @@ export function LocationSearchInput({
     if (!text.trim()) {
       onChange(null);
       setResults([]);
-      setShowDropdown(false);
     }
   };
 
@@ -149,7 +145,7 @@ export function LocationSearchInput({
         )}
 
         {/* Dropdown results */}
-        {showDropdown && results.length > 0 && (
+        {showDropdown && (
           <View className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
             <ScrollView
               style={{ maxHeight: 200 }}

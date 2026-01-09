@@ -3,7 +3,7 @@ import { FlatList, RefreshControl, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { useSupabase } from "@/hooks/useSupabase";
 import { useMessageChannels } from "@/hooks/useMessageChannels";
-import { ChannelListItem } from "./ChannelListItem";
+import { ChannelListItem } from "../design-system/ChannelListItem";
 import { LoadingState, ErrorState, EmptyState } from "@/design-system";
 import { MessageChannel } from "@/types/messageChannel";
 import { colors } from "@/design-system/colors";

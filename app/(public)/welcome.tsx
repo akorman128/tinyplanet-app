@@ -33,7 +33,9 @@ export default function WelcomePage() {
         </View>
 
         <View className="mt-8">
-          <Caption className="text-center">Made with ❤️ for friends</Caption>
+          <Caption className="text-center">
+            Made with ❤️ for friends who are family
+          </Caption>
         </View>
       </View>
     </SafeAreaView>

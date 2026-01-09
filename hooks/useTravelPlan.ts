@@ -80,14 +80,17 @@ export const useTravelPlan = () => {
    */
   const createTravelPlan = useCallback(
     async (input: CreateTravelPlanInput): Promise<CreateTravelPlanOutput> => {
-      const { destination, start_date, duration_days, post_visibility } = input;
+      const { destination, start_date, duration_days, post_visibility, text } =
+        input;
 
       // Client-side validation
       if (duration_days < 1 || duration_days > 31) {
         throw new Error("Duration must be between 1 and 31 days");
       }
 
-      const startDate = new Date(start_date);
+      // Parse date as local time (not UTC)
+      const [year, month, day] = start_date.split("-").map(Number);
+      const startDate = new Date(year, month - 1, day); // month is 0-indexed
       if (isNaN(startDate.getTime())) {
         throw new Error("Invalid start date");
       }
@@ -110,6 +113,7 @@ export const useTravelPlan = () => {
           p_start_date: start_date,
           p_duration_days: duration_days,
           p_post_visibility: post_visibility || "friends",
+          p_text: text || null,
         }
       );
 
@@ -135,6 +139,7 @@ export const useTravelPlan = () => {
         start_date,
         duration_days,
         post_visibility,
+        text,
       } = input;
 
       // Client-side validation
@@ -158,6 +163,7 @@ export const useTravelPlan = () => {
           p_start_date: start_date,
           p_duration_days: duration_days,
           p_post_visibility: post_visibility || null,
+          p_text: text || null,
         }
       );
 

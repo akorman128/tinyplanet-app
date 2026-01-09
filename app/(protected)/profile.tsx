@@ -1,20 +1,7 @@
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  useRef,
-} from "react";
-import {
-  View,
-  Text,
-  Pressable,
-  ScrollView,
-  Linking,
-  Alert,
-} from "react-native";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { View, Text, Pressable, ScrollView } from "react-native";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
-import BottomSheet from "@gorhom/bottom-sheet";
+
 import {
   Avatar,
   Button,
@@ -31,16 +18,14 @@ import {
 import { useRequireProfile } from "@/hooks/useRequireProfile";
 import { useProfile } from "@/hooks/useProfile";
 import { useVibe } from "@/hooks/useVibe";
-import { useSupabase } from "@/hooks/useSupabase";
 import { useLocation } from "@/hooks/useLocation";
 import { useTravelPlan } from "@/hooks/useTravelPlan";
 import { reverseGeocode } from "@/utils/reverseGeocode";
 import { formatBirthday } from "@/utils";
 import { Profile } from "@/types/profile";
 import { TravelPlan } from "@/types/travelPlan";
-import { VibeDisplay } from "@/components/VibeDisplay";
+import { VibeDisplay } from "@/design-system/VibeDisplay";
 import { FriendStatusSection } from "@/components/FriendStatusSection";
-import { CreateSheet } from "@/components/CreateSheet";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -48,9 +33,8 @@ export default function ProfileScreen() {
   const profile = useRequireProfile();
   const { getProfile } = useProfile();
   const { getTopVibes, isLoaded: vibeIsLoaded } = useVibe();
-  const { signOut } = useSupabase();
   const { updateLocationInDatabase } = useLocation();
-  const { getActiveTravelPlan, cancelTravelPlan } = useTravelPlan();
+  const { getActiveTravelPlan } = useTravelPlan();
 
   const [otherUserProfile, setOtherUserProfile] = useState<Profile | null>(
     null
@@ -71,14 +55,6 @@ export default function ProfileScreen() {
   const [activeTravelPlan, setActiveTravelPlan] = useState<TravelPlan | null>(
     null
   );
-  const [editingTravelPlan, setEditingTravelPlan] = useState<{
-    id: string;
-    destination: { name: string; latitude: number; longitude: number };
-    start_date: string;
-    duration_days: number;
-    visibility: "friends" | "mutuals" | "public";
-  } | null>(null);
-  const createSheetRef = useRef<BottomSheet>(null);
 
   // Determine which profile to display (memoized)
   const isViewingOwnProfile = useMemo(() => !userId, [userId]);

@@ -2,18 +2,12 @@ import React, { useState } from "react";
 import { View, Text, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { Avatar, Icons, colors } from "@/design-system";
-import { PostWithAuthor, PostVisibility } from "@/types/post";
+import { PostWithAuthor } from "@/types/post";
 import { useLikes } from "@/hooks/useLikes";
 import { useSavedPosts } from "@/hooks/useSavedPosts";
 import { usePosts } from "@/hooks/usePosts";
 import { useSupabase } from "@/hooks/useSupabase";
 import { formatTimeAgo } from "@/utils";
-
-interface EditPost {
-  id: string;
-  text: string;
-  visibility: PostVisibility;
-}
 
 interface PostCardProps {
   post: PostWithAuthor;
@@ -21,7 +15,6 @@ interface PostCardProps {
   onSave: (postId: string, updates: Partial<PostWithAuthor>) => void;
   onDelete: (postId: string) => void;
   onOpenComments: (postId: string, commentCount: number) => void;
-  onEditPost?: (post: EditPost) => void;
 }
 
 export function PostCard({
@@ -30,7 +23,6 @@ export function PostCard({
   onSave,
   onDelete,
   onOpenComments,
-  onEditPost,
 }: PostCardProps) {
   const router = useRouter();
   const { session } = useSupabase();
@@ -109,10 +101,9 @@ export function PostCard({
       {
         text: "Edit Post",
         onPress: () => {
-          onEditPost?.({
-            id: post.id,
-            text: post.text,
-            visibility: post.visibility,
+          router.push({
+            pathname: "/edit-post",
+            params: { postId: post.id },
           });
         },
       },

@@ -33,3 +33,10 @@ export type {
   OptionSelectorProps,
   OptionSelectorOption,
 } from "./OptionSelector";
+export { ChannelListItem } from "./ChannelListItem";
+export { CommentItem } from "./CommentItem";
+export { FriendRequestItem } from "./FriendRequestItem";
+export { MessageBubble } from "./MessageBubble";
+export { PostCard } from "./PostCard";
+export { TravelPlanCard } from "./TravelPlanCard";
+export { VibeDisplay } from "./VibeDisplay";

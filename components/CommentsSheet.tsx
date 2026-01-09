@@ -25,7 +25,7 @@ import {
 import { useComments } from "@/hooks/useComments";
 import { useLikes } from "@/hooks/useLikes";
 import { CommentWithAuthor } from "@/types/comment";
-import { CommentItem } from "./CommentItem";
+import { CommentItem } from "../design-system/CommentItem";
 
 const commentSchema = z.object({
   body: z

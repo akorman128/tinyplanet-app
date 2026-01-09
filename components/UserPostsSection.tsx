@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { View, FlatList, RefreshControl, Text } from "react-native";
-import { PostCard } from "@/components/PostCard";
-import { TravelPlanCard } from "@/components/TravelPlanCard";
+import { PostCard } from "@/design-system/PostCard";
+import { TravelPlanCard } from "@/design-system/TravelPlanCard";
 import { useFeed } from "@/hooks/useFeed";
 import { useSavedPosts } from "@/hooks/useSavedPosts";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
@@ -46,45 +46,48 @@ export function UserPostsSection({
   const [hasMore, setHasMore] = useState(true);
 
   // Fetch posts for current filter
-  const fetchPosts = useCallback(async (isRefresh = false) => {
-    if (!isRefresh && loading) return; // Prevent concurrent fetches
+  const fetchPosts = useCallback(
+    async (isRefresh = false) => {
+      if (!isRefresh && loading) return; // Prevent concurrent fetches
 
-    if (isRefresh) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
-    }
-    setError(null);
-
-    try {
-      let data: PostWithAuthor[];
-      const currentOffset = isRefresh ? 0 : offset;
-
-      if (activeFilter === "posts") {
-        const result = await getUserPosts(userId, {
-          limit: POSTS_PER_PAGE,
-          offset: currentOffset,
-        });
-        data = result.data;
+      if (isRefresh) {
+        setRefreshing(true);
       } else {
-        const result = await getSavedPosts({
-          limit: POSTS_PER_PAGE,
-          offset: currentOffset,
-        });
-        data = result.data;
+        setLoading(true);
       }
+      setError(null);
 
-      setPosts((prev) => (isRefresh ? data : [...prev, ...data]));
-      setOffset(isRefresh ? data.length : currentOffset + data.length);
-      setHasMore(data.length === POSTS_PER_PAGE);
-    } catch (err) {
-      console.error(`Error fetching ${activeFilter}:`, err);
-      setError(`Failed to load ${activeFilter}`);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [activeFilter, userId, offset, loading, getUserPosts, getSavedPosts]);
+      try {
+        let data: PostWithAuthor[];
+        const currentOffset = isRefresh ? 0 : offset;
+
+        if (activeFilter === "posts") {
+          const result = await getUserPosts(userId, {
+            limit: POSTS_PER_PAGE,
+            offset: currentOffset,
+          });
+          data = result.data;
+        } else {
+          const result = await getSavedPosts({
+            limit: POSTS_PER_PAGE,
+            offset: currentOffset,
+          });
+          data = result.data;
+        }
+
+        setPosts((prev) => (isRefresh ? data : [...prev, ...data]));
+        setOffset(isRefresh ? data.length : currentOffset + data.length);
+        setHasMore(data.length === POSTS_PER_PAGE);
+      } catch (err) {
+        console.error(`Error fetching ${activeFilter}:`, err);
+        setError(`Failed to load ${activeFilter}`);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [activeFilter, userId, offset, loading, getUserPosts, getSavedPosts]
+  );
 
   // Fetch on mount and when filter changes
   useEffect(() => {
@@ -111,7 +114,9 @@ export function UserPostsSection({
   };
 
   const handleLike = (postId: string, updates: Partial<PostWithAuthor>) => {
-    setPosts((prev) => prev.map((p) => (p.id === postId ? { ...p, ...updates } : p)));
+    setPosts((prev) =>
+      prev.map((p) => (p.id === postId ? { ...p, ...updates } : p))
+    );
   };
 
   const handleSave = (postId: string, updates: Partial<PostWithAuthor>) => {
@@ -119,7 +124,9 @@ export function UserPostsSection({
     if (activeFilter === "saved" && updates.saved_by_user === false) {
       setPosts((prev) => prev.filter((p) => p.id !== postId));
     } else {
-      setPosts((prev) => prev.map((p) => (p.id === postId ? { ...p, ...updates } : p)));
+      setPosts((prev) =>
+        prev.map((p) => (p.id === postId ? { ...p, ...updates } : p))
+      );
     }
   };
 

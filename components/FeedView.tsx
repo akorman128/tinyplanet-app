@@ -7,8 +7,8 @@ import {
 } from "react-native";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { useFeed } from "@/hooks/useFeed";
-import { PostCard } from "./PostCard";
-import { TravelPlanCard } from "./TravelPlanCard";
+import { PostCard } from "../design-system/PostCard";
+import { TravelPlanCard } from "../design-system/TravelPlanCard";
 import { CommentsSheet } from "./CommentsSheet";
 import { EmptyState, LoadingState, ErrorState, colors } from "@/design-system";
 import { PostWithAuthor, PostVisibility } from "@/types/post";
@@ -18,20 +18,13 @@ const isTravelPlanPost = (post: PostWithAuthor): boolean => {
   return post.text.startsWith("🚀 Traveling to");
 };
 
-interface EditPost {
-  id: string;
-  text: string;
-  visibility: PostVisibility;
-}
-
 interface FeedViewProps {
   onCommentsSheetChange?: (isOpen: boolean) => void;
-  onEditPost?: (post: EditPost) => void;
 }
 
 const PAGE_SIZE = 10;
 
-export function FeedView({ onCommentsSheetChange, onEditPost }: FeedViewProps) {
+export function FeedView({ onCommentsSheetChange }: FeedViewProps) {
   const { getFeed } = useFeed();
   const [posts, setPosts] = useState<PostWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
@@ -200,7 +193,6 @@ export function FeedView({ onCommentsSheetChange, onEditPost }: FeedViewProps) {
               onSave={handleSavePost}
               onDelete={handlePostDelete}
               onOpenComments={handleOpenComments}
-              onEditPost={onEditPost}
             />
           )
         }

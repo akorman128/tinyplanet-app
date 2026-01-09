@@ -12,15 +12,8 @@ import { Avatar, Icons } from "@/design-system";
 import { ButtonGroup } from "@/design-system/ButtonGroup";
 import { useProfileStore } from "@/stores/profileStore";
 import { colors } from "@/design-system/colors";
-import { PostVisibility } from "@/types/post";
 
 type ViewMode = "map" | "feed" | "messages";
-
-interface EditPost {
-  id: string;
-  text: string;
-  visibility: PostVisibility;
-}
 
 export default function Page() {
   const insets = useSafeAreaInsets();
@@ -28,7 +21,6 @@ export default function Page() {
   const [activeView, setActiveView] = useState<ViewMode>("map");
   const [isCreatePostSheetOpen, setIsCreatePostSheetOpen] = useState(false);
   const [isCommentsSheetOpen, setIsCommentsSheetOpen] = useState(false);
-  const [editPost, setEditPost] = useState<EditPost | undefined>(undefined);
   const router = useRouter();
   const { profileState } = useProfileStore();
   const createPostSheetRef = useRef<BottomSheet>(null);
@@ -45,30 +37,8 @@ export default function Page() {
     router.push("/search");
   };
 
-  const handlePostCreated = () => {
-    // Refresh feed after post creation
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 100);
-  };
-
-  const handlePostUpdated = () => {
-    // Refresh feed after post update
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 100);
-    setEditPost(undefined);
-  };
-
-  const handleEditPost = (post: EditPost) => {
-    setEditPost(post);
-    createPostSheetRef.current?.snapToIndex(0);
-  };
-
   const handleSheetChange = (index: number) => {
     setIsCreatePostSheetOpen(index >= 0);
-    // Clear edit post when sheet closes
-    if (index < 0) {
-      setEditPost(undefined);
-    }
   };
 
   return (
@@ -81,7 +51,6 @@ export default function Page() {
           <FeedView
             key={refreshing ? "refreshing" : "idle"}
             onCommentsSheetChange={setIsCommentsSheetOpen}
-            onEditPost={handleEditPost}
           />
         ) : (
           <MessagesView />
@@ -173,9 +142,6 @@ export default function Page() {
         <CreateSheet
           ref={createPostSheetRef}
           initialType="post"
-          editPost={editPost}
-          onPostCreated={handlePostCreated}
-          onPostUpdated={handlePostUpdated}
           onSheetChange={handleSheetChange}
         />
       </View>

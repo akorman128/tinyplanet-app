@@ -43,6 +43,7 @@ export interface CreateTravelPlanInput {
   start_date: string; // ISO date string (YYYY-MM-DD)
   duration_days: number; // 1-31
   post_visibility?: PostVisibility; // defaults to 'friends'
+  text?: string; // Optional custom message to append to post
 }
 
 export interface UpdateTravelPlanInput {
@@ -55,6 +56,7 @@ export interface UpdateTravelPlanInput {
   start_date: string;
   duration_days: number;
   post_visibility?: PostVisibility;
+  text?: string; // Optional custom message to append to post
 }
 
 // Output DTOs

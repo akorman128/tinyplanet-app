@@ -11,9 +11,19 @@ import { useRouter, Stack } from "expo-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { colors, Input, Button, Heading, Body, Caption, TabBar, Tab, ScreenHeader } from "@/design-system";
+import {
+  colors,
+  Input,
+  Button,
+  Heading,
+  Body,
+  Caption,
+  TabBar,
+  Tab,
+  ScreenHeader,
+} from "@/design-system";
 import { UserSearchListItem } from "@/components/UserSearchList";
-import { FriendRequestItem } from "@/components/FriendRequestItem";
+import { FriendRequestItem } from "@/design-system/FriendRequestItem";
 import { VibePhoneForm } from "@/components/VibePhoneForm";
 import { useFriends } from "@/hooks/useFriends";
 import { useVibe } from "@/hooks/useVibe";

@@ -10,7 +10,7 @@ import { SupabaseContext } from "../context/supabase-context";
 // React Native's default timeout is 60s, which is too long for a good UX
 const customFetch = (url: RequestInfo | URL, options: RequestInit = {}) => {
   const controller = new AbortController();
-  const timeout = 5000; // 5 second timeout
+  const timeout = 10000; // 10 second timeout
 
   const startTime = Date.now();
   console.log(`[Fetch] Starting request to ${url}`);

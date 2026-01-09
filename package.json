@@ -8,7 +8,6 @@
     "start:nocash": "npx expo start --clear --reset-cache",
     "android": "npx expo run:android",
     "ios": "npx expo run:ios",
-    "ios:nocash": "npx expo run:ios --clear --reset-cache",
     "lint": "npx expo lint . --fix"
   },
   "dependencies": {
@@ -47,6 +46,7 @@
     "@types/react-native": "^0.73.0",
     "babel-plugin-module-resolver": "^5.0.2",
     "babel-preset-expo": "~54.0.0",
+    "baseline-browser-mapping": "^2.9.11",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~10.0.0",
     "eslint-config-prettier": "^10.1.8",
