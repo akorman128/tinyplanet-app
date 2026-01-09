@@ -51,7 +51,7 @@ export const LocationPermissionProvider = ({
     checkPermissionStatus,
     getCurrentLocation,
     updateLocationInDatabase,
-    locationStore,
+    locationStore.isLocationStale,
   ]);
 
   return <>{children}</>;

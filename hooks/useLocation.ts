@@ -68,6 +68,10 @@ export const useLocation = (): UseLocationReturn => {
   const markPermissionGranted = useLocationStore(
     (state) => state.markPermissionGranted
   );
+  const requirePermission = useLocationStore(
+    (state) => state.requirePermission
+  );
+  const hasBeenGranted = useLocationStore((state) => state.hasBeenGranted);
   const setLocation = useLocationStore((state) => state.setLocation);
   const isLocationStale = useLocationStore((state) => state.isLocationStale);
   const markDatabaseUpdate = useLocationStore(
@@ -76,6 +80,25 @@ export const useLocation = (): UseLocationReturn => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  /**
+   * Enhanced permission status setter that enforces permission requirement
+   * Triggers blocking screen if user previously granted but now revoked
+   */
+  const setPermissionStatusWithEnforcement = useCallback(
+    (status: Location.PermissionStatus) => {
+      setPermissionStatus(status);
+
+      // Only enforce for returning users (hasBeenGranted = true)
+      if (hasBeenGranted && status !== Location.PermissionStatus.GRANTED) {
+        console.log(
+          `Location permission revoked (status: ${status}) - triggering blocking screen`
+        );
+        requirePermission();
+      }
+    },
+    [setPermissionStatus, hasBeenGranted, requirePermission]
+  );
 
   /**
    * Request location permission from the user
@@ -89,7 +112,7 @@ export const useLocation = (): UseLocationReturn => {
       // Check existing permission status
       const { status: existingStatus } =
         await Location.getForegroundPermissionsAsync();
-      setPermissionStatus(existingStatus);
+      setPermissionStatusWithEnforcement(existingStatus);
 
       if (existingStatus === Location.PermissionStatus.GRANTED) {
         return true;
@@ -97,7 +120,7 @@ export const useLocation = (): UseLocationReturn => {
 
       // Request permission if not granted
       const { status } = await Location.requestForegroundPermissionsAsync();
-      setPermissionStatus(status);
+      setPermissionStatusWithEnforcement(status);
 
       if (status !== Location.PermissionStatus.GRANTED) {
         setError("Location permission not granted");
@@ -113,7 +136,7 @@ export const useLocation = (): UseLocationReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [setPermissionStatus, markPermissionGranted]);
+  }, [setPermissionStatusWithEnforcement, markPermissionGranted]);
 
   /**
    * @param forceRefresh - If true, always fetch fresh location from device
@@ -175,11 +198,11 @@ export const useLocation = (): UseLocationReturn => {
   const checkPermissionStatus = useCallback(async (): Promise<void> => {
     try {
       const { status } = await Location.getForegroundPermissionsAsync();
-      setPermissionStatus(status);
+      setPermissionStatusWithEnforcement(status);
     } catch (err) {
       console.error("Error checking permission status:", err);
     }
-  }, [setPermissionStatus]);
+  }, [setPermissionStatusWithEnforcement]);
 
   /**
    * Update the user's location in the database

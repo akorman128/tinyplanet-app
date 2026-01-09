@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, Pressable, ScrollView, Alert } from "react-native";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 
 import {
   Avatar,
-  Button,
   InfoRow,
   ScreenHeader,
   Badge,
@@ -33,7 +32,6 @@ export default function ProfileScreen() {
   const profile = useRequireProfile();
   const { getProfile } = useProfile();
   const { getTopVibes, isLoaded: vibeIsLoaded } = useVibe();
-  const { updateLocationInDatabase } = useLocation();
   const { getActiveTravelPlan } = useTravelPlan();
 
   const [otherUserProfile, setOtherUserProfile] = useState<Profile | null>(
@@ -51,7 +49,6 @@ export default function ProfileScreen() {
   const [totalVibeCount, setTotalVibeCount] = useState(0);
   const [vibesLoading, setVibesLoading] = useState(false);
   const [mutualCount, setMutualCount] = useState(0);
-  const [updatingLocation, setUpdatingLocation] = useState(false);
   const [activeTravelPlan, setActiveTravelPlan] = useState<TravelPlan | null>(
     null
   );
@@ -332,44 +329,14 @@ export default function ProfileScreen() {
               <InfoRow label="Hometown" value={displayProfile.hometown} />
             )}
 
-            {isViewingOwnProfile &&
-              displayProfile.latitude === undefined &&
-              displayProfile.longitude === undefined && (
-                <View className="w-full mb-4 px-4 py-3 bg-yellow-50 rounded-lg">
-                  <Text className="text-sm text-gray-700 mb-2">
-                    Current location not set
-                  </Text>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onPress={async () => {
-                      setUpdatingLocation(true);
-                      try {
-                        // Force update location in database
-                        // This will also update the profile store automatically
-                        await updateLocationInDatabase(true);
-                      } catch (err) {
-                        console.error("Error updating location:", err);
-                        setError("Failed to update location");
-                      } finally {
-                        setUpdatingLocation(false);
-                      }
-                    }}
-                    disabled={updatingLocation}
-                  >
-                    {updatingLocation ? "Updating..." : "Update Location"}
-                  </Button>
-                </View>
+            {displayProfile.latitude !== undefined &&
+              displayProfile.longitude !== undefined && (
+                <InfoRow
+                  label="Current Location"
+                  value={humanReadableLocation || "Unknown location"}
+                  loading={geocoding}
+                />
               )}
-
-            {(displayProfile.latitude !== undefined ||
-              displayProfile.longitude !== undefined) && (
-              <InfoRow
-                label="Current Location"
-                value={humanReadableLocation || "Unknown location"}
-                loading={geocoding}
-              />
-            )}
           </View>
         </ScrollView>
       </View>

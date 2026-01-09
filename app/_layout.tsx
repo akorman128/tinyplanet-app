@@ -53,23 +53,48 @@ function RootNavigator() {
   // Load profile when session exists but profile doesn't
   useEffect(() => {
     const loadProfile = async () => {
-      // Skip if no session, profile already loaded, or currently loading
-      if (!session?.user?.id || profileState || isLoading) {
+      // Skip if no session or currently loading
+      if (!session?.user?.id || isLoading) {
         return;
       }
 
-      console.log("Session exists but no profile - fetching from database");
-      setLoading(true);
+      // If profile exists but lacks location data, re-fetch to populate computed fields
+      if (
+        profileState &&
+        (profileState.latitude === undefined || profileState.longitude === undefined)
+      ) {
+        console.log("Profile loaded from cache but missing location - re-fetching");
+        setLoading(true);
 
-      try {
-        const profile = await getProfile({ userId: session.user.id });
-        setProfileState(profile);
-        console.log("Profile loaded successfully:", profile.id);
-      } catch (error) {
-        const profileError =
-          error instanceof Error ? error : new Error("Failed to load profile");
-        setProfileError(profileError);
-        console.error("Failed to load profile:", profileError);
+        try {
+          const freshProfile = await getProfile({ userId: session.user.id });
+          setProfileState(freshProfile);
+          console.log("Profile location refreshed successfully");
+        } catch (error) {
+          const profileError =
+            error instanceof Error ? error : new Error("Failed to refresh profile");
+          setProfileError(profileError);
+          console.error("Failed to refresh profile:", profileError);
+        }
+
+        return;
+      }
+
+      // If no profile exists, fetch from database
+      if (!profileState) {
+        console.log("Session exists but no profile - fetching from database");
+        setLoading(true);
+
+        try {
+          const profile = await getProfile({ userId: session.user.id });
+          setProfileState(profile);
+          console.log("Profile loaded successfully:", profile.id);
+        } catch (error) {
+          const profileError =
+            error instanceof Error ? error : new Error("Failed to load profile");
+          setProfileError(profileError);
+          console.error("Failed to load profile:", profileError);
+        }
       }
     };
 
@@ -78,6 +103,8 @@ function RootNavigator() {
   }, [
     session?.user?.id,
     profileState,
+    profileState?.latitude,
+    profileState?.longitude,
     isLoading,
     getProfile,
     setProfileState,

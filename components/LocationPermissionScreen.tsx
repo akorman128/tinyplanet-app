@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { View } from "react-native";
+import { View, Linking } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as Location from "expo-location";
 
 import { Button, Heading, Body } from "@/design-system";
 import { useLocation } from "@/hooks/useLocation";
@@ -33,7 +34,8 @@ export function LocationPermissionScreen({
   onSuccess,
   onRetry,
 }: LocationPermissionScreenProps) {
-  const { isLoading, error, getCurrentLocation } = useLocation();
+  const { isLoading, error, getCurrentLocation, permissionStatus } =
+    useLocation();
 
   // Request location permissions on mount
   useEffect(() => {
@@ -62,6 +64,10 @@ export function LocationPermissionScreen({
     }
   };
 
+  const handleOpenSettings = () => {
+    Linking.openSettings();
+  };
+
   // Show loading screen while checking/requesting location permissions
   if (isLoading) {
     return (
@@ -76,10 +82,16 @@ export function LocationPermissionScreen({
   // Show error screen if location permissions denied
   if (error) {
     const isSignup = context === "signup";
+    const isSystemDenied =
+      permissionStatus === Location.PermissionStatus.DENIED;
+
     const title = isSignup
       ? "Location Access Required"
       : "Location Permission Revoked";
-    const message = isSignup
+
+    const message = isSystemDenied
+      ? "You have denied location access in your device settings. Please open Settings to enable location permissions for Tiny Planet."
+      : isSignup
       ? "Access to your location is required to use this Tiny Planet. How tf are we supposed to find your ass?"
       : "Location access was revoked. Please re-enable location permissions to continue using Tiny Planet.";
 
@@ -88,9 +100,16 @@ export function LocationPermissionScreen({
         <View className="flex-1 items-center justify-center px-6 gap-4">
           <Heading className="text-center">{title}</Heading>
           <Body className="text-center text-gray-600">{message}</Body>
-          <Button variant="primary" onPress={handleRetry}>
-            {isSignup ? "Retry" : "Grant Permission"}
-          </Button>
+
+          {isSystemDenied ? (
+            <Button variant="primary" onPress={handleOpenSettings}>
+              Open Settings
+            </Button>
+          ) : (
+            <Button variant="primary" onPress={handleRetry}>
+              {isSignup ? "Retry" : "Grant Permission"}
+            </Button>
+          )}
         </View>
       </SafeAreaView>
     );
