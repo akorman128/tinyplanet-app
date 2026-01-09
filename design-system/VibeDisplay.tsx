@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, Pressable } from "react-native";
-import { colors } from "@/design-system";
+import { colors } from "./colors";
 
 interface VibeDisplayProps {
   topVibes: { emoji: string; count: number }[];

@@ -1,6 +1,6 @@
 export default {
   expo: {
-    name: "tinyplanet",
+    name: "Tiny Planet",
     slug: "tinyplanet",
     version: "1.0.0",
     orientation: "portrait",

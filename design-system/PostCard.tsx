@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { View, Text, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
-import { Avatar, Icons, colors } from "@/design-system";
+import { Avatar } from "./Avatar";
+import { Icons } from "./Icons";
+import { colors } from "./colors";
 import { PostWithAuthor } from "@/types/post";
 import { useLikes } from "@/hooks/useLikes";
 import { useSavedPosts } from "@/hooks/useSavedPosts";

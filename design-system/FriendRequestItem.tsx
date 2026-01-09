@@ -1,6 +1,8 @@
 import React from "react";
 import { View, Text } from "react-native";
-import { Avatar, Badge, Button } from "@/design-system";
+import { Avatar } from "./Avatar";
+import { Badge } from "./Badge";
+import { Button } from "./Button";
 import { PendingRequest } from "@/types/friendship";
 
 type FriendRequestItemProps = {

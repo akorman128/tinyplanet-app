@@ -8,7 +8,8 @@ import {
   Text,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Icons, colors } from "@/design-system";
+import { Icons } from "./Icons";
+import { colors } from "./colors";
 
 interface ChatInputProps {
   onSend: (text: string) => void;

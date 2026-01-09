@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { View, Text, Pressable } from "react-native";
-import { Avatar, Icons, colors } from "@/design-system";
+import { Avatar } from "./Avatar";
+import { Icons } from "./Icons";
+import { colors } from "./colors";
 import { CommentWithAuthor } from "@/types/comment";
 import { formatTimeAgo } from "@/utils";
 
