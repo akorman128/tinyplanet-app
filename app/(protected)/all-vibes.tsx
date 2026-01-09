@@ -5,20 +5,31 @@ import {
   FlatList,
   ActivityIndicator,
   Pressable,
+  Modal,
+  TextInput,
+  Alert,
 } from "react-native";
-import { useLocalSearchParams, useRouter, Stack } from "expo-router";
-import { colors, Avatar, ScreenHeader } from "@/design-system";
+import { useLocalSearchParams, Stack } from "expo-router";
+import { colors, Avatar, ScreenHeader, Icons, Button } from "@/design-system";
 import { useVibe } from "@/hooks/useVibe";
 import { VibeWithSender } from "@/types/vibe";
 import { formatTimeAgo } from "@/utils";
+import { useRequireProfile } from "@/hooks/useRequireProfile";
+import { extractEmojis } from "@/utils/emojiValidation";
 
 export default function AllVibesScreen() {
-  const router = useRouter();
   const { userId } = useLocalSearchParams<{ userId: string }>();
-  const { getVibesWithSenderInfo, isLoaded } = useVibe();
+  const { getVibesWithSenderInfo, createVibe, hasGivenVibe, isLoaded } =
+    useVibe();
   const [vibes, setVibes] = useState<VibeWithSender[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [hasUserGivenVibe, setHasUserGivenVibe] = useState(false);
+  const [emojiInput, setEmojiInput] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const profile = useRequireProfile();
 
   useEffect(() => {
     const loadVibes = async () => {
@@ -39,6 +50,54 @@ export default function AllVibesScreen() {
     loadVibes();
   }, [userId, getVibesWithSenderInfo, isLoaded]);
 
+  // Check if current user has given a vibe to this recipient
+  useEffect(() => {
+    const checkUserVibe = async () => {
+      if (!userId || !isLoaded) return;
+
+      try {
+        const hasGiven = await hasGivenVibe(userId);
+        setHasUserGivenVibe(hasGiven);
+      } catch (error) {
+        console.error("Error checking user vibe:", error);
+      }
+    };
+
+    checkUserVibe();
+  }, [userId, hasGivenVibe, isLoaded]);
+
+  const handleSubmitVibe = async () => {
+    if (!userId) return;
+
+    // Extract emojis from the input string
+    const emojis = extractEmojis(emojiInput);
+
+    if (emojis.length !== 3) {
+      Alert.alert("Invalid Vibe", "Please enter exactly 3 emojis");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await createVibe({
+        receiverId: userId,
+        emojis: emojis,
+      });
+
+      setShowModal(false);
+      setEmojiInput("");
+      setHasUserGivenVibe(true);
+
+      // Reload vibes list
+      const result = await getVibesWithSenderInfo(userId);
+      setVibes(result.data as VibeWithSender[]);
+    } catch (error) {
+      console.error("Error creating vibe:", error);
+      Alert.alert("Error", "Failed to send vibe. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const renderVibeItem = ({ item }: { item: VibeWithSender }) => (
     <View className="flex-row px-6 py-4 items-start">
@@ -72,7 +131,16 @@ export default function AllVibesScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       <View className="flex-1 bg-white pt-12">
         {/* Header */}
-        <ScreenHeader title="Vibes" />
+        <ScreenHeader
+          title="Vibes"
+          rightComponent={
+            profile.id !== userId && !hasUserGivenVibe ? (
+              <Pressable onPress={() => setShowModal(true)}>
+                <Icons.plus size={24} color={colors.hex.purple600} />
+              </Pressable>
+            ) : null
+          }
+        />
 
         {/* Content */}
         {loading ? (
@@ -99,6 +167,59 @@ export default function AllVibesScreen() {
           />
         )}
       </View>
+
+      {/* Add Vibe Modal */}
+      <Modal
+        visible={showModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowModal(false)}
+      >
+        <Pressable
+          className="flex-1 bg-black/50 justify-center items-center"
+          onPress={() => setShowModal(false)}
+        >
+          <Pressable
+            className="bg-white rounded-2xl p-6 mx-6 w-[85%]"
+            onPress={(e) => e.stopPropagation()}
+          >
+            <Text className="text-xl font-bold text-purple-900 mb-4">
+              Send a Vibe
+            </Text>
+            <Text className="text-sm text-gray-600 mb-4">
+              Enter 3 emojis to represent your vibe:
+            </Text>
+            <TextInput
+              value={emojiInput}
+              onChangeText={setEmojiInput}
+              placeholder="🔥💎✨"
+              className="border border-gray-300 rounded-lg p-3 mb-4 text-2xl"
+              style={{ color: colors.hex.purple900 }}
+              maxLength={50}
+              autoFocus
+            />
+            <View className="flex-row gap-3">
+              <Button
+                variant="secondary"
+                onPress={() => {
+                  setShowModal(false);
+                  setEmojiInput("");
+                }}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onPress={handleSubmitVibe}
+                disabled={isSubmitting}
+                className="flex-1"
+              >
+                {isSubmitting ? "Sending..." : "Send"}
+              </Button>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </>
   );
 }

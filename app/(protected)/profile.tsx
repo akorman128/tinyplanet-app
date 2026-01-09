@@ -285,8 +285,6 @@ export default function ProfileScreen() {
             topVibes={topVibes}
             totalVibeCount={totalVibeCount}
             onPress={handleVibePress}
-            recipientId={!isViewingOwnProfile ? displayProfile.id : undefined}
-            onVibeCreated={fetchVibes}
           />
 
           {/* Posts Link */}
