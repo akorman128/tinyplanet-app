@@ -17,7 +17,6 @@ import {
 import { useRequireProfile } from "@/hooks/useRequireProfile";
 import { useProfile } from "@/hooks/useProfile";
 import { useVibe } from "@/hooks/useVibe";
-import { useLocation } from "@/hooks/useLocation";
 import { useTravelPlan } from "@/hooks/useTravelPlan";
 import { reverseGeocode } from "@/utils/reverseGeocode";
 import { formatBirthday } from "@/utils";
@@ -25,6 +24,7 @@ import { Profile } from "@/types/profile";
 import { TravelPlan } from "@/types/travelPlan";
 import { VibeDisplay } from "@/design-system/VibeDisplay";
 import { FriendStatusSection } from "@/components/FriendStatusSection";
+import { ListsSection } from "@/components/ListsSection";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -316,6 +316,14 @@ export default function ProfileScreen() {
               </Text>
             </View>
           )}
+
+          {/* Lists Section */}
+          <View className="w-full mb-4">
+            <ListsSection
+              userId={displayProfile.id}
+              isOwnProfile={isViewingOwnProfile}
+            />
+          </View>
 
           <View className="w-full mb-4">
             {displayProfile.birthday && (

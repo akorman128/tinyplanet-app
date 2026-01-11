@@ -1,0 +1,169 @@
+import React from "react";
+import { View, Text, TextInput, ScrollView } from "react-native";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Input } from "@/design-system/Input";
+import { Button } from "@/design-system/Button";
+import { CreateListInput } from "@/types/list";
+import { LocationSearchInput } from "./LocationSearchInput";
+
+const listSchema = z.object({
+  title: z.string().min(1, "Title is required").max(100, "Title too long"),
+  location: z
+    .object({
+      name: z.string(),
+      latitude: z.number(),
+      longitude: z.number(),
+    })
+    .nullable()
+    .refine((val) => val !== null, {
+      message: "Location is required",
+    }),
+  places: z.string().min(1, "At least one place is required"),
+});
+
+type ListFormData = z.infer<typeof listSchema>;
+
+interface ListFormProps {
+  onSubmit: (data: CreateListInput) => Promise<void>;
+  onCancel: () => void;
+  isLoading?: boolean;
+}
+
+export function ListForm({ onSubmit, onCancel, isLoading }: ListFormProps) {
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ListFormData>({
+    resolver: zodResolver(listSchema),
+    mode: "onChange",
+    defaultValues: {
+      title: "",
+      location: null,
+      places: "",
+    },
+  });
+
+  const handleFormSubmit = async (data: ListFormData) => {
+    // Parse places (one per line)
+    const placesList = data.places
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+
+    if (placesList.length === 0 || !data.location) {
+      return;
+    }
+
+    await onSubmit({
+      title: data.title.trim(),
+      location: data.location,
+      places: placesList,
+    });
+  };
+
+  return (
+    <ScrollView className="flex-1 bg-white px-6 pt-6">
+      <View className="mb-6">
+        <Text className="text-2xl font-bold text-gray-900 mb-2">
+          Create List
+        </Text>
+        <Text className="text-sm text-gray-600">
+          📍 Add your favorite places in a city. Places will be automatically
+          located on a map.
+        </Text>
+      </View>
+      <View className="gap-2">
+        {/* Title Input */}
+        <Controller
+          control={control}
+          name="title"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <Input
+              label="List Title"
+              placeholder="Best Coffee Shops"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              error={errors.title?.message}
+              maxLength={100}
+            />
+          )}
+        />
+
+        {/* Location Input */}
+        <Controller
+          control={control}
+          name="location"
+          render={({ field: { onChange, value } }) => (
+            <LocationSearchInput
+              label="Location"
+              placeholder="Search for a city..."
+              value={value}
+              onChange={onChange}
+              error={errors.location?.message}
+            />
+          )}
+        />
+
+        {/* Places Input */}
+        <View>
+          <Text className="text-sm font-medium text-gray-700 mb-2">
+            Places (one per line)
+          </Text>
+          <Controller
+            control={control}
+            name="places"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder="Blue Bottle Coffee&#10;Stumptown Coffee Roasters&#10;Devoción"
+                multiline
+                numberOfLines={6}
+                textAlignVertical="top"
+                className={`bg-white border ${
+                  errors.places ? "border-red-500" : "border-gray-300"
+                } rounded-lg px-4 py-3 text-base`}
+                placeholderTextColor="#6b7280"
+                style={{ minHeight: 120 }}
+              />
+            )}
+          />
+          {errors.places && (
+            <Text className="text-red-500 text-sm mt-1">
+              {errors.places.message}
+            </Text>
+          )}
+          <View className="flex-row items-center gap-1 bg-gray-100 p-2 mt-2 rounded-lg">
+            <Text className="text-xs text-gray-500 mt-1">
+              💡 Enter each place on a new line. This will take a bit depending
+              on the number of places.
+            </Text>
+          </View>
+        </View>
+
+        {/* Buttons */}
+        <View className="flex-row gap-2 mb-8">
+          <View className="flex-1">
+            <Button variant="secondary" onPress={onCancel} disabled={isLoading}>
+              Cancel
+            </Button>
+          </View>
+          <View className="flex-1">
+            <Button
+              variant="primary"
+              onPress={handleSubmit(handleFormSubmit)}
+              disabled={isLoading}
+            >
+              {isLoading ? "Creating..." : "Create List"}
+            </Button>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
+  );
+}

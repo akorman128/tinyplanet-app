@@ -87,7 +87,6 @@ All data operations are encapsulated in custom hooks following a consistent patt
 - Queries prefixed with `get` (e.g., `getProfile`, `getFriends`)
 - Mutations for create/update/delete operations
 - DTOs (Data Transfer Objects) for type safety
-- Callbacks wrapped in `useCallback` for optimization
 
 **Example**:
 
@@ -295,7 +294,7 @@ TWILIO_PHONE_NUMBER=
 - **ESLint**: Expo config with TypeScript support
 - **Type Safety**: Heavy use of TypeScript, Zod validation, DTOs throughout
 - **Error Handling**: Try-catch in hooks, error states in forms
-- **Optimization**: `useMemo`/`useCallback` for Supabase client and hook callbacks
+- **Optimization**: `useMemo` for Supabase client and hook callbacks
 
 ## Styling Guidelines
 
@@ -305,6 +304,7 @@ TWILIO_PHONE_NUMBER=
 - ❌ **Avoid**: `<View style={styles.container}>` with `StyleSheet.create()`
 
 **When to use NativeWind**:
+
 - All new components and screens
 - Refactoring existing components
 - Layout (flexbox, spacing, sizing)
@@ -313,6 +313,7 @@ TWILIO_PHONE_NUMBER=
 - Borders, shadows, and visual effects
 
 **Exceptions** (rare cases where StyleSheet may be needed):
+
 - Complex platform-specific styles that can't be expressed with Tailwind utilities
 - Dynamic styles that require runtime calculations
 

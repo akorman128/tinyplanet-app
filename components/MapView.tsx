@@ -553,6 +553,25 @@ export const MapView: React.FC<MapViewProps> = React.memo(
                     iconOpacity: 1,
                   }}
                 />
+                {/* Travel plan title labels */}
+                <SymbolLayer
+                  id="travel-plan-labels"
+                  style={{
+                    textField: ["get", "title"],
+                    textSize: 12,
+                    textColor: colors.hex.white,
+                    textHaloColor: colors.hex.purple900,
+                    textHaloWidth: 1.5,
+                    textOffset: [0, 2],
+                    textAnchor: "top",
+                    textFont: [
+                      "Roboto Medium",
+                      "Noto Sans Regular",
+                      "Arial Unicode MS Regular",
+                    ],
+                    textAllowOverlap: true,
+                  }}
+                />
               </ShapeSource>
             )}
           </Mapbox.MapView>

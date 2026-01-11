@@ -10,10 +10,11 @@ import { SupabaseContext } from "../context/supabase-context";
 // React Native's default timeout is 60s, which is too long for a good UX
 const customFetch = (url: RequestInfo | URL, options: RequestInit = {}) => {
   const controller = new AbortController();
-  const timeout = 10000; // 10 second timeout
+
+  const timeout = 60000; // 60s timeout for Edge Functions
 
   const startTime = Date.now();
-  console.log(`[Fetch] Starting request to ${url}`);
+  console.log(`[Fetch] Starting request to ${url} (timeout: ${timeout}ms)`);
 
   const timeoutPromise = new Promise<Response>((_, reject) =>
     setTimeout(() => {

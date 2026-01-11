@@ -22,6 +22,7 @@ interface LocationSearchInputProps {
   onChange: (value: LocationSearchValue | null) => void;
   error?: string;
   placeholder?: string;
+  types?: string; // Mapbox geocoding types (default: "place")
 }
 
 export function LocationSearchInput({
@@ -30,6 +31,7 @@ export function LocationSearchInput({
   onChange,
   error,
   placeholder = "Search for a destination...",
+  types = "place",
 }: LocationSearchInputProps) {
   const [query, setQuery] = useState(value?.name || "");
   const [results, setResults] = useState<LocationResult[]>([]);
@@ -76,7 +78,7 @@ export function LocationSearchInput({
     try {
       const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
         searchQuery
-      )}.json?access_token=${MAPBOX_ACCESS_TOKEN}&types=place&limit=5`;
+      )}.json?access_token=${MAPBOX_ACCESS_TOKEN}&types=${types}&limit=5`;
 
       const response = await fetch(url);
 
