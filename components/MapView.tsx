@@ -23,7 +23,11 @@ import Mapbox, {
 } from "@rnmapbox/maps";
 import { useFriends } from "@/hooks/useFriends";
 import { useTravelPlan } from "@/hooks/useTravelPlan";
-import { GeoJSONFeatureCollection, ConnectionLine } from "@/types/friendship";
+import {
+  GeoJSONFeatureCollection,
+  ConnectionLine,
+  PlatformStatistics,
+} from "@/types/friendship";
 import { TravelPlanMapLocation } from "@/types/travelPlan";
 import { useLocation } from "@/hooks/useLocation";
 import { colors, MapLegend } from "@/design-system";
@@ -37,7 +41,7 @@ interface MapViewProps {
 
 export const MapView: React.FC<MapViewProps> = React.memo(
   ({ onRefresh, refreshing = false }) => {
-    const { getFriendLocations } = useFriends();
+    const { getFriendLocations, getPlatformStatistics } = useFriends();
     const { getTravelPlanLocations } = useTravelPlan();
     const {
       location: userLocationObj,
@@ -51,6 +55,9 @@ export const MapView: React.FC<MapViewProps> = React.memo(
     const [travelPlanLocations, setTravelPlanLocations] = useState<
       TravelPlanMapLocation[]
     >([]);
+    const [statistics, setStatistics] = useState<PlatformStatistics | null>(
+      null
+    );
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -179,14 +186,16 @@ export const MapView: React.FC<MapViewProps> = React.memo(
           // Update user's location in the database (applies distance threshold internally)
           await updateLocationInDatabase(forceRefresh);
 
-          // Fetch friend/mutual locations and travel plans in parallel
-          const [locations, travelPlans] = await Promise.all([
+          // Fetch friend/mutual locations, travel plans, and statistics in parallel
+          const [locations, travelPlans, stats] = await Promise.all([
             getFriendLocations(),
             getTravelPlanLocations(),
+            getPlatformStatistics(),
           ]);
 
           setFriendLocations(locations);
           setTravelPlanLocations(travelPlans.data);
+          setStatistics(stats.data);
         } catch (err) {
           console.error("Error loading friend locations:", err);
           const errorMessage = err instanceof Error ? err.message : String(err);
@@ -196,6 +205,7 @@ export const MapView: React.FC<MapViewProps> = React.memo(
       [
         getFriendLocations,
         getTravelPlanLocations,
+        getPlatformStatistics,
         updateLocationInDatabase,
         getCurrentLocation,
       ]
@@ -551,6 +561,7 @@ export const MapView: React.FC<MapViewProps> = React.memo(
         <MapLegend
           showLines={showConnectionLines}
           onToggleLines={setShowConnectionLines}
+          statistics={statistics || undefined}
         />
       </View>
     );

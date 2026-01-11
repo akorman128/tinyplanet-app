@@ -22,6 +22,7 @@ import {
   SearchFriendsOutput,
   GetPendingRequestsOutput,
   PendingRequest,
+  PlatformStatisticsOutput,
 } from "@/types/friendship";
 
 export const useFriends = () => {
@@ -391,6 +392,23 @@ export const useFriends = () => {
     return (data as Friend[]) ?? [];
   };
 
+  const getPlatformStatistics =
+    async (): Promise<PlatformStatisticsOutput> => {
+      if (!profile?.id) {
+        throw new Error("User not authenticated");
+      }
+
+      const { data, error } = await supabase.rpc("get_platform_statistics", {
+        p_user_id: profile.id,
+      });
+
+      if (error) throw error;
+
+      return {
+        data: data?.[0] || { total_users: 0, connections_count: 0 },
+      };
+    };
+
   return {
     isLoaded,
     getFriends,
@@ -405,5 +423,6 @@ export const useFriends = () => {
     unfriend,
     createFriend,
     getMutualsBetweenUsers,
+    getPlatformStatistics,
   };
 };

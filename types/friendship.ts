@@ -150,3 +150,13 @@ export interface ConnectionData {
   userToFriendLines: ConnectionLine[];
   friendToMutualLines: ConnectionLine[];
 }
+
+// Platform statistics types for MapLegend
+export interface PlatformStatistics {
+  total_users: number;
+  connections_count: number;
+}
+
+export interface PlatformStatisticsOutput {
+  data: PlatformStatistics;
+}
