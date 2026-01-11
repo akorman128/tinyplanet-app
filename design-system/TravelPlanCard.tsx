@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { Avatar } from "./Avatar";
 import { Icons } from "./Icons";
@@ -7,6 +7,8 @@ import { colors } from "./colors";
 import { PostWithAuthor } from "@/types/post";
 import { useLikes } from "@/hooks/useLikes";
 import { useSavedPosts } from "@/hooks/useSavedPosts";
+import { usePosts } from "@/hooks/usePosts";
+import { useSupabase } from "@/hooks/useSupabase";
 import { formatTimeAgo } from "@/utils";
 
 interface TravelPlanCardProps {
@@ -29,8 +31,10 @@ export function TravelPlanCard({
   onOpenComments,
 }: TravelPlanCardProps) {
   const router = useRouter();
+  const { session } = useSupabase();
   const { likePost, unlikePost } = useLikes();
   const { savePost, unsavePost } = useSavedPosts();
+  const { deletePost } = usePosts();
   const [isLiking, setIsLiking] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -100,6 +104,63 @@ export function TravelPlanCard({
     onOpenComments(post.id, post.comment_count);
   };
 
+  const handleOptions = () => {
+    const isOwnPost = session?.user?.id === post.author.id;
+
+    if (!isOwnPost) {
+      Alert.alert("Options", "No actions available");
+      return;
+    }
+
+    Alert.alert("Travel Plan Options", "Choose an action", [
+      {
+        text: "Edit Travel Plan",
+        onPress: () => {
+          router.push({
+            pathname: "/edit-travel-plan",
+            params: { travelPlanId: post.id },
+          });
+        },
+      },
+      {
+        text: "Delete Travel Plan",
+        onPress: () => {
+          Alert.alert(
+            "Delete Travel Plan",
+            "Are you sure you want to delete this travel plan? This will remove it from all users' feeds.",
+            [
+              {
+                text: "Cancel",
+                style: "cancel",
+              },
+              {
+                text: "Delete",
+                style: "destructive",
+                onPress: async () => {
+                  try {
+                    await deletePost(post.id);
+                    onDelete(post.id);
+                  } catch (err) {
+                    console.error("Error deleting travel plan:", err);
+                    Alert.alert(
+                      "Error",
+                      "Failed to delete travel plan. Please try again."
+                    );
+                  }
+                },
+              },
+            ]
+          );
+        },
+        style: "destructive",
+      },
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+    ]);
+  };
+
   // Parse travel plan details from post text
   // Format: "🚀 Traveling to {destination} from {start} to {end} ({duration} days)"
   const parseTravelDetails = () => {
@@ -145,20 +206,32 @@ export function TravelPlanCard({
       </Pressable>
 
       <View className="flex-1 ml-3">
-        {/* Header: Name • Time */}
-        <View className="flex-row items-center mb-1">
-          <Text className="text-base font-semibold text-gray-900">
-            {post.author.full_name}
-          </Text>
-          <Text className="text-sm text-gray-500 ml-2">
-            • {formatTimeAgo(post.created_at)}
-          </Text>
+        {/* Header: Name • Time • Options */}
+        <View className="flex-row items-center justify-between mb-1">
+          <View className="flex-row items-center flex-1">
+            <Text className="text-base font-semibold text-gray-900">
+              {post.author.full_name}
+            </Text>
+            <Text className="text-sm text-gray-500 ml-2">
+              • {formatTimeAgo(post.created_at)}
+            </Text>
+          </View>
+
+          {/* Options */}
+          <Pressable onPress={handleOptions} hitSlop={8}>
+            <Icons.dots size={20} color={colors.hex.gray500} />
+          </Pressable>
         </View>
 
         {/* Travel Plan Badge */}
         <Text className="text-sm text-orange-600 font-medium mb-2">
           Travel Plan
         </Text>
+
+        {/* Custom Message */}
+        {customMessage && (
+          <Text className="text-sm text-gray-700 mb-2">{customMessage}</Text>
+        )}
 
         {/* Travel Details Card */}
         <View className="bg-white rounded-lg p-4 border border-orange-200 mb-2">
@@ -183,11 +256,6 @@ export function TravelPlanCard({
             </Text>
           </View>
         </View>
-
-        {/* Custom Message */}
-        {customMessage && (
-          <Text className="text-sm text-gray-700 mb-2">{customMessage}</Text>
-        )}
 
         {/* Actions row */}
         <View className="flex-row items-center gap-4">

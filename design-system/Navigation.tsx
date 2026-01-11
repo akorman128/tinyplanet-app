@@ -2,7 +2,8 @@ import React from "react";
 import { View, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ButtonGroup } from "./ButtonGroup";
-import { Avatar, Icons } from "./index";
+import { Avatar } from "./Avatar";
+import { Icons } from "./Icons";
 import { colors } from "./colors";
 
 export interface NavigationProps {

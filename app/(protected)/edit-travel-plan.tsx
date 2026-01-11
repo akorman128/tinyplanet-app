@@ -17,13 +17,14 @@ import {
   TravelPlanFormData,
 } from "@/components/TravelPlanForm";
 import { useTravelPlan } from "@/hooks/useTravelPlan";
-
+import { useSupabase } from "@/hooks/useSupabase";
 import { PostVisibility } from "@/types/post";
 
 export default function EditTravelPlanScreen() {
   const router = useRouter();
   const { travelPlanId } = useLocalSearchParams<{ travelPlanId: string }>();
-  const { getActiveTravelPlan, updateTravelPlan } = useTravelPlan();
+  const { updateTravelPlan } = useTravelPlan();
+  const { supabase } = useSupabase();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,25 +47,50 @@ export default function EditTravelPlanScreen() {
       try {
         setLoading(true);
         setError(null);
-        const { data: travelPlan } = await getActiveTravelPlan();
 
-        if (!travelPlan) {
-          setError("No active travel plan found");
+        if (!travelPlanId) {
+          setError("No travel plan ID provided");
           setLoading(false);
           return;
         }
 
-        // Pre-fill form with travel plan data
+        // Fetch travel plan with coordinates using RPC function
+        const { data, error: fetchError } = await supabase.rpc(
+          "get_travel_plan_with_coordinates",
+          { p_travel_plan_id: travelPlanId }
+        );
+
+        if (fetchError) throw fetchError;
+
+        if (!data || data.length === 0) {
+          setError("Travel plan not found");
+          setLoading(false);
+          return;
+        }
+
+        const travelPlan = data[0];
+
+        // Validate coordinates
+        if (!travelPlan.longitude || !travelPlan.latitude) {
+          setError("Invalid destination coordinates");
+          setLoading(false);
+          return;
+        }
+
+        // Pre-fill form with actual travel plan data
         form.reset({
           destination: {
-            name: "",
-            latitude: 0,
-            longitude: 0,
+            name: travelPlan.destination_name,
+            latitude: travelPlan.latitude,
+            longitude: travelPlan.longitude,
           },
           startDate: new Date(travelPlan.start_date),
           durationDays: travelPlan.duration_days,
-          text: "",
+          text: "", // Leave empty - user can add new text if desired
         });
+
+        // Trigger validation after reset to properly update form state
+        form.trigger();
 
         // Set default visibility (travel plans are typically friends-only)
         setVisibility("friends");
@@ -77,7 +103,7 @@ export default function EditTravelPlanScreen() {
     };
 
     fetchTravelPlan();
-  }, [getActiveTravelPlan]);
+  }, [supabase, travelPlanId, form]);
 
   const onSubmit = async (data: TravelPlanFormData) => {
     if (!travelPlanId) {

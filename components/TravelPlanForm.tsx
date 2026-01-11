@@ -17,7 +17,7 @@ export const travelPlanSchema = z.object({
     })
     .nullable()
     .refine((val) => val !== null, { message: "Destination is required" }),
-  startDate: z.date().min(new Date(), "Start date must be in the future"),
+  startDate: z.date(),
   durationDays: z
     .number()
     .int()

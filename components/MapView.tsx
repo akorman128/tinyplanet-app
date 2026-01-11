@@ -28,6 +28,7 @@ import { TravelPlanMapLocation } from "@/types/travelPlan";
 import { useLocation } from "@/hooks/useLocation";
 import { colors, MapLegend } from "@/design-system";
 import { useRouter } from "expo-router";
+import { getDurationInDays } from "@/utils";
 
 interface MapViewProps {
   onRefresh?: () => void;
@@ -160,6 +161,7 @@ export const MapView: React.FC<MapViewProps> = React.memo(
             start_date: tp.start_date,
             end_date: tp.end_date,
             type: tp.type,
+            title: `${tp.full_name} - ${getDurationInDays(tp.start_date, tp.end_date)} days`,
           },
         })),
       };

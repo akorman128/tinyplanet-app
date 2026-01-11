@@ -267,7 +267,7 @@ export const CreateSheet = forwardRef<BottomSheet, CreateSheetProps>(
                 />
               )}
 
-              {!activeTravelPlan && (
+              {!activeTravelPlan && !loading && (
                 <TravelPlanForm
                   control={travelPlanForm.control}
                   errors={travelPlanForm.formState.errors}

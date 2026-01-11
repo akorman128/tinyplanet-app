@@ -169,14 +169,21 @@ export function PostCard({
       </Pressable>
 
       <View className="flex-1 ml-3">
-        {/* Header: Name • Time */}
-        <View className="flex-row items-center mb-1">
-          <Text className="text-base font-semibold text-gray-900">
-            {post.author.full_name}
-          </Text>
-          <Text className="text-sm text-gray-500 ml-2">
-            • {formatTimeAgo(post.created_at)}
-          </Text>
+        {/* Header: Name • Time • Options */}
+        <View className="flex-row items-center justify-between mb-1">
+          <View className="flex-row items-center flex-1">
+            <Text className="text-base font-semibold text-gray-900">
+              {post.author.full_name}
+            </Text>
+            <Text className="text-sm text-gray-500 ml-2">
+              • {formatTimeAgo(post.created_at)}
+            </Text>
+          </View>
+
+          {/* Options */}
+          <Pressable onPress={handleOptions} hitSlop={8}>
+            <Icons.dots size={20} color={colors.hex.gray500} />
+          </Pressable>
         </View>
 
         {/* Post text */}
@@ -239,11 +246,6 @@ export function PostCard({
               }
               fill={post.saved_by_user ? colors.hex.purple600 : "none"}
             />
-          </Pressable>
-
-          {/* Options */}
-          <Pressable onPress={handleOptions}>
-            <Icons.dots size={20} color={colors.hex.gray500} />
           </Pressable>
         </View>
       </View>
