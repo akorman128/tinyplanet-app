@@ -1,13 +1,24 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, Text, TextInput, Pressable, ScrollView } from "react-native";
 import { colors } from "@/design-system";
+import { useLocationStore } from "@/stores/locationStore";
 
 const MAPBOX_ACCESS_TOKEN = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
+// Generate a simple session token for Mapbox Search API billing
+function generateSessionToken() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 interface LocationResult {
   id: string;
-  place_name: string;
-  center: [number, number]; // [longitude, latitude]
+  name: string;
+  full_address: string;
+  place_formatted: string;
 }
 
 export interface LocationSearchValue {
@@ -22,7 +33,6 @@ interface LocationSearchInputProps {
   onChange: (value: LocationSearchValue | null) => void;
   error?: string;
   placeholder?: string;
-  types?: string; // Mapbox geocoding types (default: "place")
 }
 
 export function LocationSearchInput({
@@ -30,13 +40,14 @@ export function LocationSearchInput({
   value,
   onChange,
   error,
-  placeholder = "Search for a destination...",
-  types = "place",
+  placeholder = "Search for a place...",
 }: LocationSearchInputProps) {
+  const { currentLocation } = useLocationStore();
   const [query, setQuery] = useState(value?.name || "");
   const [results, setResults] = useState<LocationResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sessionTokenRef = useRef(generateSessionToken());
 
   const showDropdown = results.length > 0;
 
@@ -76,25 +87,44 @@ export function LocationSearchInput({
   const searchLocations = async (searchQuery: string) => {
     setIsLoading(true);
     try {
-      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-        searchQuery
-      )}.json?access_token=${MAPBOX_ACCESS_TOKEN}&types=${types}&limit=5`;
+      // Use Mapbox Search Box API for POI/place/address search
+      const params = new URLSearchParams({
+        q: searchQuery,
+        access_token: MAPBOX_ACCESS_TOKEN || "",
+        session_token: sessionTokenRef.current,
+        limit: "5",
+        language: "en",
+      });
 
-      const response = await fetch(url);
-
-      if (!response.ok) {
-        throw new Error(`Geocoding API error: ${response.statusText}`);
+      // Bias results toward user's current location if available
+      if (currentLocation?.latitude && currentLocation?.longitude) {
+        params.append(
+          "proximity",
+          `${currentLocation.longitude},${currentLocation.latitude}`
+        );
       }
 
+      const url = `https://api.mapbox.com/search/searchbox/v1/suggest?${params.toString()}`;
+
+      const response = await fetch(url);
       const data = await response.json();
 
-      const locations: LocationResult[] = data.features?.map(
-        (feature: any) => ({
-          id: feature.id,
-          place_name: feature.place_name,
-          center: feature.center,
-        })
-      ) || [];
+      if (!response.ok) {
+        console.error("Search API error:", response.status, data);
+        throw new Error(
+          `Search API error: ${response.status} - ${data?.message || "Unknown error"}`
+        );
+      }
+
+      const locations: LocationResult[] =
+        data.suggestions
+          ?.filter((s: any) => s.mapbox_id)
+          .map((s: any) => ({
+            id: s.mapbox_id,
+            name: s.name,
+            full_address: s.full_address || "",
+            place_formatted: s.place_formatted || "",
+          })) || [];
 
       setResults(locations);
     } catch (err) {
@@ -105,14 +135,43 @@ export function LocationSearchInput({
     }
   };
 
-  const handleSelectLocation = (location: LocationResult) => {
-    setQuery(location.place_name);
+  const handleSelectLocation = async (result: LocationResult) => {
+    const displayName = result.full_address || result.place_formatted
+      ? `${result.name}, ${result.full_address || result.place_formatted}`
+      : result.name;
+    setQuery(displayName);
     setResults([]);
-    onChange({
-      name: location.place_name,
-      longitude: location.center[0],
-      latitude: location.center[1],
-    });
+
+    // Call retrieve endpoint to get coordinates
+    try {
+      const params = new URLSearchParams({
+        access_token: MAPBOX_ACCESS_TOKEN || "",
+        session_token: sessionTokenRef.current,
+      });
+      const url = `https://api.mapbox.com/search/searchbox/v1/retrieve/${result.id}?${params.toString()}`;
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Retrieve API error:", response.status, errorData);
+        throw new Error(`Retrieve API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const feature = data.features?.[0];
+
+      if (feature?.geometry?.coordinates) {
+        onChange({
+          name: displayName,
+          longitude: feature.geometry.coordinates[0],
+          latitude: feature.geometry.coordinates[1],
+        });
+        // Generate new session token after successful retrieval
+        sessionTokenRef.current = generateSessionToken();
+      }
+    } catch (err) {
+      console.error("Error retrieving location details:", err);
+    }
   };
 
   const handleChangeText = (text: string) => {
@@ -160,9 +219,12 @@ export function LocationSearchInput({
                   className="px-4 py-3 border-b border-gray-100"
                   onPress={() => handleSelectLocation(item)}
                 >
-                  <Text className="text-base text-gray-900">
-                    {item.place_name}
-                  </Text>
+                  <Text className="text-base text-gray-900">{item.name}</Text>
+                  {(item.full_address || item.place_formatted) && (
+                    <Text className="text-sm text-gray-500" numberOfLines={1}>
+                      {item.full_address || item.place_formatted}
+                    </Text>
+                  )}
                 </Pressable>
               ))}
             </ScrollView>

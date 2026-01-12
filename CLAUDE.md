@@ -10,9 +10,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Mobile**: React Native 0.81.5 + Expo SDK 54 (with new architecture and React Compiler experimental features)
 - **Routing**: Expo Router 6.0 (file-based routing with typed routes)
-- **Styling**: NativeWind 4.2 (Tailwind CSS for React Native)
-- **State**: Zustand 5.0 with AsyncStorage persistence
-- **Forms**: React Hook Form 7.66 + Zod 4.1 validation
+- **Styling**: NativeWind 4.2.1 (Tailwind CSS for React Native)
+- **State**: Zustand 5.0.8 with AsyncStorage persistence
+- **Forms**: React Hook Form 7.66 + Zod 4.1.12 validation
 - **Backend**: Supabase (PostgreSQL with PostGIS, Auth, Row Level Security)
 - **Edge Functions**: Deno functions for SMS via Twilio
 - **Language**: TypeScript 5.9
@@ -24,7 +24,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm start
 
 # Clear cache if needed (Metro/Expo issues)
-npx expo start --clear --reset-cache
+npm run start:nocash
+# or: npx expo start --clear --reset-cache
 
 # Platform builds
 npm run android
@@ -50,6 +51,9 @@ app/
 ├── (public)/                   # Unauthenticated routes
 │   ├── welcome.tsx
 │   ├── sign-in/
+│   │   ├── index.tsx
+│   │   ├── sign-in.tsx
+│   │   └── verify-otp.tsx
 │   └── sign-up/               # Multi-step signup flow
 │       ├── index.tsx
 │       ├── invite-code.tsx    # Step 1: Validate invite
@@ -58,10 +62,25 @@ app/
 │       ├── phone-number.tsx
 │       └── verify-otp.tsx     # Final step
 └── (protected)/               # Authenticated routes
+    ├── index.tsx              # Home/landing
+    ├── profile.tsx
+    ├── edit-profile.tsx
+    ├── settings.tsx
+    ├── search.tsx
+    ├── mutuals.tsx
+    ├── all-vibes.tsx
+    ├── user-posts.tsx
+    ├── edit-post.tsx
+    ├── edit-travel-plan.tsx
+    ├── create-list.tsx
+    ├── chat/[friendId].tsx    # Dynamic chat route
+    ├── list/[listId].tsx      # Dynamic list route
     ├── onboarding/
     │   └── send-invites.tsx
     └── (tabs)/                # Main app tabs
-        └── index.tsx
+        ├── map.tsx
+        ├── feed.tsx
+        └── messages.tsx
 ```
 
 **Key Pattern**: `Stack.Protected` guards routes based on session state from `useSupabase` hook.
@@ -81,6 +100,16 @@ All data operations are encapsulated in custom hooks following a consistent patt
 - `useComments` - Comment operations
 - `useLikes` - Like/unlike posts or comments
 - `useSignUp` - Multi-step signup orchestration
+- `useSignIn` - Sign-in flow orchestration
+- `useFeed` - Feed data aggregation
+- `useChat` - Real-time messaging
+- `useMessageChannels` - Message channel management
+- `useSavedPosts` - Bookmark/save posts
+- `useTravelPlan` - Travel plan CRUD
+- `useLocation` - Device location services
+- `useLists` - User-created place lists
+- `useRequireProfile` - Profile requirement guard
+- `useContactPicker` - Device contacts access
 
 **Hook Pattern**:
 
@@ -108,6 +137,7 @@ await createProfile({
 
 - `profileStore` - Current user profile (persisted)
 - `signupStore` - Multi-step signup form data (persisted)
+- `locationStore` - User's current device location (persisted)
 
 **Pattern**: All stores use Zustand's persist middleware with AsyncStorage for automatic persistence across app restarts.
 
@@ -131,10 +161,19 @@ export const useProfileStore = create<ProfileState>()(
 
 Centralized UI components in `/design-system/`:
 
-- `Button` - Primary/Secondary variants with disabled states
-- `Input` - Form inputs with labels, errors, character count
+- `Button`, `ButtonGroup` - Action buttons with variants
+- `Input`, `ChatInput` - Form inputs with labels, errors, character count
 - `Typography` - Text components
-- `colors.ts` - Purple-themed color palette
+- `Avatar`, `Badge` - User display elements
+- `PostCard`, `TravelPlanCard`, `ListCard` - Content cards
+- `CommentItem`, `ChannelListItem`, `FriendRequestItem` - List items
+- `MessageBubble`, `TypingIndicator` - Chat UI
+- `ScreenHeader`, `TabBar`, `Navigation` - Navigation elements
+- `MapLegend` - Map overlay component
+- `OptionSelector`, `InfoRow`, `VibeDisplay` - Utility components
+- `EmptyState`, `LoadingState`, `ErrorState` - Status displays
+- `SocialMediaLinks` - Social profile links
+- `colors.ts`, `Icons.tsx` - Design tokens and icons
 
 All components use NativeWind (Tailwind) for styling.
 
@@ -182,13 +221,19 @@ For signup flow (5 steps: invite code → location → details → phone → OTP
 
 ### Core Tables
 
-- **profiles**: User profiles with location (PostGIS POINT), `invited_by` tracking
+- **profiles**: User profiles with location (PostGIS POINT), `invited_by` tracking, social media links
 - **friendships**: Bidirectional relationships (user_a, user_b, status)
 - **vibes**: 3-emoji messages between users (with optional `invite_code_id` for linking)
 - **invite_codes**: Invite system (code, status, expiry, redeemed_by)
 - **posts**: User posts with visibility enum (friends/mutuals/public)
 - **comments**: Nested comments with `parent_comment_id`
 - **likes**: Polymorphic likes (post_id OR comment_id, not both)
+- **messages**: Real-time chat messages between users
+- **conversation_reads**: Read receipt tracking for chats
+- **travel_plans**: User travel plans with dates and locations
+- **saved_posts**: Bookmarked posts by users
+- **lists**: User-created place lists
+- **list_places**: Places within lists (with PostGIS location)
 
 ### Row Level Security (RLS)
 
@@ -205,6 +250,23 @@ All tables have RLS enabled with friend-based access control:
 - **Soft references**: `invite_code_id` in vibes allows tracking invite origin
 - **Migrations**: Located in `/supabase/migrations/`, timestamped naming
 - **Indexes**: All foreign keys and frequently queried columns indexed
+
+### RPC Functions
+
+Key Supabase RPC functions (defined in migrations):
+
+- `get_profile` - Optimized profile fetching with social fields
+- `get_mutual_friends` - Find mutual connections between users
+- `count_mutual_friends` - Count shared friends
+- `search_friends` - Search friend list
+- `get_top_vibes` - Aggregate vibe statistics
+- `get_feed_*` - Optimized feed queries with pagination
+- `get_friend_locations` - Map data with friend positions
+- `get_travel_plan_with_coordinates` - Travel plan with geo data
+- `get_message_channels` - Chat channel list with unread counts
+- `get_platform_statistics` - App-wide stats
+- `get_list_places_with_coordinates` - List places with geo
+- `get_lists_with_places` - Bulk list fetching with pagination
 
 ## Authentication Flow
 

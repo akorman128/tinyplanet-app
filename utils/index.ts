@@ -6,3 +6,4 @@ export * from "./durationInDays";
 export * from "./formatBirthday";
 export * from "./formatTimeAgo";
 export * from "./postgis";
+export * from "./mapUtils";

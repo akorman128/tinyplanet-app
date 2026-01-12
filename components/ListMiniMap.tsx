@@ -3,6 +3,11 @@ import { View, Text } from "react-native";
 import Mapbox from "@rnmapbox/maps";
 import { ListPlace } from "@/types/list";
 import { colors } from "@/design-system";
+import {
+  filterValidPlaces,
+  calculateMapBounds,
+  placesToGeoJSON,
+} from "@/utils/mapUtils";
 
 interface ListMiniMapProps {
   places: ListPlace[];
@@ -11,30 +16,22 @@ interface ListMiniMapProps {
 
 export function ListMiniMap({ places, height = 200 }: ListMiniMapProps) {
   // Filter places with valid coordinates
-  const validPlaces = useMemo(
-    () =>
-      places.filter(
-        (place) =>
-          place.latitude !== null &&
-          place.longitude !== null &&
-          !isNaN(place.latitude) &&
-          !isNaN(place.longitude)
-      ),
-    [places]
-  );
+  const validPlaces = useMemo(() => filterValidPlaces(places), [places]);
 
   // Calculate bounds for camera
-  const bounds = useMemo(() => {
-    if (validPlaces.length === 0) return null;
+  const bounds = useMemo(
+    () =>
+      calculateMapBounds(
+        validPlaces as Array<{ latitude: number; longitude: number }>
+      ),
+    [validPlaces]
+  );
 
-    const lats = validPlaces.map((p) => p.latitude!);
-    const lngs = validPlaces.map((p) => p.longitude!);
-
-    return {
-      ne: [Math.max(...lngs), Math.max(...lats)],
-      sw: [Math.min(...lngs), Math.min(...lats)],
-    };
-  }, [validPlaces]);
+  // Create GeoJSON for places
+  const placesGeoJSON = useMemo(
+    () => placesToGeoJSON(validPlaces),
+    [validPlaces]
+  );
 
   if (validPlaces.length === 0) {
     return (
@@ -63,23 +60,35 @@ export function ListMiniMap({ places, height = 200 }: ListMiniMapProps) {
           animationDuration={0}
         />
 
-        {validPlaces.map((place, index) => {
-          const isAmbiguous = place.status === "ambiguous";
-          const markerColor = isAmbiguous ? "#fb923c" : colors.hex.purple600;
-
-          return (
-            <Mapbox.PointAnnotation
-              key={place.id}
-              id={`place-${place.id}`}
-              coordinate={[place.longitude!, place.latitude!]}
-            >
-              <View
-                className="w-3 h-3 rounded-full border-2 border-white"
-                style={{ backgroundColor: markerColor }}
-              />
-            </Mapbox.PointAnnotation>
-          );
-        })}
+        <Mapbox.ShapeSource id="places" shape={placesGeoJSON}>
+          <Mapbox.CircleLayer
+            id="places-circles"
+            style={{
+              circleRadius: 6,
+              circleColor: [
+                "case",
+                ["get", "isAmbiguous"],
+                "#fb923c",
+                colors.hex.purple600,
+              ],
+              circleStrokeColor: "#ffffff",
+              circleStrokeWidth: 2,
+            }}
+          />
+          <Mapbox.SymbolLayer
+            id="places-labels"
+            style={{
+              textField: ["get", "name"],
+              textSize: 12,
+              textColor: "#ffffff",
+              textHaloColor: "rgba(0,0,0,0.75)",
+              textHaloWidth: 1,
+              textOffset: [0, 1.2],
+              textAnchor: "top",
+              textMaxWidth: 10,
+            }}
+          />
+        </Mapbox.ShapeSource>
       </Mapbox.MapView>
     </View>
   );

@@ -1,6 +1,6 @@
 import { View, Text, ViewProps } from "react-native";
 
-type BadgeVariant = "default" | "primary" | "secondary";
+type BadgeVariant = "default" | "primary" | "secondary" | "warning" | "error";
 type BadgeSize = "small" | "medium";
 
 export interface BadgeProps extends ViewProps {
@@ -14,12 +14,16 @@ const variantStyles = {
   default: "bg-gray-100",
   primary: "bg-purple-600",
   secondary: "bg-purple-100",
+  warning: "bg-orange-100",
+  error: "bg-red-100",
 };
 
 const textStyles = {
   default: "text-gray-500",
   primary: "text-white",
   secondary: "text-purple-600",
+  warning: "text-orange-700",
+  error: "text-red-700",
 };
 
 const sizeStyles = {

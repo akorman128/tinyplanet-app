@@ -42,3 +42,5 @@ export { TravelPlanCard } from "./TravelPlanCard";
 export { VibeDisplay } from "./VibeDisplay";
 export { Navigation } from "./Navigation";
 export type { NavigationProps } from "./Navigation";
+export { PlaceListItem } from "./PlaceListItem";
+export type { PlaceListItemProps } from "./PlaceListItem";
