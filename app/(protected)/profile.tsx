@@ -24,7 +24,6 @@ import { Profile } from "@/types/profile";
 import { TravelPlan } from "@/types/travelPlan";
 import { VibeDisplay } from "@/design-system/VibeDisplay";
 import { FriendStatusSection } from "@/components/FriendStatusSection";
-import { ListsSection } from "@/components/ListsSection";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -215,10 +214,10 @@ export default function ProfileScreen() {
             isViewingOwnProfile ? (
               <View className="flex-row items-center gap-2">
                 <Pressable onPress={() => router.push("/edit-profile")}>
-                  <Icons.edit size={24} color={colors.hex.purple600} />
+                  <Icons.edit size={24} color={colors.black} />
                 </Pressable>
                 <Pressable onPress={() => router.push("/settings")}>
-                  <Icons.settings size={24} color={colors.hex.purple600} />
+                  <Icons.settings size={24} color={colors.black} />
                 </Pressable>
               </View>
             ) : undefined
@@ -284,6 +283,18 @@ export default function ProfileScreen() {
             onPress={handleVibePress}
           />
 
+          {activeTravelPlan && (
+            <View className="w-full mb-4 px-4 py-3 bg-purple-50 rounded-lg flex-col  justify-between">
+              <Text className="text-base font-semibold text-purple-900 mb-1">
+                🚀 {activeTravelPlan.destination_name}
+              </Text>
+              <Text className="text-sm font-semibold text-purple-600">
+                {new Date(activeTravelPlan.start_date).toLocaleDateString()} →{" "}
+                {new Date(activeTravelPlan.end_date).toLocaleDateString()}
+              </Text>
+            </View>
+          )}
+
           {/* Posts Link */}
           {displayProfile && (
             <Pressable
@@ -305,25 +316,24 @@ export default function ProfileScreen() {
             </Pressable>
           )}
 
-          {activeTravelPlan && (
-            <View className="w-full mb-4 px-4 py-3 bg-purple-50 rounded-lg flex-col  justify-between">
-              <Text className="text-base font-semibold text-purple-900 mb-1">
-                🚀 {activeTravelPlan.destination_name}
-              </Text>
-              <Text className="text-sm font-semibold text-purple-600">
-                {new Date(activeTravelPlan.start_date).toLocaleDateString()} →{" "}
-                {new Date(activeTravelPlan.end_date).toLocaleDateString()}
+          {/* Lists Link */}
+          <Pressable
+            onPress={() =>
+              router.push({
+                pathname: "/user-lists",
+                params: { userId: displayProfile.id },
+              })
+            }
+            className="w-full mb-4 px-4 py-3 bg-purple-50 rounded-lg flex-row items-center justify-between"
+          >
+            <View className="flex-row items-center gap-3">
+              <Icons.list size={32} color={colors.hex.purple600} />
+              <Text className="text-base font-semibold text-purple-900">
+                Lists
               </Text>
             </View>
-          )}
-
-          {/* Lists Section */}
-          <View className="w-full mb-4">
-            <ListsSection
-              userId={displayProfile.id}
-              isOwnProfile={isViewingOwnProfile}
-            />
-          </View>
+            <Icons.chevronRight size={20} color={colors.hex.purple600} />
+          </Pressable>
 
           <View className="w-full mb-4">
             {displayProfile.birthday && (

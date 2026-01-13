@@ -31,6 +31,8 @@ interface LocationSearchInputProps {
   label?: string;
   value?: LocationSearchValue | null;
   onChange: (value: LocationSearchValue | null) => void;
+  onTextOnly?: (text: string) => void;
+  allowTextOnly?: boolean;
   error?: string;
   placeholder?: string;
 }
@@ -39,6 +41,8 @@ export function LocationSearchInput({
   label,
   value,
   onChange,
+  onTextOnly,
+  allowTextOnly = false,
   error,
   placeholder = "Search for a place...",
 }: LocationSearchInputProps) {
@@ -49,7 +53,9 @@ export function LocationSearchInput({
   const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sessionTokenRef = useRef(generateSessionToken());
 
-  const showDropdown = results.length > 0;
+  const hasQuery = query.trim().length > 0 && query !== value?.name;
+  const showTextOnlyOption = allowTextOnly && hasQuery && onTextOnly;
+  const showDropdown = results.length > 0 || showTextOnlyOption;
 
   // Sync query with value prop (for form reset scenarios)
   useEffect(() => {
@@ -182,6 +188,13 @@ export function LocationSearchInput({
     }
   };
 
+  const handleTextOnly = () => {
+    if (query.trim() && onTextOnly) {
+      onTextOnly(query.trim());
+      setResults([]);
+    }
+  };
+
   return (
     <View className="mb-4">
       <Text className="text-sm font-medium text-gray-700 mb-2">{label}</Text>
@@ -227,6 +240,19 @@ export function LocationSearchInput({
                   )}
                 </Pressable>
               ))}
+              {showTextOnlyOption && (
+                <Pressable
+                  className="px-4 py-3 bg-gray-50"
+                  onPress={handleTextOnly}
+                >
+                  <Text className="text-base text-gray-600">
+                    Use "{query.trim()}" as text only
+                  </Text>
+                  <Text className="text-sm text-gray-400">
+                    No map location
+                  </Text>
+                </Pressable>
+              )}
             </ScrollView>
           </View>
         )}

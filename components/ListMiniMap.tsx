@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, ReactNode } from "react";
 import { View, Text } from "react-native";
 import Mapbox from "@rnmapbox/maps";
 import { ListPlace } from "@/types/list";
@@ -12,9 +12,24 @@ import {
 interface ListMiniMapProps {
   places: ListPlace[];
   height?: number;
+  styleURL?: string;
+  circleRadius?: number;
+  padding?: number;
+  rotateEnabled?: boolean;
+  truncateName?: number;
+  children?: ReactNode;
 }
 
-export function ListMiniMap({ places, height = 200 }: ListMiniMapProps) {
+export function ListMiniMap({
+  places,
+  height = 200,
+  styleURL = Mapbox.StyleURL.Dark,
+  circleRadius = 6,
+  padding = 40,
+  rotateEnabled = false,
+  truncateName,
+  children,
+}: ListMiniMapProps) {
   // Filter places with valid coordinates
   const validPlaces = useMemo(() => filterValidPlaces(places), [places]);
 
@@ -29,8 +44,8 @@ export function ListMiniMap({ places, height = 200 }: ListMiniMapProps) {
 
   // Create GeoJSON for places
   const placesGeoJSON = useMemo(
-    () => placesToGeoJSON(validPlaces),
-    [validPlaces]
+    () => placesToGeoJSON(validPlaces, truncateName ? { truncateName } : undefined),
+    [validPlaces, truncateName]
   );
 
   if (validPlaces.length === 0) {
@@ -45,18 +60,25 @@ export function ListMiniMap({ places, height = 200 }: ListMiniMapProps) {
   }
 
   return (
-    <View className="rounded-lg overflow-hidden" style={{ height }}>
+    <View className="rounded-lg overflow-hidden" style={{ height, position: "relative" }}>
       <Mapbox.MapView
         style={{ flex: 1 }}
-        styleURL={Mapbox.StyleURL.Dark}
+        styleURL={styleURL}
         pitchEnabled={false}
-        rotateEnabled={false}
+        rotateEnabled={rotateEnabled}
         scrollEnabled={true}
         zoomEnabled={true}
+        logoEnabled={false}
+        scaleBarEnabled={false}
       >
         <Mapbox.Camera
           bounds={bounds ? { ne: bounds.ne, sw: bounds.sw } : undefined}
-          padding={{ paddingTop: 40, paddingBottom: 40, paddingLeft: 40, paddingRight: 40 }}
+          padding={{
+            paddingTop: padding,
+            paddingBottom: padding,
+            paddingLeft: padding,
+            paddingRight: padding,
+          }}
           animationDuration={0}
         />
 
@@ -64,7 +86,7 @@ export function ListMiniMap({ places, height = 200 }: ListMiniMapProps) {
           <Mapbox.CircleLayer
             id="places-circles"
             style={{
-              circleRadius: 6,
+              circleRadius: circleRadius,
               circleColor: [
                 "case",
                 ["get", "isAmbiguous"],
@@ -90,6 +112,7 @@ export function ListMiniMap({ places, height = 200 }: ListMiniMapProps) {
           />
         </Mapbox.ShapeSource>
       </Mapbox.MapView>
+      {children}
     </View>
   );
 }

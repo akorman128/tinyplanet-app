@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Icons } from "./Icons";
 import { colors } from "./colors";
 
-interface InputProps extends Omit<TextInputProps, 'onChange'> {
+interface InputProps extends Omit<TextInputProps, "onChange"> {
   className?: string;
   label?: string;
   error?: string;
@@ -14,12 +14,22 @@ interface InputProps extends Omit<TextInputProps, 'onChange'> {
   onChange?: (value: string) => void; // Support React Hook Form
 }
 
-export function Input({ className = "", label, error, maxLength, showCharacterCount = false, clearable = false, onClear, onChange, ...props }: InputProps) {
+export function Input({
+  className = "",
+  label,
+  error,
+  maxLength,
+  showCharacterCount = false,
+  clearable = false,
+  onClear,
+  onChange,
+  ...props
+}: InputProps) {
   const [currentLength, setCurrentLength] = useState(
     props.value?.toString().length || props.defaultValue?.toString().length || 0
   );
   const baseStyles =
-    "py-5 px-4 rounded-xl border-2 border-gray-300 bg-white text-base text-gray-900 leading-5";
+    "py-3 px-4 rounded-xl border-2 border-gray-300 bg-white text-base text-gray-900 leading-5";
   const focusStyles = "focus:border-purple-600";
   const errorStyles = error ? "border-red-500" : "";
   const clearPadding = clearable ? "pr-12" : "";
@@ -31,15 +41,14 @@ export function Input({ className = "", label, error, maxLength, showCharacterCo
     onChange?.(text); // Support React Hook Form
   };
 
-  const showClearIcon = clearable && props.value && props.value.toString().length > 0;
+  const showClearIcon =
+    clearable && props.value && props.value.toString().length > 0;
 
   return (
     <View className="w-full">
       {label && (
         <View className="flex-row justify-between items-center mb-2">
-          <Text className="text-sm font-semibold text-gray-700">
-            {label}
-          </Text>
+          <Text className="text-sm font-semibold text-gray-700">{label}</Text>
           {showCharacterCount && maxLength && (
             <Text className="text-xs text-gray-500">
               {currentLength}/{maxLength}

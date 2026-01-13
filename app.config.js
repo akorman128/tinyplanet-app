@@ -19,7 +19,7 @@ export default {
           "We need your location to show you on the map with your friends.",
         NSLocationAlwaysAndWhenInUseUsageDescription:
           "We need your location to show you on the map with your friends.",
-        LSApplicationQueriesSchemes: ["instagram", "twitter"],
+        LSApplicationQueriesSchemes: ["instagram", "twitter", "comgooglemaps"],
       },
     },
     android: {

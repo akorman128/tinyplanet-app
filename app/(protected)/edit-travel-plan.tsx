@@ -22,9 +22,10 @@ import { PostVisibility } from "@/types/post";
 
 export default function EditTravelPlanScreen() {
   const router = useRouter();
-  const { travelPlanId } = useLocalSearchParams<{ travelPlanId: string }>();
+  const { postId } = useLocalSearchParams<{ postId: string }>();
   const { updateTravelPlan } = useTravelPlan();
   const { supabase } = useSupabase();
+  const [travelPlanId, setTravelPlanId] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,23 +42,23 @@ export default function EditTravelPlanScreen() {
     mode: "all",
   });
 
-  // Fetch active travel plan on mount
+  // Fetch travel plan on mount using post ID
   useEffect(() => {
     const fetchTravelPlan = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        if (!travelPlanId) {
-          setError("No travel plan ID provided");
+        if (!postId) {
+          setError("No post ID provided");
           setLoading(false);
           return;
         }
 
-        // Fetch travel plan with coordinates using RPC function
+        // Fetch travel plan by post ID using RPC function
         const { data, error: fetchError } = await supabase.rpc(
-          "get_travel_plan_with_coordinates",
-          { p_travel_plan_id: travelPlanId }
+          "get_travel_plan_by_post_id",
+          { p_post_id: postId }
         );
 
         if (fetchError) throw fetchError;
@@ -69,6 +70,9 @@ export default function EditTravelPlanScreen() {
         }
 
         const travelPlan = data[0];
+
+        // Store the travel plan ID for the update call
+        setTravelPlanId(travelPlan.id);
 
         // Validate coordinates
         if (!travelPlan.longitude || !travelPlan.latitude) {
@@ -103,7 +107,7 @@ export default function EditTravelPlanScreen() {
     };
 
     fetchTravelPlan();
-  }, [supabase, travelPlanId, form]);
+  }, [supabase, postId, form]);
 
   const onSubmit = async (data: TravelPlanFormData) => {
     if (!travelPlanId) {

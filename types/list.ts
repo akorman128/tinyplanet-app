@@ -1,8 +1,18 @@
+// Category type for lists
+export type ListCategory =
+  | "nightlife"
+  | "eat_drink"
+  | "activities"
+  | "explore"
+  | "shop"
+  | "work";
+
 // Core types
 export interface List {
   id: string;
   user_id: string;
   title: string;
+  category: ListCategory;
   location_name: string;
   location: {
     latitude: number;
@@ -39,6 +49,11 @@ export interface ListWithPlaces extends List {
   places: ListPlace[];
 }
 
+// List with owner info for picker display
+export interface ViewableList extends ListWithPlaces {
+  owner_name: string;
+}
+
 // LLM Response schema (matches required JSON output)
 export interface LLMPlaceResolution {
   original_text: string;
@@ -53,6 +68,7 @@ export interface LLMPlaceResolution {
 // Input DTOs
 export interface CreateListInput {
   title: string;
+  category: ListCategory;
   location: {
     name: string;
     latitude: number;
@@ -64,6 +80,7 @@ export interface CreateListInput {
 export interface UpdateListInput {
   list_id: string;
   title?: string;
+  category?: ListCategory;
   location?: {
     name: string;
     latitude: number;
@@ -114,17 +131,19 @@ export interface GetListsOutput {
   total: number;
 }
 
+export interface GetViewableListsOutput {
+  data: ViewableList[];
+  total: number;
+}
+
 export interface GetListOutput {
   data: ListWithPlaces | null;
 }
 
 // Edge function types
 export interface ResolvePlacesInput {
-  list_title: string;
   location_name: string;
   places: string[];
-  user_lat?: number;
-  user_lng?: number;
 }
 
 export interface ResolvePlacesOutput {

@@ -5,11 +5,29 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Input } from "@/design-system/Input";
 import { Button } from "@/design-system/Button";
-import { CreateListInput } from "@/types/list";
+import { Select, SelectOption } from "@/design-system/Select";
+import { CreateListInput, ListCategory } from "@/types/list";
 import { LocationSearchInput } from "./LocationSearchInput";
+
+const CATEGORY_OPTIONS: SelectOption<ListCategory>[] = [
+  { value: "nightlife", label: "Nightlife" },
+  { value: "eat_drink", label: "Eat & Drink" },
+  { value: "activities", label: "Activities" },
+  { value: "explore", label: "Explore" },
+  { value: "shop", label: "Shop" },
+  { value: "work", label: "Work" },
+];
 
 const listSchema = z.object({
   title: z.string().min(1, "Title is required").max(100, "Title too long"),
+  category: z.enum([
+    "nightlife",
+    "eat_drink",
+    "activities",
+    "explore",
+    "shop",
+    "work",
+  ]),
   location: z
     .object({
       name: z.string(),
@@ -41,6 +59,7 @@ export function ListForm({ onSubmit, onCancel, isLoading }: ListFormProps) {
     mode: "onChange",
     defaultValues: {
       title: "",
+      category: "eat_drink",
       location: null,
       places: "",
     },
@@ -59,6 +78,7 @@ export function ListForm({ onSubmit, onCancel, isLoading }: ListFormProps) {
 
     await onSubmit({
       title: data.title.trim(),
+      category: data.category,
       location: data.location,
       places: placesList,
     });
@@ -89,6 +109,21 @@ export function ListForm({ onSubmit, onCancel, isLoading }: ListFormProps) {
               onBlur={onBlur}
               error={errors.title?.message}
               maxLength={100}
+            />
+          )}
+        />
+
+        {/* Category Selector */}
+        <Controller
+          control={control}
+          name="category"
+          render={({ field: { onChange, value } }) => (
+            <Select
+              label="Category"
+              options={CATEGORY_OPTIONS}
+              value={value}
+              onChange={onChange}
+              placeholder="Select a category"
             />
           )}
         />
@@ -141,7 +176,8 @@ export function ListForm({ onSubmit, onCancel, isLoading }: ListFormProps) {
           <View className="flex-row items-center gap-1 bg-gray-100 p-2 mt-2 rounded-lg">
             <Text className="text-xs text-gray-500 mt-1">
               💡 Enter each place on a new line. This will take a bit depending
-              on the number of places.
+              on the number of places. Results vary, but you can correct
+              manually.
             </Text>
           </View>
         </View>

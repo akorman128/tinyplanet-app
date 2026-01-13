@@ -118,7 +118,7 @@ export function TravelPlanCard({
         onPress: () => {
           router.push({
             pathname: "/edit-travel-plan",
-            params: { travelPlanId: post.id },
+            params: { postId: post.id },
           });
         },
       },

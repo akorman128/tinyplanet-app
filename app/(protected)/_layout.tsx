@@ -2,25 +2,10 @@ import { Stack } from "expo-router";
 
 export default function ProtectedLayout() {
   return (
-    <Stack>
-      <Stack.Screen
-        name="onboarding"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="index"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="(tabs)"
-        options={{
-          headerShown: false,
-        }}
-      />
-    </Stack>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+      }}
+    />
   );
 }

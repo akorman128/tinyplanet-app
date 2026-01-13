@@ -27,14 +27,14 @@ export const ScreenHeader = React.memo<ScreenHeaderProps>(
       <View className="flex-row justify-between items-center px-6 py-4 border-b border-gray-100">
         {showBackButton ? (
           <Pressable onPress={handleBack} className="py-2 pr-3">
-            <Body className="text-base font-semibold text-purple-600">
+            <Body className="text-base font-semibold text-gray-600">
               ← Back
             </Body>
           </Pressable>
         ) : (
           <View className="w-[60px]" />
         )}
-        <Heading className="text-xl font-bold">{title}</Heading>
+        <Heading className="text-xl font-bold text-gray-900">{title}</Heading>
         {rightComponent ? rightComponent : <View className="w-[60px]" />}
       </View>
     );

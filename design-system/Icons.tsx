@@ -3130,7 +3130,7 @@ export const Icons = {
     </Svg>
   ),
   list: (props: IconProps) => (
-    <Svg {...props}>
+    <Svg width="16" height="16" viewBox="0 0 16 16" fill="none" {...props}>
       <Path
         d="M3.33333 9.61735C4.06971 9.61735 4.66667 9.0204 4.66667 8.28402C4.66667 7.54764 4.06971 6.95068 3.33333 6.95068C2.59695 6.95068 2 7.54764 2 8.28402C2 9.0204 2.59695 9.61735 3.33333 9.61735Z"
         stroke="currentColor"

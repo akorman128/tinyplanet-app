@@ -5,15 +5,16 @@ import {
   View,
   ActivityIndicator,
 } from "react-native";
+import { useRouter } from "expo-router";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { useFeed } from "@/hooks/useFeed";
 import { PostCard } from "../design-system/PostCard";
 import { TravelPlanCard } from "../design-system/TravelPlanCard";
 import { CommentsSheet } from "./CommentsSheet";
 import { EmptyState, LoadingState, ErrorState, colors } from "@/design-system";
-import { PostWithAuthor, PostVisibility } from "@/types/post";
+import { PostWithAuthor } from "@/types/post";
+import { useListSelectionStore } from "@/stores/listSelectionStore";
 
-// Helper function to detect travel plan posts
 const isTravelPlanPost = (post: PostWithAuthor): boolean => {
   return post.text.startsWith("🚀 Traveling to");
 };
@@ -25,6 +26,7 @@ interface FeedViewProps {
 const PAGE_SIZE = 10;
 
 export function FeedView({ onCommentsSheetChange }: FeedViewProps) {
+  const router = useRouter();
   const { getFeed } = useFeed();
   const [posts, setPosts] = useState<PostWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,25 +36,23 @@ export function FeedView({ onCommentsSheetChange }: FeedViewProps) {
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
 
-  // Store getFeed in ref to prevent loadFeed from recreating
   const getFeedRef = useRef(getFeed);
   useEffect(() => {
     getFeedRef.current = getFeed;
   }, [getFeed]);
 
-  // Atomic guard to prevent concurrent initial fetches
   const hasLoadedRef = useRef(false);
   const isLoadingRef = useRef(false);
 
-  // CommentsSheet state
   const commentsSheetRef = useRef<BottomSheet>(null);
   const [activePost, setActivePost] = useState<{
     id: string;
     commentCount: number;
   } | null>(null);
 
+  const { selectedList, clear: clearListSelection } = useListSelectionStore();
+
   const loadFeed = useCallback(async () => {
-    // Atomic guard: prevent concurrent initial fetches
     if (isLoadingRef.current) {
       return;
     }
@@ -148,9 +148,20 @@ export function FeedView({ onCommentsSheetChange }: FeedViewProps) {
   const handleCommentsSheetChange = useCallback(
     (index: number) => {
       onCommentsSheetChange?.(index >= 0);
+      if (index < 0) {
+        clearListSelection();
+      }
     },
-    [onCommentsSheetChange]
+    [onCommentsSheetChange, clearListSelection]
   );
+
+  const handleOpenCommentListPicker = useCallback(() => {
+    router.push("/select-list");
+  }, [router]);
+
+  const handleRemoveCommentList = useCallback(() => {
+    clearListSelection();
+  }, [clearListSelection]);
 
   if (loading && !refreshing) {
     return <LoadingState />;
@@ -217,6 +228,9 @@ export function FeedView({ onCommentsSheetChange }: FeedViewProps) {
           initialCommentCount={activePost.commentCount}
           onCommentCountChange={handleCommentCountChange}
           onSheetChange={handleCommentsSheetChange}
+          selectedList={selectedList}
+          onOpenListPicker={handleOpenCommentListPicker}
+          onRemoveList={handleRemoveCommentList}
         />
       )}
     </>

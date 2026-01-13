@@ -8,10 +8,8 @@ import React, {
 import {
   View,
   ActivityIndicator,
-  StyleSheet,
   Text,
   LayoutChangeEvent,
-  Image,
 } from "react-native";
 import Mapbox, {
   Camera,
@@ -284,12 +282,13 @@ export const MapView: React.FC<MapViewProps> = React.memo(
       <View className="flex-1" onLayout={handleLayout}>
         {mapDimensions.width > 0 && mapDimensions.height > 0 && (
           <Mapbox.MapView
-            style={styles.map}
+            style={{ width: mapDimensions.width, height: mapDimensions.height }}
             // styleURL="mapbox://styles/mapbox/navigation-day-v1"
             // styleURL={Mapbox.StyleURL.Street}
             styleURL={Mapbox.StyleURL.Dark}
             compassViewPosition={3}
             scaleBarEnabled={false}
+            logoEnabled={false}
           >
             <Camera
               zoomLevel={12}
@@ -587,23 +586,3 @@ export const MapView: React.FC<MapViewProps> = React.memo(
   }
 );
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  map: {
-    flex: 1,
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: colors.hex.white,
-  },
-  errorText: {
-    color: colors.hex.error,
-    fontSize: 16,
-    textAlign: "center",
-    paddingHorizontal: 24,
-  },
-});

@@ -5,12 +5,7 @@ interface TypographyProps extends TextProps {
 }
 
 export function Heading({ className = "", ...props }: TypographyProps) {
-  return (
-    <Text
-      className={`text-5xl font-bold text-purple-600 ${className}`}
-      {...props}
-    />
-  );
+  return <Text className={`text-5xl font-bold ${className}`} {...props} />;
 }
 
 export function Subheading({ className = "", ...props }: TypographyProps) {

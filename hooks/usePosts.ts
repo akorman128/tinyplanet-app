@@ -57,12 +57,56 @@ export const usePosts = () => {
 
     if (userLikeError) throw userLikeError;
 
+    // Fetch attached list data if list_id exists
+    let attachedList = null;
+    if (post.list_id) {
+      const { data: listData, error: listError } = await supabase
+        .from("lists")
+        .select(
+          `
+          id,
+          title,
+          location_name,
+          user_id,
+          owner:profiles!lists_user_id_fkey(full_name)
+        `
+        )
+        .eq("id", post.list_id)
+        .single();
+
+      if (!listError && listData) {
+        const { count: placeCount } = await supabase
+          .from("list_places")
+          .select("*", { count: "exact", head: true })
+          .eq("list_id", listData.id);
+
+        const owner = listData.owner as
+          | { full_name: string }
+          | { full_name: string }[]
+          | null;
+        const ownerFullName = Array.isArray(owner)
+          ? owner[0]?.full_name
+          : owner?.full_name;
+        const ownerName =
+          listData.user_id === profile.id ? "You" : ownerFullName || "Unknown";
+        attachedList = {
+          id: listData.id,
+          title: listData.title,
+          location_name: listData.location_name,
+          place_count: placeCount || 0,
+          owner_name: ownerName,
+        };
+      }
+    }
+
     const postWithAuthor: PostWithAuthor = {
       ...post,
       author: post.author,
       like_count: likeCount || 0,
       comment_count: commentCount || 0,
       liked_by_user: !!userLike,
+      saved_by_user: false,
+      attached_list: attachedList,
     };
 
     return { data: postWithAuthor };
@@ -82,6 +126,7 @@ export const usePosts = () => {
         text: input.text,
         visibility: input.visibility,
         media_urls: input.media_urls || [],
+        list_id: input.list_id || null,
       })
       .select()
       .single();
@@ -103,6 +148,7 @@ export const usePosts = () => {
       text?: string;
       visibility?: "friends" | "mutuals" | "public";
       media_urls?: string[];
+      list_id?: string | null;
     } = {
       edited_at: new Date().toISOString(),
     };
@@ -110,6 +156,7 @@ export const usePosts = () => {
     if (input.text !== undefined) updates.text = input.text;
     if (input.visibility !== undefined) updates.visibility = input.visibility;
     if (input.media_urls !== undefined) updates.media_urls = input.media_urls;
+    if (input.list_id !== undefined) updates.list_id = input.list_id;
 
     const { data, error } = await supabase
       .from("posts")

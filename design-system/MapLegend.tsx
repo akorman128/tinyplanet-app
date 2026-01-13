@@ -23,7 +23,7 @@ export const MapLegend: React.FC<MapLegendProps> = ({
     >
       {/* Statistics Section - stacked above toggle */}
       {statistics && (
-        <View className="p-2 border-b border-gray-200">
+        <View className="px-2 py-1 border-b border-gray-200">
           <View className="flex-row items-center justify-between">
             <Caption>🌎</Caption>
             <Caption className="text-gray-700 font-bold">
@@ -40,9 +40,10 @@ export const MapLegend: React.FC<MapLegendProps> = ({
       )}
 
       {/* Toggle Section - existing functionality */}
-      <View className="flex-row items-center justify-between p-2">
+      <View className="flex-row items-center justify-between px-2 py-1">
         <Caption className="mr-3">
-          <Icons.audience size={20} />
+          👥
+          {/* <Icons.profileActive size={6} /> */}
         </Caption>
         <Switch
           value={showLines}

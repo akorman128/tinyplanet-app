@@ -1,30 +1,27 @@
 import React, { forwardRef, useState, useEffect, useCallback } from "react";
-import {
-  View,
-  Text,
-  Alert,
-  Pressable,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
+import { View, Text, Alert, Pressable } from "react-native";
 import BottomSheet, {
   BottomSheetView,
   BottomSheetFlatList,
+  BottomSheetFooter,
+  BottomSheetFooterProps,
 } from "@gorhom/bottom-sheet";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
-  Input,
-  Button,
   Icons,
   colors,
   LoadingState,
   EmptyState,
+  ListChip,
+  CommentInput,
 } from "@/design-system";
 import { useComments } from "@/hooks/useComments";
 import { useLikes } from "@/hooks/useLikes";
 import { CommentWithAuthor } from "@/types/comment";
+import { AttachedList } from "@/types/post";
 import { CommentItem } from "../design-system/CommentItem";
 
 const commentSchema = z.object({
@@ -42,15 +39,27 @@ interface CommentsSheetProps {
   initialCommentCount: number;
   onCommentCountChange?: (postId: string, newCount: number) => void;
   onSheetChange?: (index: number) => void;
+  selectedList: AttachedList | null;
+  onOpenListPicker: () => void;
+  onRemoveList: () => void;
 }
 
 export const CommentsSheet = forwardRef<BottomSheet, CommentsSheetProps>(
   (
-    { postId, initialCommentCount, onCommentCountChange, onSheetChange },
+    {
+      postId,
+      initialCommentCount,
+      onCommentCountChange,
+      onSheetChange,
+      selectedList,
+      onOpenListPicker,
+      onRemoveList,
+    },
     ref
   ) => {
     const { getComments, createComment } = useComments();
     const { likeComment, unlikeComment } = useLikes();
+    const { bottom: bottomSafeArea } = useSafeAreaInsets();
 
     const [comments, setComments] = useState<CommentWithAuthor[]>([]);
     const [loading, setLoading] = useState(true);
@@ -109,6 +118,7 @@ export const CommentsSheet = forwardRef<BottomSheet, CommentsSheetProps>(
         parent_comment_id: replyingTo?.id || null,
         author_id: "current-user",
         body: data.body,
+        list_id: selectedList?.id || null,
         edited_at: null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -120,6 +130,7 @@ export const CommentsSheet = forwardRef<BottomSheet, CommentsSheetProps>(
         like_count: 0,
         liked_by_user: false,
         replies: [],
+        attached_list: selectedList,
       };
 
       // Optimistic update
@@ -145,6 +156,7 @@ export const CommentsSheet = forwardRef<BottomSheet, CommentsSheetProps>(
           post_id: postId,
           parent_comment_id: replyingTo?.id || null,
           body: data.body,
+          list_id: selectedList?.id || null,
         });
 
         // Update comment count in parent
@@ -154,9 +166,7 @@ export const CommentsSheet = forwardRef<BottomSheet, CommentsSheetProps>(
         // Reset form and reply state
         reset();
         setReplyingTo(null);
-
-        // Reload comments to get the real data
-        await loadComments();
+        onRemoveList();
       } catch (err) {
         // Revert optimistic update on error
         if (replyingTo) {
@@ -247,6 +257,76 @@ export const CommentsSheet = forwardRef<BottomSheet, CommentsSheetProps>(
       [handleReply, handleLikeToggle]
     );
 
+    const renderFooter = useCallback(
+      (props: BottomSheetFooterProps) => (
+        <BottomSheetFooter {...props} bottomInset={bottomSafeArea}>
+          <View className="px-6 py-4 border-t border-gray-200 bg-white">
+            {/* Reply context chip */}
+            {replyingTo && (
+              <View className="flex-row items-center justify-between mb-2 px-3 py-2 bg-purple-50 rounded-lg">
+                <Text className="text-sm text-purple-700">
+                  Replying to {replyingTo.author.full_name}
+                </Text>
+                <Pressable onPress={handleCancelReply}>
+                  <Icons.close size={16} color={colors.hex.purple600} />
+                </Pressable>
+              </View>
+            )}
+
+            {/* Selected list chip */}
+            {selectedList && (
+              <View className="flex-row items-center mb-2">
+                <View className="flex-1">
+                  <ListChip list={selectedList} size="small" />
+                </View>
+                <Pressable onPress={onRemoveList} className="ml-2 p-1">
+                  <Icons.close size={14} color={colors.hex.gray500} />
+                </Pressable>
+              </View>
+            )}
+
+            {/* Comment input and submit button */}
+            <Controller
+              control={control}
+              name="body"
+              render={({ field }) => (
+                <CommentInput
+                  value={field.value}
+                  onChangeText={field.onChange}
+                  onSubmit={handleSubmit(onSubmit)}
+                  placeholder="Add comment..."
+                  isSubmitting={isSubmitting}
+                  error={errors.body?.message}
+                  submitDisabled={!!errors.body}
+                  rightAction={
+                    <Pressable
+                      onPress={onOpenListPicker}
+                      className="p-4 rounded-lg bg-gray-100 h-15 w-11 items-center justify-center"
+                    >
+                      <Icons.list size={20} color={colors.hex.purple600} />
+                    </Pressable>
+                  }
+                />
+              )}
+            />
+          </View>
+        </BottomSheetFooter>
+      ),
+      [
+        bottomSafeArea,
+        replyingTo,
+        handleCancelReply,
+        selectedList,
+        onRemoveList,
+        control,
+        handleSubmit,
+        onSubmit,
+        isSubmitting,
+        errors.body,
+        onOpenListPicker,
+      ]
+    );
+
     return (
       <BottomSheet
         ref={ref}
@@ -254,6 +334,7 @@ export const CommentsSheet = forwardRef<BottomSheet, CommentsSheetProps>(
         snapPoints={["80%"]}
         enablePanDownToClose
         onChange={handleSheetChange}
+        footerComponent={renderFooter}
         backgroundStyle={{
           backgroundColor: colors.hex.white,
           borderTopLeftRadius: 24,
@@ -271,11 +352,11 @@ export const CommentsSheet = forwardRef<BottomSheet, CommentsSheetProps>(
         <BottomSheetView className="flex-1">
           {/* Comments List */}
           {loading ? (
-            <View className="flex-1 justify-center">
+            <View className="flex-1 pb-32 justify-center">
               <LoadingState />
             </View>
           ) : comments.length === 0 ? (
-            <View className="flex-1 mt-10 mb-10 justify-center">
+            <View className="flex-1 pb-32 justify-center">
               <EmptyState message="Start yapping..." />
             </View>
           ) : (
@@ -283,71 +364,12 @@ export const CommentsSheet = forwardRef<BottomSheet, CommentsSheetProps>(
               data={comments}
               renderItem={renderComment}
               keyExtractor={(item: CommentWithAuthor) => item.id}
-              contentContainerClassName="px-6 pb-4"
+              contentContainerClassName="px-6 pb-32"
               ItemSeparatorComponent={() => (
                 <View className="h-px bg-gray-100 my-2" />
               )}
             />
           )}
-
-          {/* Sticky Input Area */}
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            keyboardVerticalOffset={0}
-          >
-            <View className="px-6 py-4 border-t border-gray-200 bg-white">
-              {/* Reply context chip */}
-              {replyingTo && (
-                <View className="flex-row items-center justify-between mb-2 px-3 py-2 bg-purple-50 rounded-lg">
-                  <Text className="text-sm text-purple-700">
-                    Replying to {replyingTo.author.full_name}
-                  </Text>
-                  <Pressable onPress={handleCancelReply}>
-                    <Icons.close size={16} color={colors.hex.purple600} />
-                  </Pressable>
-                </View>
-              )}
-
-              {/* Comment input and submit button */}
-              <View className="flex-row items-end gap-2 ">
-                <View className="flex-1">
-                  <Controller
-                    control={control}
-                    name="body"
-                    render={({ field }) => (
-                      <Input
-                        {...field}
-                        placeholder="Add comment..."
-                        multiline
-                        maxLength={500}
-                        error={errors.body?.message}
-                        className="max-h-[100px]"
-                      />
-                    )}
-                  />
-                </View>
-
-                <Pressable
-                  onPress={handleSubmit(onSubmit)}
-                  disabled={isSubmitting || !!errors.body}
-                  className={`px-4 py-3 rounded-lg ${
-                    isSubmitting || !!errors.body
-                      ? "bg-gray-300"
-                      : "bg-purple-600"
-                  }`}
-                >
-                  <Icons.send
-                    size={20}
-                    color={
-                      isSubmitting || !!errors.body
-                        ? colors.hex.gray500
-                        : colors.hex.white
-                    }
-                  />
-                </Pressable>
-              </View>
-            </View>
-          </KeyboardAvoidingView>
         </BottomSheetView>
       </BottomSheet>
     );

@@ -31,7 +31,7 @@ export function PlaceListItem({
           className="justify-center items-center bg-purple-600 w-16 mb-4"
           style={{ height: "100%" }}
         >
-          <Icons.edit size={20} color={colors.hex.white} />
+          <Icons.edit size={20} color={colors.black} />
         </Pressable>
       )}
       {onDelete && (

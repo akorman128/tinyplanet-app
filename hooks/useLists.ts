@@ -4,12 +4,14 @@ import {
   List,
   ListPlace,
   ListWithPlaces,
+  ViewableList,
   CreateListInput,
   CreateListOutput,
   UpdateListInput,
   AddPlacesToListInput,
   GetListsOutput,
   GetListOutput,
+  GetViewableListsOutput,
   ResolvePlacesOutput,
   ReorderPlacesInput,
   UpdatePlaceInput,
@@ -78,12 +80,14 @@ export const useLists = () => {
   };
 
   const getList = async (listId: string): Promise<GetListOutput> => {
+      console.log("[getList] Fetching list:", listId, "profile.id:", profile.id);
       const { data: list, error: listError } = await supabase
         .from("lists")
         .select("*")
         .eq("id", listId)
         .maybeSingle();
 
+      console.log("[getList] Result:", { list, listError });
       if (listError) {
         throw new Error(`Failed to fetch list ${listId}: ${listError.message}`);
       }
@@ -99,20 +103,102 @@ export const useLists = () => {
     };
   };
 
+  /**
+   * Get all lists the user can view (own lists + friends' lists).
+   * Used for the list picker when attaching lists to posts/comments.
+   */
+  const getViewableLists = async (): Promise<GetViewableListsOutput> => {
+    // Get own lists
+    const { data: ownLists, error: ownError } = await supabase
+      .from("lists")
+      .select("*")
+      .eq("user_id", profile.id)
+      .order("created_at", { ascending: false });
+
+    if (ownError) {
+      throw new Error(`Failed to fetch own lists: ${ownError.message}`);
+    }
+
+    // Get friends' lists (RLS will handle the filtering via existing policies)
+    const { data: friendLists, error: friendError } = await supabase
+      .from("lists")
+      .select(
+        `
+        *,
+        owner:profiles!lists_user_id_fkey(id, full_name)
+      `
+      )
+      .neq("user_id", profile.id)
+      .order("created_at", { ascending: false });
+
+    if (friendError) {
+      throw new Error(`Failed to fetch friends' lists: ${friendError.message}`);
+    }
+
+    // Fetch places for all lists
+    const allListIds = [
+      ...(ownLists || []).map((l) => l.id),
+      ...(friendLists || []).map((l) => l.id),
+    ];
+
+    // Get place counts for all lists
+    const placeCounts = new Map<string, number>();
+    for (const listId of allListIds) {
+      const { count } = await supabase
+        .from("list_places")
+        .select("*", { count: "exact", head: true })
+        .eq("list_id", listId);
+      placeCounts.set(listId, count || 0);
+    }
+
+    // Transform own lists
+    const transformedOwnLists: ViewableList[] = (ownLists || []).map(
+      (list: any) => ({
+        ...list,
+        location:
+          list.longitude && list.latitude
+            ? { longitude: list.longitude, latitude: list.latitude }
+            : null,
+        places: [], // Empty for picker (we don't need full places)
+        owner_name: "You",
+      })
+    );
+
+    // Transform friends' lists
+    const transformedFriendLists: ViewableList[] = (friendLists || []).map(
+      (list: any) => ({
+        ...list,
+        location:
+          list.longitude && list.latitude
+            ? { longitude: list.longitude, latitude: list.latitude }
+            : null,
+        places: [],
+        owner_name: list.owner?.full_name || "Unknown",
+      })
+    );
+
+    // Combine all lists (own lists first)
+    const allLists = [...transformedOwnLists, ...transformedFriendLists];
+
+    return {
+      data: allLists,
+      total: allLists.length,
+    };
+  };
+
   // ––– MUTATIONS –––
 
   const createList = async (input: CreateListInput): Promise<CreateListOutput> => {
-      const { title, location, places: inputPlaces } = input;
+      const { title, category, location, places: inputPlaces } = input;
 
       // Step 1: Resolve places via Edge Function
       const { data: resolveData, error: resolveError } =
         await supabase.functions.invoke("resolve-list-places", {
           body: {
-            list_title: title,
             location_name: location.name,
+            latitude: location.latitude,
+            longitude: location.longitude,
             places: inputPlaces,
-            user_lat: profile.latitude,
-            user_lng: profile.longitude,
           },
         });
 
@@ -143,6 +229,7 @@ export const useLists = () => {
         .insert({
           user_id: profile.id,
           title,
+          category,
           location_name: location.name,
           location: `POINT(${location.longitude} ${location.latitude})`,
         })
@@ -190,16 +277,18 @@ export const useLists = () => {
   };
 
   const updateList = async (input: UpdateListInput): Promise<List> => {
-      const { list_id, title, location } = input;
+      const { list_id, title, category, location } = input;
 
       interface ListUpdateFields {
         title: string;
+        category: string;
         location_name: string;
         location: string;
       }
 
       const updates: Partial<ListUpdateFields> = {};
       if (title !== undefined) updates.title = title;
+      if (category !== undefined) updates.category = category;
       if (location !== undefined) {
         updates.location_name = location.name;
         updates.location = `POINT(${location.longitude} ${location.latitude})`;
@@ -247,11 +336,10 @@ export const useLists = () => {
       const { data: resolveData, error: resolveError } =
         await supabase.functions.invoke("resolve-list-places", {
           body: {
-            list_title: existingList.title,
             location_name: existingList.location_name,
+            latitude: existingList.location?.latitude,
+            longitude: existingList.location?.longitude,
             places: inputPlaces,
-            user_lat: profile.latitude,
-            user_lng: profile.longitude,
           },
         });
 
@@ -396,6 +484,7 @@ export const useLists = () => {
     // Queries
     getList,
     getLists,
+    getViewableLists,
     // Mutations
     createList,
     updateList,

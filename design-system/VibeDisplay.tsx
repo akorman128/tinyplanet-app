@@ -14,7 +14,7 @@ export const VibeDisplay: React.FC<VibeDisplayProps> = ({
   onPress,
 }) => {
   return (
-    <View className="mb-6 items-center w-full">
+    <View className=" items-center w-full">
       <Pressable className="mb-6 items-center w-full" onPress={onPress}>
         <Text
           className="text-sm font-semibold uppercase mb-2"

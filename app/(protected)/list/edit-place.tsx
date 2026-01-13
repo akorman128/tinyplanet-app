@@ -3,7 +3,6 @@ import { View, ScrollView, Alert, Text } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import {
   ScreenHeader,
-  Button,
   LoadingState,
   ErrorState,
 } from "@/design-system";
@@ -72,20 +71,44 @@ export default function EditPlaceScreen() {
     fetchPlace();
   }, [placeId, listId, getList]);
 
-  const onSubmit = async () => {
-    if (!place || !location) return;
+  const handleLocationSelect = async (loc: LocationSearchValue | null) => {
+    if (!place || !loc) {
+      setLocation(loc);
+      return;
+    }
 
     setIsSubmitting(true);
     try {
       await updatePlace({
         place_id: place.id,
-        resolved_name: location.name,
+        resolved_name: loc.name,
         location: {
-          latitude: location.latitude,
-          longitude: location.longitude,
+          latitude: loc.latitude,
+          longitude: loc.longitude,
         },
         status: "resolved",
         confidence: 1.0,
+      });
+
+      router.back();
+    } catch (err) {
+      console.error("Error updating place:", err);
+      Alert.alert("Error", "Failed to update place. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleTextOnly = async (text: string) => {
+    if (!place) return;
+
+    setIsSubmitting(true);
+    try {
+      await updatePlace({
+        place_id: place.id,
+        resolved_name: text,
+        status: "unresolved",
+        confidence: 0,
       });
 
       router.back();
@@ -130,27 +153,24 @@ export default function EditPlaceScreen() {
         <ScrollView
           className="flex-1"
           contentContainerClassName="px-6 pt-6 pb-8"
+          keyboardShouldPersistTaps="handled"
         >
           <Text className="text-sm text-gray-600 mb-4">
-            Editing: {place.resolved_name}
+            Original: {place.original_text}
           </Text>
 
-          <LocationSearchInput
-            label="Search for location"
-            value={location}
-            onChange={setLocation}
-            placeholder="Search for a more specific location..."
-          />
+          {isSubmitting && (
+            <Text className="text-sm text-gray-500 mb-4">Saving...</Text>
+          )}
 
-          <View className="mt-6">
-            <Button
-              variant="primary"
-              onPress={onSubmit}
-              disabled={!location || isSubmitting}
-            >
-              {isSubmitting ? "Saving..." : "Save"}
-            </Button>
-          </View>
+          <LocationSearchInput
+            label="Search for a location"
+            value={location}
+            onChange={handleLocationSelect}
+            onTextOnly={handleTextOnly}
+            allowTextOnly={true}
+            placeholder={place.resolved_name}
+          />
         </ScrollView>
       </View>
     </>

@@ -48,6 +48,7 @@ export const colors = {
     gray300: "#d1d5db", // gray-300
     gray500: "#6b7280", // gray-500
     gray600: "#4b5563", // gray-600
+    gray900: "#111827", // gray-900 equivalent
     placeholder: "#9CA3AF", // gray-400 equivalent
     white: "#ffffff",
 

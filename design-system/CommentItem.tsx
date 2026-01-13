@@ -3,6 +3,7 @@ import { View, Text, Pressable } from "react-native";
 import { Avatar } from "./Avatar";
 import { Icons } from "./Icons";
 import { colors } from "./colors";
+import { ListChip } from "./ListChip";
 import { CommentWithAuthor } from "@/types/comment";
 import { formatTimeAgo } from "@/utils";
 
@@ -67,6 +68,13 @@ export function CommentItem({
           <Text className="text-sm text-gray-900 leading-5 mb-2">
             {comment.body}
           </Text>
+
+          {/* Attached list */}
+          {comment.attached_list && (
+            <View className="mb-2">
+              <ListChip list={comment.attached_list} size="small" />
+            </View>
+          )}
 
           {/* Actions: Like and Reply */}
           <View className="flex-row items-center gap-4">

@@ -14,7 +14,7 @@ import {
 } from "@/design-system";
 import { usePosts } from "@/hooks/usePosts";
 import { useTravelPlan } from "@/hooks/useTravelPlan";
-import { PostVisibility } from "@/types/post";
+import { PostVisibility, AttachedList } from "@/types/post";
 import { TravelPlan, CreateTravelPlanInput } from "@/types/travelPlan";
 import { PostForm, postSchema, PostFormData } from "./PostForm";
 import {
@@ -29,12 +29,17 @@ type ContentType = "post" | "travel-plan";
 
 interface CreateSheetProps {
   initialType: ContentType;
-
   onSheetChange: (index: number) => void;
+  selectedList: AttachedList | null;
+  onOpenListPicker: () => void;
+  onRemoveList: () => void;
 }
 
 export const CreateSheet = forwardRef<BottomSheet, CreateSheetProps>(
-  ({ initialType = "post", onSheetChange }, ref) => {
+  (
+    { initialType = "post", onSheetChange, selectedList, onOpenListPicker, onRemoveList },
+    ref
+  ) => {
     const router = useRouter();
     const { createPost } = usePosts();
     const { createTravelPlan, getActiveTravelPlan, cancelTravelPlan } =
@@ -89,6 +94,7 @@ export const CreateSheet = forwardRef<BottomSheet, CreateSheetProps>(
       postForm.reset();
       travelPlanForm.reset();
       setVisibility(type === "post" ? "public" : "friends");
+      onRemoveList();
     };
 
     // Reset forms when switching tabs
@@ -114,10 +120,10 @@ export const CreateSheet = forwardRef<BottomSheet, CreateSheetProps>(
       (ref as React.RefObject<BottomSheet>).current?.close();
 
       setContentType("post");
-      // Navigate to edit screen
+      // Navigate to edit screen using the post_id
       router.push({
         pathname: "/edit-travel-plan",
-        params: { travelPlanId: activeTravelPlan.id },
+        params: { postId: activeTravelPlan.post_id },
       });
     };
 
@@ -159,7 +165,11 @@ export const CreateSheet = forwardRef<BottomSheet, CreateSheetProps>(
     };
 
     const submitPost = async (data: PostFormData) => {
-      await createPost({ text: data.text, visibility });
+      await createPost({
+        text: data.text,
+        visibility,
+        list_id: selectedList?.id || null,
+      });
     };
 
     const submitTravelPlan = async (data: TravelPlanFormData) => {
@@ -252,6 +262,9 @@ export const CreateSheet = forwardRef<BottomSheet, CreateSheetProps>(
             <PostForm
               control={postForm.control}
               errors={postForm.formState.errors}
+              selectedList={selectedList}
+              onAttachList={onOpenListPicker}
+              onRemoveList={onRemoveList}
             />
           )}
 

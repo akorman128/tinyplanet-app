@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { Avatar } from "./Avatar";
 import { Icons } from "./Icons";
 import { colors } from "./colors";
+import { ListChip } from "./ListChip";
 import { PostWithAuthor } from "@/types/post";
 import { useLikes } from "@/hooks/useLikes";
 import { useSavedPosts } from "@/hooks/useSavedPosts";
@@ -190,6 +191,13 @@ export function PostCard({
         <Text className="text-base text-gray-900 leading-5 mb-2">
           {post.text}
         </Text>
+
+        {/* Attached list */}
+        {post.attached_list && (
+          <View className="mb-2">
+            <ListChip list={post.attached_list} />
+          </View>
+        )}
 
         {/* Actions row */}
         <View className="flex-row items-center gap-4">
