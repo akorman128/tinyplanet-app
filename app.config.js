@@ -5,13 +5,18 @@ export default {
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/icon.png",
-    scheme: "expo-supabase-starter",
+    scheme: "tinyplanet",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     platforms: ["ios", "android"],
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.alexkorman.tinyplanet",
+      entitlements: {
+        "com.apple.security.application-groups": [
+          "group.com.alexkorman.tinyplanet",
+        ],
+      },
       infoPlist: {
         NSContactsUsageDescription:
           "We need access to your contacts so you can easily invite friends to Tiny Planet.",
@@ -36,6 +41,7 @@ export default {
       ],
     },
     plugins: [
+      "./plugins/withShareExtension",
       "expo-router",
       "expo-contacts",
       "expo-location",

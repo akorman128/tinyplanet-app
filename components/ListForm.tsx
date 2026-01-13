@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, TextInput, ScrollView } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,12 +47,19 @@ interface ListFormProps {
   onSubmit: (data: CreateListInput) => Promise<void>;
   onCancel: () => void;
   isLoading?: boolean;
+  initialPlaces?: string;
 }
 
-export function ListForm({ onSubmit, onCancel, isLoading }: ListFormProps) {
+export function ListForm({
+  onSubmit,
+  onCancel,
+  isLoading,
+  initialPlaces = "",
+}: ListFormProps) {
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<ListFormData>({
     resolver: zodResolver(listSchema),
@@ -64,6 +71,13 @@ export function ListForm({ onSubmit, onCancel, isLoading }: ListFormProps) {
       places: "",
     },
   });
+
+  // Update places field when initialPlaces changes (for share extension)
+  useEffect(() => {
+    if (initialPlaces) {
+      setValue("places", initialPlaces);
+    }
+  }, [initialPlaces, setValue]);
 
   const handleFormSubmit = async (data: ListFormData) => {
     // Parse places (one per line)

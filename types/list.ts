@@ -18,6 +18,7 @@ export interface List {
     latitude: number;
     longitude: number;
   } | null;
+  note: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -75,12 +76,14 @@ export interface CreateListInput {
     longitude: number;
   };
   places: string[];
+  note?: string;
 }
 
 export interface UpdateListInput {
   list_id: string;
   title?: string;
   category?: ListCategory;
+  note?: string;
   location?: {
     name: string;
     latitude: number;

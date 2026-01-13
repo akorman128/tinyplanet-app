@@ -1,15 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Alert } from "react-native";
-import { useRouter, Stack } from "expo-router";
+import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { ListForm } from "@/components/ListForm";
 import { useLists } from "@/hooks/useLists";
 import { CreateListInput } from "@/types/list";
 import { ScreenHeader } from "@/design-system";
+import {
+  getSharedNote,
+  clearSharedNote,
+} from "@/modules/SharedNoteModule";
 
 export default function CreateListScreen() {
   const router = useRouter();
   const { createList } = useLists();
+  const { fromShare } = useLocalSearchParams<{ fromShare?: string }>();
   const [isLoading, setIsLoading] = useState(false);
+  const [initialPlaces, setInitialPlaces] = useState("");
+
+  // Load shared note if coming from share extension
+  useEffect(() => {
+    if (fromShare === "true") {
+      loadSharedNote();
+    }
+  }, [fromShare]);
+
+  const loadSharedNote = async () => {
+    const note = await getSharedNote();
+    if (note?.text) {
+      setInitialPlaces(note.text);
+      // Clear immediately to prevent duplicate imports
+      await clearSharedNote();
+    }
+  };
 
   const handleSubmit = async (data: CreateListInput) => {
     try {
@@ -45,6 +67,7 @@ export default function CreateListScreen() {
           onSubmit={handleSubmit}
           onCancel={handleCancel}
           isLoading={isLoading}
+          initialPlaces={initialPlaces}
         />
       </View>
     </>
