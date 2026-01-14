@@ -1,11 +1,13 @@
 import { View, TouchableOpacity, Text } from "react-native";
 import { JSX } from "react";
 import { IconProps } from "./Icons";
+import { Badge } from "./Badge";
 
 export interface ButtonGroupOption {
   label?: string;
   icon?: (props: IconProps) => JSX.Element;
   onPress: () => void;
+  badge?: number | boolean;
 }
 
 interface ButtonGroupProps {
@@ -39,7 +41,7 @@ export function ButtonGroup({
           <TouchableOpacity
             key={index}
             onPress={option.onPress}
-            className={`flex-1 py-4 px-6 ${
+            className={`relative flex-1 py-4 px-6 ${
               isActive ? "bg-purple-600" : "bg-transparent"
             } active:bg-gray-800 ${!isLast ? "border-r border-gray-600" : ""}`}
           >
@@ -51,6 +53,15 @@ export function ButtonGroup({
                 </Text>
               )}
             </View>
+            {option.badge && (
+              <Badge
+                variant="primary"
+                size="small"
+                className="absolute -top-1 -right-1"
+              >
+                {typeof option.badge === "number" ? option.badge.toString() : "●"}
+              </Badge>
+            )}
           </TouchableOpacity>
         );
       })}

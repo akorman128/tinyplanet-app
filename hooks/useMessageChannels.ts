@@ -51,6 +51,16 @@ export const useMessageChannels = () => {
     [supabase, profile.id]
   );
 
+  const hasUnreadMessages = useCallback(async (): Promise<boolean> => {
+    const { data, error } = await supabase.rpc("has_unread_messages", {
+      p_user_id: profile.id,
+    });
+
+    if (error) throw error;
+
+    return (data as boolean) ?? false;
+  }, [supabase, profile.id]);
+
   const subscribeToAllMessages = useCallback(
     (onMessage: (friendId: string, message: any) => void) => {
       const userId = profile.id;
@@ -101,5 +111,6 @@ export const useMessageChannels = () => {
     getMessageChannels,
     markChannelAsRead,
     subscribeToAllMessages,
+    hasUnreadMessages,
   };
 };

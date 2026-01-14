@@ -70,6 +70,19 @@ function withShareExtension(config) {
       }
     }
 
+    // Copy native module files to main app target
+    const nativeModulesDir = path.join(projectRoot, "plugins", "nativeModules");
+    const mainAppDir = path.join(platformProjectRoot, "TinyPlanet");
+    const nativeModuleFiles = ["SharedNoteModule.swift", "SharedNoteModule.m"];
+
+    for (const file of nativeModuleFiles) {
+      const sourcePath = path.join(nativeModulesDir, file);
+      const destPath = path.join(mainAppDir, file);
+      if (fs.existsSync(sourcePath)) {
+        fs.copyFileSync(sourcePath, destPath);
+      }
+    }
+
     // Get the project object
     const project = xcodeProject;
 
@@ -139,7 +152,7 @@ function withShareExtension(config) {
         config.buildSettings.CODE_SIGN_ENTITLEMENTS = `${EXTENSION_NAME}/ShareExtension.entitlements`;
         config.buildSettings.INFOPLIST_FILE = `${EXTENSION_NAME}/Info.plist`;
         config.buildSettings.PRODUCT_BUNDLE_IDENTIFIER = extensionBundleId;
-        config.buildSettings.DEVELOPMENT_TEAM = "$(DEVELOPMENT_TEAM)";
+        config.buildSettings.DEVELOPMENT_TEAM = '"$(DEVELOPMENT_TEAM)"';
         config.buildSettings.CODE_SIGN_STYLE = "Automatic";
         config.buildSettings.MARKETING_VERSION = "1.0";
         config.buildSettings.CURRENT_PROJECT_VERSION = "1";
@@ -148,35 +161,9 @@ function withShareExtension(config) {
       }
     }
 
-    // Add the extension to the main app's embed frameworks phase
-    // Find the main app target
+    // Add target dependency so the extension builds with the main app
     const mainTarget = project.getFirstTarget();
     if (mainTarget) {
-      // Add copy files build phase to embed the extension
-      const embedPhase = project.addBuildPhase(
-        [],
-        "PBXCopyFilesBuildPhase",
-        "Embed App Extensions",
-        mainTarget.uuid,
-        "app_extension"
-      );
-
-      if (embedPhase) {
-        // Set the destination to PlugIns folder (13 = PlugIns)
-        const embedPhaseObj = project.hash.project.objects.PBXCopyFilesBuildPhase[embedPhase.uuid];
-        if (embedPhaseObj) {
-          embedPhaseObj.dstSubfolderSpec = 13;
-          embedPhaseObj.dstPath = "";
-        }
-
-        // Add the extension product to the embed phase
-        const extensionProductRef = project.findProductByName(`${EXTENSION_NAME}.appex`);
-        if (extensionProductRef) {
-          project.addToPbxCopyfilesBuildPhase(extensionProductRef, embedPhase.uuid);
-        }
-      }
-
-      // Add target dependency
       project.addTargetDependency(mainTarget.uuid, [targetKey]);
     }
 

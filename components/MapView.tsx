@@ -579,7 +579,6 @@ export const MapView: React.FC<MapViewProps> = React.memo(
         <MapLegend
           showLines={showConnectionLines}
           onToggleLines={setShowConnectionLines}
-          statistics={statistics || undefined}
         />
       </View>
     );

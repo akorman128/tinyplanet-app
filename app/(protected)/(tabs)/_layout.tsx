@@ -1,12 +1,22 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Tabs, useRouter, usePathname } from "expo-router";
 import { Navigation } from "@/design-system";
 import { useProfileStore } from "@/stores/profileStore";
+import { useFriends } from "@/hooks/useFriends";
+import type { PlatformStatistics } from "@/types/friendship";
 
 export default function TabsLayout() {
   const router = useRouter();
   const pathname = usePathname();
   const { profileState } = useProfileStore();
+  const { getPlatformStatistics } = useFriends();
+  const [statistics, setStatistics] = useState<PlatformStatistics | null>(null);
+
+  useEffect(() => {
+    getPlatformStatistics().then((result) => {
+      setStatistics(result.data);
+    });
+  }, [getPlatformStatistics]);
 
   // Determine active tab index from pathname
   const getActiveIndex = () => {
@@ -38,6 +48,7 @@ export default function TabsLayout() {
         onSearchPress={() => router.push("/search")}
         profileFullName={profileState?.full_name}
         profileAvatarUrl={profileState?.avatar_url}
+        statistics={statistics || undefined}
       />
     </>
   );

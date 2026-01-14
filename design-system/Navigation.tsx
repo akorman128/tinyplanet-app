@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, TouchableOpacity } from "react-native";
+import type { PlatformStatistics } from "@/types/friendship";
+import { Caption } from "./Typography";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ButtonGroup } from "./ButtonGroup";
 import { Avatar } from "./Avatar";
@@ -15,6 +17,8 @@ export interface NavigationProps {
   onSearchPress: () => void;
   profileFullName?: string;
   profileAvatarUrl?: string;
+  hasUnreadMessages?: boolean;
+  statistics?: PlatformStatistics;
 }
 
 export function Navigation({
@@ -26,14 +30,17 @@ export function Navigation({
   onSearchPress,
   profileFullName = "",
   profileAvatarUrl,
+  hasUnreadMessages,
+  statistics,
 }: NavigationProps) {
   const insets = useSafeAreaInsets();
+  const [showStats, setShowStats] = useState(false);
 
   return (
     <>
       {/* Custom ButtonGroup (Centered Top) */}
       <View
-        className="absolute left-0 right-0 flex-row justify-center px-20 z-10"
+        className="absolute left-0 right-0 items-center px-20 z-10"
         style={{ top: insets.top + 20 }}
         pointerEvents="box-none"
       >
@@ -51,9 +58,51 @@ export function Navigation({
             {
               icon: Icons.messageOutline,
               onPress: onMessagesPress,
+              badge: hasUnreadMessages,
             },
           ]}
         />
+
+        {/* Stats Dropdown Arrow */}
+        <TouchableOpacity
+          onPress={() => setShowStats(!showStats)}
+          className="mt-1 p-1"
+        >
+          <Icons.chevronDown
+            size={16}
+            color={colors.hex.gray500}
+            style={{ transform: [{ rotate: showStats ? "180deg" : "0deg" }] }}
+          />
+        </TouchableOpacity>
+
+        {/* Stats Dropdown */}
+        {showStats && statistics && (
+          <View
+            className="bg-white/90 rounded-xl px-4 py-2 mt-1"
+            style={{
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.15,
+              shadowRadius: 4,
+              elevation: 3,
+            }}
+          >
+            <View className="flex-row items-center gap-3">
+              <View className="flex-row items-center">
+                <Caption>🌎</Caption>
+                <Caption className="ml-1 font-bold">
+                  {statistics.total_users.toLocaleString()}
+                </Caption>
+              </View>
+              <View className="flex-row items-center">
+                <Caption>🤝</Caption>
+                <Caption className="ml-1 font-bold">
+                  {statistics.connections_count}
+                </Caption>
+              </View>
+            </View>
+          </View>
+        )}
       </View>
 
       {/* Profile Button (Top Left) */}

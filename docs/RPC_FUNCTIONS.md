@@ -17,6 +17,7 @@
 | `get_mutual_friends_between_users` | `20251202000001_add_get_mutual_friends_rpc.sql` | `hooks/useFriends.ts` | Returns complete profile data for all mutual friends between two users |
 | `get_message_channels` | `20260103000002_add_message_channels_rpc.sql` | `hooks/useMessageChannels.ts` | Returns all accepted friends with last message preview, timestamp, and server-side calculated unread counts |
 | `get_platform_statistics` | `20260111000001_add_get_platform_statistics_rpc.sql` | `hooks/useFriends.ts` | Returns platform statistics for MapLegend: total users count and combined connections count (friends + mutuals) |
+| `has_unread_messages` | `20260114000001_add_get_total_unread_count_rpc.sql` | `hooks/useMessageChannels.ts` | Efficiently checks if user has any unread messages using EXISTS with early termination |
 
 ## Deprecated/Unused RPCs
 
