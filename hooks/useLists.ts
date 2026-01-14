@@ -271,11 +271,12 @@ export const useLists = () => {
   };
 
   const updateList = async (input: UpdateListInput): Promise<List> => {
-    const { list_id, title, category, location } = input;
+    const { list_id, title, category, note, location } = input;
 
     interface ListUpdateFields {
       title: string;
       category: string;
+      note: string | null;
       location_name: string;
       location: string;
     }
@@ -283,6 +284,7 @@ export const useLists = () => {
     const updates: Partial<ListUpdateFields> = {};
     if (title !== undefined) updates.title = title;
     if (category !== undefined) updates.category = category;
+    if (note !== undefined) updates.note = note || null;
     if (location !== undefined) {
       updates.location_name = location.name;
       updates.location = `POINT(${location.longitude} ${location.latitude})`;

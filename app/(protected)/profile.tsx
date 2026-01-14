@@ -237,7 +237,7 @@ export default function ProfileScreen() {
           </View>
 
           <View className="flex-row items-center justify-center mb-2">
-            <Heading className="text-purple-900 text-center">
+            <Heading className="text-black text-center">
               {displayProfile.full_name}
             </Heading>
           </View>
@@ -288,7 +288,7 @@ export default function ProfileScreen() {
               <Text className="text-base font-semibold text-purple-900 mb-1">
                 🚀 {activeTravelPlan.destination_name}
               </Text>
-              <Text className="text-sm font-semibold text-purple-600">
+              <Text className="text-sm font-semibold text-purple-900">
                 {new Date(activeTravelPlan.start_date).toLocaleDateString()} →{" "}
                 {new Date(activeTravelPlan.end_date).toLocaleDateString()}
               </Text>
@@ -307,12 +307,12 @@ export default function ProfileScreen() {
               className="w-full mb-4 px-4 py-3 bg-purple-50 rounded-lg flex-row items-center justify-between"
             >
               <View className="flex-row items-center gap-3">
-                <Icons.posts size={32} color={colors.hex.purple600} />
+                <Icons.posts size={32} color={colors.hex.purple900} />
                 <Text className="text-base font-semibold text-purple-900">
                   Posts
                 </Text>
               </View>
-              <Icons.chevronRight size={20} color={colors.hex.purple600} />
+              <Icons.chevronRight size={20} color={colors.hex.purple900} />
             </Pressable>
           )}
 
@@ -327,12 +327,12 @@ export default function ProfileScreen() {
             className="w-full mb-4 px-4 py-3 bg-purple-50 rounded-lg flex-row items-center justify-between"
           >
             <View className="flex-row items-center gap-3">
-              <Icons.list size={32} color={colors.hex.purple600} />
+              <Icons.list size={32} color={colors.hex.purple900} />
               <Text className="text-base font-semibold text-purple-900">
                 Lists
               </Text>
             </View>
-            <Icons.chevronRight size={20} color={colors.hex.purple600} />
+            <Icons.chevronRight size={20} color={colors.hex.purple900} />
           </Pressable>
 
           <View className="w-full mb-4">

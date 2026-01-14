@@ -29,6 +29,7 @@ export default function EditListScreen() {
   const [list, setList] = useState<ListWithPlaces | null>(null);
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<ListCategory>("eat_drink");
+  const [note, setNote] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,6 +55,7 @@ export default function EditListScreen() {
         setList(data);
         setTitle(data.title);
         setCategory(data.category);
+        setNote(data.note || "");
       } catch (err) {
         console.error("Error fetching list:", err);
         setError("Failed to load list");
@@ -74,6 +76,7 @@ export default function EditListScreen() {
         list_id: list.id,
         title: title.trim(),
         category,
+        note: note.trim() || undefined,
       });
       router.back();
     } catch (err) {
@@ -84,7 +87,11 @@ export default function EditListScreen() {
     }
   };
 
-  const hasChanges = list && (title.trim() !== list.title || category !== list.category);
+  const hasChanges =
+    list &&
+    (title.trim() !== list.title ||
+      category !== list.category ||
+      note.trim() !== (list.note || ""));
 
   if (loading) {
     return (
@@ -155,6 +162,20 @@ export default function EditListScreen() {
               options={CATEGORY_OPTIONS}
               value={category}
               onChange={setCategory}
+            />
+          </View>
+
+          <View className="mb-6">
+            <Text className="text-sm font-medium text-gray-700 mb-2">Notes</Text>
+            <TextInput
+              value={note}
+              onChangeText={setNote}
+              className="border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-900"
+              placeholder="Add any notes about this list..."
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
+              style={{ minHeight: 80 }}
             />
           </View>
         </ScrollView>

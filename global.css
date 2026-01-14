@@ -1,3 +1,18 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "uniwind";
+
+@theme {
+  /* Custom primary colors */
+  --color-primary-light: #c7d2fe;
+  --color-primary: #6b61f3;
+  --color-primary-dark: #5a52d5;
+
+  /* Extended purple scale */
+  --color-purple-200: #c7d2fe;
+  --color-purple-400: #6057db;
+  --color-purple-500: #564ec2;
+  --color-purple-600: #6b61f3;
+  --color-purple-700: #5a52d5;
+  --color-purple-800: #4a44b8;
+  --color-purple-900: #3a369a;
+}

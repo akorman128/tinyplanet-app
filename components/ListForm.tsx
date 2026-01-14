@@ -1,11 +1,12 @@
-import React, { useEffect } from "react";
-import { View, Text, TextInput, ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, TextInput, ScrollView, Pressable } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Input } from "@/design-system/Input";
 import { Button } from "@/design-system/Button";
 import { Select, SelectOption } from "@/design-system/Select";
+import { colors } from "@/design-system/colors";
 import { CreateListInput, ListCategory } from "@/types/list";
 import { LocationSearchInput } from "./LocationSearchInput";
 
@@ -38,7 +39,8 @@ const listSchema = z.object({
     .refine((val) => val !== null, {
       message: "Location is required",
     }),
-  places: z.string().min(1, "At least one place is required"),
+  note: z.string().max(500, "Note too long").optional(),
+  places: z.string().optional(),
 });
 
 type ListFormData = z.infer<typeof listSchema>;
@@ -56,6 +58,8 @@ export function ListForm({
   isLoading,
   initialPlaces = "",
 }: ListFormProps) {
+  const [showPlaces, setShowPlaces] = useState(!!initialPlaces);
+
   const {
     control,
     handleSubmit,
@@ -68,6 +72,7 @@ export function ListForm({
       title: "",
       category: "eat_drink",
       location: null,
+      note: "",
       places: "",
     },
   });
@@ -76,25 +81,29 @@ export function ListForm({
   useEffect(() => {
     if (initialPlaces) {
       setValue("places", initialPlaces);
+      setShowPlaces(true);
     }
   }, [initialPlaces, setValue]);
 
   const handleFormSubmit = async (data: ListFormData) => {
-    // Parse places (one per line)
-    const placesList = data.places
-      .split("\n")
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0);
-
-    if (placesList.length === 0 || !data.location) {
+    if (!data.location) {
       return;
     }
+
+    // Parse places (one per line) - now optional
+    const placesList = data.places
+      ? data.places
+          .split("\n")
+          .map((line) => line.trim())
+          .filter((line) => line.length > 0)
+      : [];
 
     await onSubmit({
       title: data.title.trim(),
       category: data.category,
       location: data.location,
       places: placesList,
+      note: data.note?.trim() || undefined,
     });
   };
 
@@ -116,7 +125,7 @@ export function ListForm({
           name="title"
           render={({ field: { onChange, onBlur, value } }) => (
             <Input
-              label="List Title"
+              label="Title"
               placeholder="Best Coffee Shops"
               value={value}
               onChangeText={onChange}
@@ -138,6 +147,24 @@ export function ListForm({
               value={value}
               onChange={onChange}
               placeholder="Select a category"
+            />
+          )}
+        />
+
+        {/* Notes Input */}
+        <Controller
+          control={control}
+          name="note"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <Input
+              label="Note"
+              placeholder="Add a note"
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              error={errors.note?.message}
+              multiline
+              numberOfLines={3}
             />
           )}
         />
@@ -167,31 +194,23 @@ export function ListForm({
             name="places"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
-                value={value}
+                value={value || ""}
                 onChangeText={onChange}
                 onBlur={onBlur}
                 placeholder="Blue Bottle Coffee&#10;Stumptown Coffee Roasters&#10;Devoción"
                 multiline
                 numberOfLines={6}
                 textAlignVertical="top"
-                className={`bg-white border ${
-                  errors.places ? "border-red-500" : "border-gray-300"
-                } rounded-lg px-4 py-3 text-base`}
-                placeholderTextColor="#6b7280"
+                className="bg-white border-2 border-gray-300 rounded-xl px-4 py-3 text-base"
+                placeholderTextColor="#9CA3AF"
                 style={{ minHeight: 120 }}
               />
             )}
           />
-          {errors.places && (
-            <Text className="text-red-500 text-sm mt-1">
-              {errors.places.message}
-            </Text>
-          )}
           <View className="flex-row items-center gap-1 bg-gray-100 p-2 mt-2 rounded-lg">
             <Text className="text-xs text-gray-500 mt-1">
-              💡 Enter each place on a new line. This will take a bit depending
-              on the number of places. Results vary, but you can correct
-              manually.
+              💡 This will take a bit depending on the number of places. Results
+              vary, but you can correct manually.
             </Text>
           </View>
         </View>
