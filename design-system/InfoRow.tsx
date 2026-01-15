@@ -17,9 +17,9 @@ export function InfoRow({
 }: InfoRowProps) {
   return (
     <View
-      className={`w-full mb-4 py-4 px-5 bg-gray-50 rounded-xl ${className}`}
+      className={`w-full mb-4 py-2 px-5 bg-gray-50 rounded-xl ${className}`}
     >
-      <Text className="text-xs font-semibold text-[#9ca3af] mb-1.5 uppercase tracking-wide">
+      <Text className="text-xs font-semibold text-[#9ca3af] mb-1 uppercase tracking-wide">
         {label}
       </Text>
       {loading ? (

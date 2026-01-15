@@ -48,3 +48,5 @@ export { Select } from "./Select";
 export type { SelectProps, SelectOption } from "./Select";
 export { CommentInput } from "./CommentInput";
 export type { CommentInputProps } from "./CommentInput";
+export { GlassInfoCard, GlassInfoItem } from "./GlassInfoCard";
+export type { GlassInfoCardProps, GlassInfoItemProps } from "./GlassInfoCard";

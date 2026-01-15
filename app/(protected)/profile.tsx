@@ -4,7 +4,8 @@ import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 
 import {
   Avatar,
-  InfoRow,
+  GlassInfoCard,
+  GlassInfoItem,
   ScreenHeader,
   Badge,
   LoadingState,
@@ -13,6 +14,7 @@ import {
   Icons,
   colors,
   SocialMediaLinks,
+  InfoRow,
 } from "@/design-system";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
 import { useProfile } from "@/hooks/useProfile";
@@ -304,7 +306,7 @@ export default function ProfileScreen() {
                   params: { userId: displayProfile.id },
                 })
               }
-              className="w-full mb-4 px-4 py-3 bg-purple-50 rounded-lg flex-row items-center justify-between"
+              className="w-full px-4 py-3 bg-purple-50 rounded-t-lg flex-row items-center justify-between"
             >
               <View className="flex-row items-center gap-3">
                 <Icons.posts size={32} color={colors.hex.purple900} />
@@ -324,7 +326,7 @@ export default function ProfileScreen() {
                 params: { userId: displayProfile.id },
               })
             }
-            className="w-full mb-4 px-4 py-3 bg-purple-50 rounded-lg flex-row items-center justify-between"
+            className="w-full mb-4 px-4 py-3 bg-purple-50 rounded-b-lg flex-row items-center justify-between"
           >
             <View className="flex-row items-center gap-3">
               <Icons.list size={32} color={colors.hex.purple900} />
@@ -335,27 +337,25 @@ export default function ProfileScreen() {
             <Icons.chevronRight size={20} color={colors.hex.purple900} />
           </Pressable>
 
-          <View className="w-full mb-4">
+          <GlassInfoCard className="w-full mb-4">
             {displayProfile.birthday && (
-              <InfoRow
+              <GlassInfoItem
                 label="Birthday"
                 value={formatBirthday(displayProfile.birthday)}
               />
             )}
-
             {displayProfile.hometown && (
-              <InfoRow label="Hometown" value={displayProfile.hometown} />
+              <GlassInfoItem label="Hometown" value={displayProfile.hometown} />
             )}
-
             {displayProfile.latitude !== undefined &&
               displayProfile.longitude !== undefined && (
-                <InfoRow
+                <GlassInfoItem
                   label="Current Location"
                   value={humanReadableLocation || "Unknown location"}
                   loading={geocoding}
                 />
               )}
-          </View>
+          </GlassInfoCard>
         </ScrollView>
       </View>
     </>
