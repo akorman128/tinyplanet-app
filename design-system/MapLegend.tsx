@@ -1,7 +1,8 @@
 import React from "react";
 import { View, Switch } from "react-native";
-import { Caption } from "./Typography";
+// import { Caption } from "./Typography";
 import { colors } from "./colors";
+import { Icons } from "./Icons";
 
 export interface MapLegendProps {
   showLines: boolean;
@@ -18,7 +19,8 @@ export const MapLegend: React.FC<MapLegendProps> = ({
       style={{ zIndex: 10 }}
     >
       <View className="flex-row items-center justify-between px-2 py-1">
-        <Caption className="mr-3">👥</Caption>
+        {/* <Caption className="mr-3">👥</Caption> */}
+        <Icons.audience color={colors.hex.purple900}></Icons.audience>
         <Switch
           value={showLines}
           onValueChange={onToggleLines}
