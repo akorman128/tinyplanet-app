@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity, Switch } from "react-native";
 import type { PlatformStatistics } from "@/types/friendship";
 import { Caption } from "./Typography";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -19,6 +19,8 @@ export interface NavigationProps {
   profileAvatarUrl?: string;
   hasUnreadMessages?: boolean;
   statistics?: PlatformStatistics;
+  showLines: boolean;
+  onToggleLines: (value: boolean) => void;
 }
 
 export function Navigation({
@@ -32,6 +34,8 @@ export function Navigation({
   profileAvatarUrl,
   hasUnreadMessages,
   statistics,
+  showLines,
+  onToggleLines,
 }: NavigationProps) {
   const insets = useSafeAreaInsets();
   const [showStats, setShowStats] = useState(false);
@@ -40,7 +44,7 @@ export function Navigation({
     <>
       {/* Custom ButtonGroup (Centered Top) */}
       <View
-        className="absolute left-0 right-0 items-center px-20 z-10"
+        className="absolute left-0 right-0 items-center px-35 z-10"
         style={{ top: insets.top + 20 }}
         pointerEvents="box-none"
       >
@@ -87,6 +91,24 @@ export function Navigation({
               elevation: 3,
             }}
           >
+            <View className="flex-row items-center justify-between px-2 py-1">
+              <Caption className="mr-3">🧵</Caption>
+              {/* <Icons.audience
+                size={28}
+                color={colors.hex.purple900}
+              /> */}
+              <Switch
+                value={showLines}
+                onValueChange={onToggleLines}
+                trackColor={{
+                  false: colors.hex.placeholder,
+                  true: colors.hex.purple600,
+                }}
+                thumbColor={colors.hex.white}
+                ios_backgroundColor={colors.hex.placeholder}
+                style={{ transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }] }}
+              />
+            </View>
             <View className="flex-row items-center gap-3">
               <View className="flex-row items-center">
                 <Caption>🌎</Caption>

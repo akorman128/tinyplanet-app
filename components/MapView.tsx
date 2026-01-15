@@ -28,9 +28,10 @@ import {
 } from "@/types/friendship";
 import { TravelPlanMapLocation } from "@/types/travelPlan";
 import { useLocation } from "@/hooks/useLocation";
-import { colors, MapLegend } from "@/design-system";
+import { colors } from "@/design-system";
 import { useRouter } from "expo-router";
 import { getDurationInDays } from "@/utils";
+import { useMapStore } from "@/stores/mapStore";
 
 interface MapViewProps {
   onRefresh?: () => void;
@@ -61,8 +62,8 @@ export const MapView: React.FC<MapViewProps> = React.memo(
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [mapDimensions, setMapDimensions] = useState({ width: 0, height: 0 });
 
-    // Connection line visibility state (default: off)
-    const [showConnectionLines, setShowConnectionLines] = useState(false);
+    // Connection line visibility from shared store
+    const showConnectionLines = useMapStore((state) => state.showConnectionLines);
 
     // Convert user location object to [longitude, latitude] tuple for Mapbox
     const userLocation: [number, number] | null = userLocationObj
@@ -576,10 +577,6 @@ export const MapView: React.FC<MapViewProps> = React.memo(
           </Mapbox.MapView>
         )}
 
-        <MapLegend
-          showLines={showConnectionLines}
-          onToggleLines={setShowConnectionLines}
-        />
       </View>
     );
   }

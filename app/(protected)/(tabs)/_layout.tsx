@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Tabs, useRouter, usePathname } from "expo-router";
 import { Navigation } from "@/design-system";
 import { useProfileStore } from "@/stores/profileStore";
+import { useMapStore } from "@/stores/mapStore";
 import { useFriends } from "@/hooks/useFriends";
 import type { PlatformStatistics } from "@/types/friendship";
 
@@ -9,6 +10,7 @@ export default function TabsLayout() {
   const router = useRouter();
   const pathname = usePathname();
   const { profileState } = useProfileStore();
+  const { showConnectionLines, setShowConnectionLines } = useMapStore();
   const { getPlatformStatistics } = useFriends();
   const [statistics, setStatistics] = useState<PlatformStatistics | null>(null);
 
@@ -49,6 +51,8 @@ export default function TabsLayout() {
         profileFullName={profileState?.full_name}
         profileAvatarUrl={profileState?.avatar_url}
         statistics={statistics || undefined}
+        showLines={showConnectionLines}
+        onToggleLines={setShowConnectionLines}
       />
     </>
   );

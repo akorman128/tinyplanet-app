@@ -10,8 +10,6 @@ export { Avatar } from "./Avatar";
 export type { AvatarProps } from "./Avatar";
 export { InfoRow } from "./InfoRow";
 export type { InfoRowProps } from "./InfoRow";
-export { MapLegend } from "./MapLegend";
-export type { MapLegendProps } from "./MapLegend";
 export { Badge } from "./Badge";
 export type { BadgeProps } from "./Badge";
 export { TabBar } from "./TabBar";
