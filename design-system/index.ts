@@ -50,3 +50,5 @@ export { CommentInput } from "./CommentInput";
 export type { CommentInputProps } from "./CommentInput";
 export { GlassInfoCard, GlassInfoItem } from "./GlassInfoCard";
 export type { GlassInfoCardProps, GlassInfoItemProps } from "./GlassInfoCard";
+export { ContactCard } from "./ContactCard";
+export type { ContactCardProps } from "./ContactCard";

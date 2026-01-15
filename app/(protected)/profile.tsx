@@ -228,7 +228,7 @@ export default function ProfileScreen() {
 
         <ScrollView
           className="flex-1"
-          contentContainerClassName="px-6 pt-8 pb-8 items-center"
+          contentContainerClassName="px-6 pt-4 pb-8 items-center"
         >
           <View className="mb-4">
             <Avatar
@@ -326,12 +326,31 @@ export default function ProfileScreen() {
                 params: { userId: displayProfile.id },
               })
             }
-            className="w-full mb-4 px-4 py-3 bg-purple-50 rounded-b-lg flex-row items-center justify-between"
+            className="w-full px-4 py-3 bg-purple-50 flex-row items-center justify-between"
           >
             <View className="flex-row items-center gap-3">
               <Icons.list size={32} color={colors.hex.purple900} />
               <Text className="text-base font-semibold text-purple-900">
                 Lists
+              </Text>
+            </View>
+            <Icons.chevronRight size={20} color={colors.hex.purple900} />
+          </Pressable>
+
+          {/* Verified Contacts Link */}
+          <Pressable
+            onPress={() =>
+              router.push({
+                pathname: "/user-contacts",
+                params: { userId: displayProfile.id },
+              })
+            }
+            className="w-full mb-4 px-4 py-3 bg-purple-50 rounded-b-lg flex-row items-center justify-between"
+          >
+            <View className="flex-row items-center gap-3">
+              <Icons.userList size={32} color={colors.hex.purple900} />
+              <Text className="text-base font-semibold text-purple-900">
+                Contacts
               </Text>
             </View>
             <Icons.chevronRight size={20} color={colors.hex.purple900} />

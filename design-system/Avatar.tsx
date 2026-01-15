@@ -32,7 +32,7 @@ export const Avatar = React.memo<AvatarProps>(
       <View
         className={`${config.container} rounded-full bg-purple-200 justify-center items-center`}
       >
-        <Text className={`${config.fontSize} font-semibold text-purple-800`}>
+        <Text className={`${config.fontSize} font-semibold text-purple`}>
           {initials}
         </Text>
       </View>
