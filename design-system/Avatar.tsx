@@ -1,32 +1,90 @@
-import React from "react";
-import { View, Text } from "react-native";
+import React, { useState } from "react";
+import { View, Text, Image } from "react-native";
 import { getInitials } from "@/utils";
+import { colors } from "./colors";
 
 export interface AvatarProps {
   fullName: string;
   avatarUrl?: string;
-  size?: "small" | "medium" | "large";
+  size?: "map" | "small" | "medium" | "large";
+  onImageLoad?: () => void;
 }
 
 const sizeConfig = {
+  map: {
+    container: "w-6 h-6",
+    fontSize: "text-[10px]",
+    pixels: 24,
+    fontPixels: 10,
+  },
   small: {
     container: "w-10 h-10",
     fontSize: "text-base",
+    pixels: 40,
+    fontPixels: 16,
   },
   medium: {
     container: "w-[60px] h-[60px]",
     fontSize: "text-2xl",
+    pixels: 60,
+    fontPixels: 24,
   },
   large: {
     container: "w-20 h-20",
     fontSize: "text-[32px]",
+    pixels: 80,
+    fontPixels: 32,
   },
 };
 
 export const Avatar = React.memo<AvatarProps>(
-  ({ fullName, avatarUrl, size = "large" }) => {
+  ({ fullName, avatarUrl, size = "large", onImageLoad }) => {
     const config = sizeConfig[size];
     const initials = getInitials(fullName);
+    const [imageError, setImageError] = useState(false);
+
+    if (avatarUrl && !imageError) {
+      return (
+        <Image
+          source={{ uri: avatarUrl }}
+          style={{
+            width: config.pixels,
+            height: config.pixels,
+            borderRadius: config.pixels / 2,
+          }}
+          fadeDuration={0}
+          onLoad={onImageLoad}
+          onError={() => setImageError(true)}
+        />
+      );
+    }
+
+    // Use inline styles for "map" size since it renders inside
+    // PointAnnotation's offscreen bitmap where NativeWind doesn't apply
+    if (size === "map") {
+      return (
+        <View
+          style={{
+            width: config.pixels,
+            height: config.pixels,
+            borderRadius: config.pixels / 2,
+            backgroundColor: colors.hex.purple200,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Text
+            style={{
+              fontSize: config.fontPixels,
+              fontWeight: "600",
+              color: colors.hex.purple600,
+            }}
+          >
+            {initials}
+          </Text>
+        </View>
+      );
+    }
 
     return (
       <View

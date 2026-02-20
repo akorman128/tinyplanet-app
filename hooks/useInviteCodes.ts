@@ -1,11 +1,11 @@
-import { useRequireProfile } from "./useRequireProfile";
+import { useProfileStore } from "@/stores/profileStore";
 import { useSupabase } from "./useSupabase";
 import { InviteCode, InviteCodeStatus } from "../types/invite_code";
 import { generateInviteCode } from "../utils/inviteCode";
 
 export const useInviteCodes = () => {
   const { isLoaded, supabase } = useSupabase();
-  const profile = useRequireProfile();
+  const { profileState } = useProfileStore();
 
   // ––– QUERIES –––
 
@@ -70,6 +70,7 @@ export const useInviteCodes = () => {
   const createInviteCode = async (
     input: createInviteCodeDto
   ): Promise<createInviteCodeOutputDto> => {
+    if (!profileState) throw new Error("Profile required");
     const { code: providedCode, expires_at } = input;
 
     if (providedCode) {
@@ -77,7 +78,7 @@ export const useInviteCodes = () => {
         .from("invite_codes")
         .insert({
           code: providedCode,
-          inviter_id: profile.id,
+          inviter_id: profileState.id,
           status: "active",
           expires_at,
         })
@@ -103,7 +104,7 @@ export const useInviteCodes = () => {
         .from("invite_codes")
         .insert({
           code: generatedCode,
-          inviter_id: profile.id,
+          inviter_id: profileState.id,
           status: "active",
           expires_at,
         })
@@ -146,6 +147,7 @@ export const useInviteCodes = () => {
   const sendInviteCode = async (
     input: sendInviteCodeDto
   ): Promise<sendInviteCodeOutputDto> => {
+    if (!profileState) throw new Error("Profile required");
     const { phone_number, invite_code, inviter_name } = input;
 
     const {
@@ -157,7 +159,7 @@ export const useInviteCodes = () => {
       body: {
         phone_number,
         invite_code,
-        inviter_name: inviter_name || profile.full_name,
+        inviter_name: inviter_name || profileState.full_name,
       },
     });
 
@@ -249,6 +251,7 @@ export const useInviteCodes = () => {
 
   // Get count of invite codes created this month
   const getInviteCountThisMonth = async (): Promise<number> => {
+    if (!profileState) throw new Error("Profile required");
     // Calculate start of current month
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -256,7 +259,7 @@ export const useInviteCodes = () => {
 
     const { data } = await getInviteCodes({
       filters: {
-        userId: profile.id,
+        userId: profileState.id,
         startDate: startOfMonth,
         endDate: endOfMonth,
       },

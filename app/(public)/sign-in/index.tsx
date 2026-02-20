@@ -4,7 +4,7 @@ import { router } from "expo-router";
 export default function SignUpIndex() {
   useEffect(() => {
     // Redirect to the first step of signup
-    router.replace("/sign-in/sign-in");
+    router.replace("/sign-in/phone-number");
   }, []);
 
   return null;

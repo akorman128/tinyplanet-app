@@ -30,7 +30,7 @@ export default {
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
-        backgroundColor: "#ffffff",
+        backgroundColor: "#e8e8e8",
       },
       edgeToEdgeEnabled: true,
       package: "com.alexkorman.tinyplanet",
@@ -57,12 +57,17 @@ export default {
         "expo-splash-screen",
         {
           image: "./assets/splash-icon.png",
-          imageWidth: 200,
+          imageWidth: 250,
           resizeMode: "contain",
-          backgroundColor: "#ffffff",
+          backgroundColor: "#e8e8e8",
         },
       ],
     ],
+    extra: {
+      eas: {
+        projectId: "093eb18f-5646-4ee0-99ed-f5b6f00d27dd",
+      },
+    },
     experiments: {
       typedRoutes: true,
       reactCompiler: true,

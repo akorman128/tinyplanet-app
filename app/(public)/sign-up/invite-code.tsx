@@ -1,11 +1,11 @@
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useInviteCodes } from "@/hooks/useInviteCodes";
-import { Button, Heading, Subheading, Input } from "@/design-system";
+import { Button, Heading, Subheading, Input, Caption } from "@/design-system";
 import { useSignupStore } from "@/stores/signupStore";
 
 // Zod schema for invite code validation
@@ -95,6 +95,9 @@ export default function InviteCodePage() {
           >
             Continue
           </Button>
+          <Pressable className="items-center" onPress={() => router.back()}>
+            <Caption>Back</Caption>
+          </Pressable>
         </View>
       </View>
     </KeyboardAwareScrollView>

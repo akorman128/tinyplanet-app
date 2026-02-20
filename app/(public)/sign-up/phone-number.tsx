@@ -15,7 +15,7 @@ export default function Page() {
       buttonText="Continue"
       footerText="Already have an account?"
       footerLinkText="Sign in"
-      footerLinkPath="/sign-in/sign-in"
+      footerLinkPath="/sign-in/phone-number"
       verifyOtpPath="/sign-up/verify-otp"
     />
   );

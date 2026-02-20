@@ -5,12 +5,7 @@ import React, {
   useRef,
   useMemo,
 } from "react";
-import {
-  View,
-  ActivityIndicator,
-  Text,
-  LayoutChangeEvent,
-} from "react-native";
+import { View, ActivityIndicator, Text, LayoutChangeEvent } from "react-native";
 import Mapbox, {
   Camera,
   ShapeSource,
@@ -19,6 +14,7 @@ import Mapbox, {
   LineLayer,
   Images,
 } from "@rnmapbox/maps";
+import { MapMarker } from "./MapMarker";
 import { useFriends } from "@/hooks/useFriends";
 import { useTravelPlan } from "@/hooks/useTravelPlan";
 import {
@@ -63,7 +59,9 @@ export const MapView: React.FC<MapViewProps> = React.memo(
     const [mapDimensions, setMapDimensions] = useState({ width: 0, height: 0 });
 
     // Connection line visibility from shared store
-    const showConnectionLines = useMapStore((state) => state.showConnectionLines);
+    const showConnectionLines = useMapStore(
+      (state) => state.showConnectionLines
+    );
 
     // Convert user location object to [longitude, latitude] tuple for Mapbox
     const userLocation: [number, number] | null = userLocationObj
@@ -241,22 +239,21 @@ export const MapView: React.FC<MapViewProps> = React.memo(
       setMapDimensions({ width, height });
     }, []);
 
-    // Handle marker press
+    // Handle friend/mutual marker press (from MapMarker component)
+    const handleFriendMarkerPress = useCallback(
+      (userId: string) => {
+        router.push({ pathname: "/profile", params: { userId } });
+      },
+      [router]
+    );
+
+    // Handle travel plan marker press (from ShapeSource onPress)
     const handleMarkerPress = useCallback(
       (event: any) => {
         const { features } = event;
         if (features && features.length > 0) {
           const feature = features[0];
-
-          // Don't do anything if a cluster is tapped
-          if (feature.properties.point_count) {
-            return;
-          }
-
-          // For travel plan markers, use user_id; for friend/mutual markers, use id
           const userId = feature.properties.user_id || feature.properties.id;
-
-          // Navigate to the user's profile page
           router.push({ pathname: "/profile", params: { userId } });
         }
       },
@@ -344,9 +341,10 @@ export const MapView: React.FC<MapViewProps> = React.memo(
                   style={{
                     textField: ["get", "name"],
                     textSize: 12,
-                    textColor: "#53d769",
-                    textHaloColor: colors.hex.white,
-                    textHaloWidth: 2,
+                    textColor: colors.hex.white,
+                    textHaloColor: colors.hex.purple800,
+                    textHaloWidth: 8,
+                    textHaloBlur: 0,
                     textOffset: [0, 1.5],
                     textAnchor: "top",
                     textFont: [
@@ -396,134 +394,19 @@ export const MapView: React.FC<MapViewProps> = React.memo(
                 </ShapeSource>
               )}
 
-            {/* Friend and mutual markers with clustering */}
-            {friendLocations && friendLocations.features.length > 0 && (
-              <ShapeSource
-                id="friend-locations"
-                shape={friendLocations}
-                cluster
-                clusterRadius={50}
-                clusterMaxZoomLevel={14}
-                onPress={handleMarkerPress}
-              >
-                {/* Clustered points */}
-                <CircleLayer
-                  id="cluster-circles"
-                  filter={["has", "point_count"]}
-                  style={{
-                    circleRadius: [
-                      "step",
-                      ["get", "point_count"],
-                      20, // radius for clusters with < 10 points
-                      10,
-                      20, // radius for clusters with 10-100 points
-                      100,
-                      20, // radius for clusters with > 100 points
-                    ],
-                    circleColor: colors.hex.purple600,
-                    circleOpacity: 0.9,
-                    circleStrokeWidth: 3,
-                    circleStrokeColor: colors.hex.white,
-                  }}
+            {/* Friend and mutual avatar markers */}
+            {friendLocations &&
+              friendLocations.features.map((feature) => (
+                <MapMarker
+                  key={feature.properties.id}
+                  id={feature.properties.id}
+                  coordinate={feature.geometry.coordinates}
+                  name={feature.properties.name}
+                  avatarUrl={feature.properties.avatar_url}
+                  type={feature.properties.type}
+                  onPress={handleFriendMarkerPress}
                 />
-                <SymbolLayer
-                  id="cluster-count"
-                  filter={["has", "point_count"]}
-                  style={{
-                    textField: ["get", "point_count_abbreviated"],
-                    textSize: 14,
-                    textColor: colors.hex.white,
-                    textFont: [
-                      "Roboto Bold",
-                      "Noto Sans Bold",
-                      "Arial Unicode MS Bold",
-                    ],
-                  }}
-                />
-
-                {/* Individual friend markers */}
-                <CircleLayer
-                  id="friend-markers"
-                  filter={[
-                    "all",
-                    ["!has", "point_count"],
-                    ["==", "type", "friend"],
-                  ]}
-                  style={{
-                    circleRadius: 10,
-                    circleColor: colors.hex.purple600,
-                    circleOpacity: 0.85,
-                    circleStrokeWidth: 3,
-                    circleStrokeColor: colors.hex.white,
-                  }}
-                />
-
-                {/* Individual mutual markers */}
-                <CircleLayer
-                  id="mutual-markers"
-                  filter={[
-                    "all",
-                    ["!has", "point_count"],
-                    ["==", "type", "mutual"],
-                  ]}
-                  style={{
-                    circleRadius: 10,
-                    circleColor: colors.hex.purple200,
-                    circleOpacity: 0.85,
-                    circleStrokeWidth: 3,
-                    circleStrokeColor: colors.hex.white,
-                  }}
-                />
-
-                {/* Friend name labels */}
-                <SymbolLayer
-                  id="friend-labels"
-                  filter={[
-                    "all",
-                    ["!has", "point_count"],
-                    ["==", "type", "friend"],
-                  ]}
-                  style={{
-                    textField: ["get", "name"],
-                    textSize: 12,
-                    textColor: colors.hex.purple900,
-                    textHaloColor: colors.hex.white,
-                    textHaloWidth: 2,
-                    textOffset: [0, 1.5],
-                    textAnchor: "top",
-                    textFont: [
-                      "Roboto Medium",
-                      "Noto Sans Regular",
-                      "Arial Unicode MS Regular",
-                    ],
-                  }}
-                />
-
-                {/* Mutual name labels */}
-                <SymbolLayer
-                  id="mutual-labels"
-                  filter={[
-                    "all",
-                    ["!has", "point_count"],
-                    ["==", "type", "mutual"],
-                  ]}
-                  style={{
-                    textField: ["get", "name"],
-                    textSize: 12,
-                    textColor: colors.hex.purple800,
-                    textHaloColor: colors.hex.white,
-                    textHaloWidth: 2,
-                    textOffset: [0, 1.5],
-                    textAnchor: "top",
-                    textFont: [
-                      "Roboto Medium",
-                      "Noto Sans Regular",
-                      "Arial Unicode MS Regular",
-                    ],
-                  }}
-                />
-              </ShapeSource>
-            )}
+              ))}
 
             {/* Travel plan destination markers with rocket icon */}
             {travelPlanGeoJSON && travelPlanGeoJSON.features.length > 0 && (
@@ -561,7 +444,8 @@ export const MapView: React.FC<MapViewProps> = React.memo(
                     textSize: 12,
                     textColor: colors.hex.white,
                     textHaloColor: colors.hex.purple900,
-                    textHaloWidth: 1.5,
+                    textHaloWidth: 8,
+                    textHaloBlur: 0,
                     textOffset: [0, 2],
                     textAnchor: "top",
                     textFont: [
@@ -576,9 +460,7 @@ export const MapView: React.FC<MapViewProps> = React.memo(
             )}
           </Mapbox.MapView>
         )}
-
       </View>
     );
   }
 );
-

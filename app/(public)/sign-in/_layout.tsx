@@ -10,7 +10,7 @@ export default function SignInLayout() {
       }}
     >
       <Stack.Screen
-        name="sign-in"
+        name="phone-number"
         options={{
           headerShown: false,
         }}
