@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Pressable } from "react-native";
-import { Avatar, Badge, Text } from "@/design-system";
+import { Avatar, Badge, Body, Caption } from "@/design-system";
 import { Friend } from "@/types/friendship";
 
 type UserSearchListItemProps = {
@@ -25,12 +25,12 @@ export function UserSearchListItem({
         size="small"
       />
       <View className="flex-1 ml-3">
-        <Text className="text-base font-semibold text-purple-900 mb-1">
+        <Body className="font-semibold text-purple-900 mb-1">
           {user.full_name}
-        </Text>
+        </Body>
         <View className="flex-row items-center gap-2">
           {user.hometown && (
-            <Text className="text-sm text-gray-400">{user.hometown}</Text>
+            <Caption className="text-gray-400">{user.hometown}</Caption>
           )}
           <Badge size="small" variant="secondary">
             Friend

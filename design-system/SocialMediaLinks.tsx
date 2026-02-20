@@ -93,7 +93,7 @@ export const SocialMediaLinks: React.FC<SocialMediaLinksProps> = ({
   };
 
   return (
-    <View className="w-full flex-row items-center justify-around  bg-gray-100 rounded-lg p-4">
+    <View className="w-full flex-row items-center justify-around  bg-gray-50 rounded-lg p-4">
       {activePlatforms.map((platform, index) => {
         const Icon = Icons[platform.icon];
         return (

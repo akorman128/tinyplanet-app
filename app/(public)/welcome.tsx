@@ -10,8 +10,8 @@ export default function WelcomePage() {
       contentContainerClassName="flex-1 items-center justify-center px-6"
     >
       <View className="items-center mb-12">
-        <Heading className="mb-2">Welcome</Heading>
-        <Subheading className="text-center">
+        <Heading className="text-5xl mb-2">Welcome</Heading>
+        <Subheading className="text-xl text-center">
           Your planet is waiting for you
         </Subheading>
       </View>

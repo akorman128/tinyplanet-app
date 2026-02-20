@@ -27,6 +27,7 @@ import {
   Icons,
   colors,
   PlaceListItem,
+  SectionTitle,
   Text,
 } from "@/design-system";
 
@@ -302,9 +303,9 @@ export default function ListDetailScreen() {
           {/* Places List */}
           <ScrollView className="flex-1 bg-white">
             <View className="px-6 py-4">
-              <Text className="text-lg font-semibold text-gray-900 mb-4">
+              <SectionTitle className="mb-4">
                 Places ({list.places.length})
-              </Text>
+              </SectionTitle>
 
               {list.places.map((place, index) => (
                 <PlaceListItem

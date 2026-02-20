@@ -7,7 +7,7 @@ import { Input } from "@/design-system/Input";
 import { Button } from "@/design-system/Button";
 import { Select, SelectOption } from "@/design-system/Select";
 import { colors } from "@/design-system/colors";
-import { Text } from "@/design-system";
+import { Heading, Label, Caption, Meta, Text } from "@/design-system";
 import { CreateListInput, ListCategory } from "@/types/list";
 import { LocationSearchInput } from "./LocationSearchInput";
 
@@ -111,13 +111,13 @@ export function ListForm({
   return (
     <ScrollView className="flex-1 bg-white px-6 pt-6">
       <View className="mb-6">
-        <Text className="text-2xl font-bold text-gray-900 mb-2">
+        <Heading className="mb-2">
           Create List
-        </Text>
-        <Text className="text-sm text-gray-600">
+        </Heading>
+        <Caption className="text-gray-600">
           📍 Add your favorite places in a city. Places will be automatically
           located on a map.
-        </Text>
+        </Caption>
       </View>
       <View className="gap-2">
         {/* Title Input */}
@@ -187,9 +187,9 @@ export function ListForm({
 
         {/* Places Input */}
         <View>
-          <Text className="text-sm font-medium text-gray-700 mb-2">
+          <Label className="mb-2">
             Places (one per line)
-          </Text>
+          </Label>
           <Controller
             control={control}
             name="places"
@@ -209,10 +209,10 @@ export function ListForm({
             )}
           />
           <View className="flex-row items-center gap-1 bg-gray-100 p-2 mt-2 rounded-lg">
-            <Text className="text-xs text-gray-500 mt-1">
+            <Meta className="mt-1">
               💡 This will take a bit depending on the number of places. Results
               vary, but you can correct manually.
-            </Text>
+            </Meta>
           </View>
         </View>
 

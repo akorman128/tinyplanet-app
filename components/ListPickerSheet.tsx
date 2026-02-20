@@ -6,7 +6,16 @@ import BottomSheet, {
 } from "@gorhom/bottom-sheet";
 import { useLists } from "@/hooks/useLists";
 import { ViewableList } from "@/types/list";
-import { LoadingState, EmptyState, Icons, colors, Text } from "@/design-system";
+import {
+  LoadingState,
+  EmptyState,
+  Icons,
+  colors,
+  SectionTitle,
+  Body,
+  Caption,
+  Text,
+} from "@/design-system";
 
 interface ListPickerSheetProps {
   onSelect: (list: ViewableList | null) => void;
@@ -66,13 +75,13 @@ export const ListPickerSheet = forwardRef<BottomSheet, ListPickerSheetProps>(
       >
         <Icons.list size={20} color={colors.hex.purple600} />
         <View className="flex-1 ml-3">
-          <Text className="text-base font-medium text-gray-900">
+          <Body className="font-medium">
             {item.title}
-          </Text>
-          <Text className="text-sm text-gray-500">
+          </Body>
+          <Caption>
             {item.location_name}
             {item.owner_name !== "You" && ` - by ${item.owner_name}`}
-          </Text>
+          </Caption>
         </View>
         {selectedListId === item.id && (
           <Icons.check size={20} color={colors.hex.purple600} />
@@ -91,7 +100,7 @@ export const ListPickerSheet = forwardRef<BottomSheet, ListPickerSheetProps>(
       >
         <BottomSheetView className="flex-1">
           <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200">
-            <Text className="text-lg font-semibold">Attach a List</Text>
+            <SectionTitle>Attach a List</SectionTitle>
             {selectedListId && (
               <Pressable onPress={handleClear}>
                 <Text className="text-purple-600 font-medium">Clear</Text>

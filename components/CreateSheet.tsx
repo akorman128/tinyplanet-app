@@ -22,7 +22,7 @@ import {
   TravelPlanFormData,
   TravelPlanForm,
 } from "./TravelPlanForm";
-import { ActiveTravelPlanBanner } from "./ActiveTravelPlanBanner";
+import { ActiveTravelPlanBanner } from "@/design-system";
 
 // Content type
 type ContentType = "post" | "travel-plan";

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { View, TextInput, Pressable, ScrollView } from "react-native";
-import { colors, Text } from "@/design-system";
+import { colors, Label, Body, Caption, Text } from "@/design-system";
 import { useLocationStore } from "@/stores/locationStore";
 
 const MAPBOX_ACCESS_TOKEN = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN;
@@ -197,7 +197,7 @@ export function LocationSearchInput({
 
   return (
     <View className="mb-4">
-      <Text className="text-sm font-medium text-gray-700 mb-2">{label}</Text>
+      <Label className="mb-2">{label}</Label>
 
       <View className="relative">
         <TextInput
@@ -232,11 +232,11 @@ export function LocationSearchInput({
                   className="px-4 py-3 border-b border-gray-100"
                   onPress={() => handleSelectLocation(item)}
                 >
-                  <Text className="text-base text-gray-900">{item.name}</Text>
+                  <Body>{item.name}</Body>
                   {(item.full_address || item.place_formatted) && (
-                    <Text className="text-sm text-gray-500" numberOfLines={1}>
+                    <Caption numberOfLines={1}>
                       {item.full_address || item.place_formatted}
-                    </Text>
+                    </Caption>
                   )}
                 </Pressable>
               ))}
@@ -258,7 +258,7 @@ export function LocationSearchInput({
         )}
       </View>
 
-      {error && <Text className="text-red-500 text-sm mt-1">{error}</Text>}
+      {error && <Caption className="text-red-500 mt-1">{error}</Caption>}
     </View>
   );
 }

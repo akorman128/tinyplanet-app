@@ -3,10 +3,10 @@ import { View, Pressable } from "react-native";
 import { Controller, Control, FieldErrors } from "react-hook-form";
 import { z } from "zod";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Input, Text } from "@/design-system";
+import { Input, Body, Label, Caption, Meta, Text } from "@/design-system";
 import { TravelPlan } from "@/types/travelPlan";
 import { LocationSearchInput } from "./LocationSearchInput";
-import { ActiveTravelPlanBanner } from "./ActiveTravelPlanBanner";
+import { ActiveTravelPlanBanner } from "@/design-system";
 // Travel plan schema
 export const travelPlanSchema = z.object({
   destination: z
@@ -49,9 +49,9 @@ export function TravelPlanForm({
         <>
           {isEditingActivePlan && (
             <View className="mb-4 flex-row items-center justify-between">
-              <Text className="text-base font-semibold text-gray-900">
+              <Body className="font-semibold">
                 Editing Travel Plan
-              </Text>
+              </Body>
               <Pressable onPress={onCancelEdit}>
                 <Text className="text-purple-600 font-medium">Cancel</Text>
               </Pressable>
@@ -77,9 +77,9 @@ export function TravelPlanForm({
             name="startDate"
             render={({ field }) => (
               <View className="mb-4">
-                <Text className="text-sm font-medium text-gray-700 mb-2">
+                <Label className="mb-2">
                   Start Date
-                </Text>
+                </Label>
                 <DateTimePicker
                   value={field.value}
                   mode="date"
@@ -90,9 +90,9 @@ export function TravelPlanForm({
                 />
 
                 {errors.startDate && (
-                  <Text className="text-red-500 text-sm mt-1">
+                  <Caption className="text-red-500 mt-1">
                     {errors.startDate.message}
-                  </Text>
+                  </Caption>
                 )}
               </View>
             )}
@@ -113,9 +113,9 @@ export function TravelPlanForm({
                   error={errors.durationDays?.message}
                 />
                 {!errors.durationDays && (
-                  <Text className="text-xs text-gray-500 mt-1">
+                  <Meta className="mt-1">
                     Maximum 31 days
-                  </Text>
+                  </Meta>
                 )}
               </View>
             )}

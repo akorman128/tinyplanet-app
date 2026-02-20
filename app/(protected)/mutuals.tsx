@@ -6,7 +6,7 @@ import {
   FlatList,
 } from "react-native";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
-import { colors, Avatar, Text } from "@/design-system";
+import { colors, Avatar, Body, Caption, Text } from "@/design-system";
 import { useFriends } from "@/hooks/useFriends";
 import { Friend } from "@/types/friendship";
 
@@ -57,11 +57,11 @@ export default function MutualsScreen() {
         size="small"
       />
       <View className="ml-3 flex-1">
-        <Text className="text-base font-medium text-gray-900">
+        <Body className="font-medium">
           {item.full_name}
-        </Text>
+        </Body>
         {item.hometown && (
-          <Text className="text-sm text-gray-500 mt-0.5">{item.hometown}</Text>
+          <Caption className="mt-0.5">{item.hometown}</Caption>
         )}
       </View>
     </Pressable>
@@ -88,16 +88,16 @@ export default function MutualsScreen() {
 
         {mutuals.length === 0 ? (
           <View className="flex-1 justify-center items-center px-6">
-            <Text className="text-base text-gray-400 text-center">
+            <Body className="text-gray-400 text-center">
               No mutual friends
-            </Text>
+            </Body>
           </View>
         ) : (
           <View className="flex-1">
             <View className="py-3 px-6 border-b border-gray-100">
-              <Text className="text-sm text-gray-500">
+              <Caption>
                 {mutuals.length} {mutuals.length === 1 ? "mutual" : "mutuals"}
-              </Text>
+              </Caption>
             </View>
             <FlatList
               data={mutuals}

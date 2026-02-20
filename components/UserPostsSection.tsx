@@ -6,7 +6,7 @@ import { useFeed } from "@/hooks/useFeed";
 import { useSavedPosts } from "@/hooks/useSavedPosts";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
 import { PostWithAuthor } from "@/types/post";
-import { colors, TabBar, Text } from "@/design-system";
+import { colors, TabBar, SectionTitle, Caption, Text } from "@/design-system";
 
 // Helper function to detect travel plan posts
 const isTravelPlanPost = (post: PostWithAuthor): boolean => {
@@ -182,12 +182,12 @@ export function UserPostsSection({
           />
         )}
         <View className="flex-1 items-center justify-center p-6">
-          <Text className="text-gray-900 text-lg font-semibold mb-2">
+          <SectionTitle className="mb-2">
             {emptyStateMessage.title}
-          </Text>
-          <Text className="text-gray-500 text-center">
+          </SectionTitle>
+          <Caption className="text-center">
             {emptyStateMessage.subtitle}
-          </Text>
+          </Caption>
         </View>
       </View>
     );

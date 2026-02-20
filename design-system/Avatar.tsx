@@ -25,8 +25,8 @@ const sizeConfig = {
     fontPixels: 16,
   },
   medium: {
-    container: "w-[60px] h-[60px]",
-    fontSize: "text-2xl",
+    container: "w-[55px] h-[55px]",
+    fontSize: "text-xl",
     pixels: 60,
     fontPixels: 24,
   },
@@ -90,9 +90,9 @@ export const Avatar = React.memo<AvatarProps>(
 
     return (
       <View
-        className={`${config.container} rounded-full bg-purple-200 justify-center items-center shadow-lg border-4 border-white`}
+        className={`${config.container} rounded-full bg-purple-600 justify-center items-center shadow-xl border-4 border-white`}
       >
-        <Text className={`${config.fontSize} font-semibold text-purple `}>
+        <Text className={`${config.fontSize} font-semibold text-white `}>
           {initials}
         </Text>
       </View>

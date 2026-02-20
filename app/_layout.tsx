@@ -13,7 +13,7 @@ import { LocationPermissionProvider } from "../providers/LocationPermissionProvi
 import { LocationPermissionScreen } from "@/components/LocationPermissionScreen";
 import { initializeMapbox } from "@/utils/mapboxConfig";
 import { Button } from "@/design-system/Button";
-import { Text } from "@/design-system";
+import { SectionTitle, Body } from "@/design-system";
 import "../global.css";
 
 // Initialize Mapbox once at app startup
@@ -135,12 +135,12 @@ function RootNavigator() {
   if (session && error && !profileState) {
     return (
       <View className="flex-1 justify-center items-center bg-white px-6">
-        <Text className="text-lg text-purple-900 font-semibold mb-2">
+        <SectionTitle className="text-purple-900 mb-2">
           Failed to Load Profile
-        </Text>
-        <Text className="text-base text-gray-500 mb-6 text-center">
+        </SectionTitle>
+        <Body className="text-gray-500 mb-6 text-center">
           {error.message}
-        </Text>
+        </Body>
         <Button
           onPress={() => {
             setError(null);

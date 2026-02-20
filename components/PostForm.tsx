@@ -48,9 +48,9 @@ export function PostForm({
 
       {/* Selected List Display */}
       {selectedList && (
-        <View className="mt-3 flex-row items-center">
+        <View className="mt-2 flex-row items-center">
           <View className="flex-1">
-            <ListChip list={selectedList} />
+            <ListChip size="medium" list={selectedList} />
           </View>
           <Pressable onPress={onRemoveList} className="ml-2 p-1">
             <Icons.close size={16} color={colors.hex.gray500} />
@@ -59,11 +59,13 @@ export function PostForm({
       )}
 
       {/* Attach List Button */}
-      {onAttachList && (
-        <Pressable onPress={onAttachList} className="mt-3 flex-row items-center">
+
+      {!selectedList && (
+        <Pressable onPress={onAttachList} className="flex-row items-center">
           <Icons.list size={20} color={colors.hex.purple600} />
+
           <Text className="ml-2 text-purple-600 font-medium">
-            {selectedList ? "Change List" : "Attach a List"}
+            Attach a List
           </Text>
         </Pressable>
       )}

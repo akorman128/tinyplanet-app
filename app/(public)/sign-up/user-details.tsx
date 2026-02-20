@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
-import { Button, Heading, Subheading, Body, Input } from "@/design-system";
+import { Button, Heading, Subheading, Body, Label, Input } from "@/design-system";
 import { useSignupStore } from "@/stores/signupStore";
 
 // Zod schema for user details validation
@@ -124,9 +124,9 @@ export default function UserDetailsPage() {
             render={({ field: { value, onChange } }) => (
               <>
                 <View className="w-full">
-                  <Body className="text-sm font-semibold text-gray-700 mb-2">
+                  <Label className="font-semibold mb-2">
                     Birthday
-                  </Body>
+                  </Label>
                   <TouchableOpacity onPress={() => setShowDatePicker(true)}>
                     <View
                       className={`py-4 px-4 rounded-xl border-2 bg-white ${

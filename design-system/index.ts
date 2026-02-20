@@ -2,7 +2,15 @@ export { Text } from "./Text";
 export { Button } from "./Button";
 export { ButtonGroup } from "./ButtonGroup";
 export type { ButtonGroupOption } from "./ButtonGroup";
-export { Heading, Subheading, Body, Caption } from "./Typography";
+export {
+  Heading,
+  Subheading,
+  SectionTitle,
+  Body,
+  Label,
+  Caption,
+  Meta,
+} from "./Typography";
 export { Input } from "./Input";
 export { colors } from "./colors";
 export { Icons } from "./Icons";
@@ -51,3 +59,7 @@ export { GlassInfoCard, GlassInfoItem } from "./GlassInfoCard";
 export type { GlassInfoCardProps, GlassInfoItemProps } from "./GlassInfoCard";
 export { ContactCard } from "./ContactCard";
 export type { ContactCardProps } from "./ContactCard";
+export { MenuRow } from "./MenuRow";
+export type { MenuRowProps } from "./MenuRow";
+export { ActiveTravelPlanBanner } from "./ActiveTravelPlanBanner";
+export type { ActiveTravelPlanBannerProps } from "./ActiveTravelPlanBanner";

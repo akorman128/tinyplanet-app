@@ -9,7 +9,7 @@ import { useRouter } from "expo-router";
 import { useLists } from "@/hooks/useLists";
 import { ListCard } from "@/design-system/ListCard";
 import { ListWithPlaces } from "@/types/list";
-import { colors, Text } from "@/design-system";
+import { colors, SectionTitle, Caption, Text } from "@/design-system";
 
 interface ListsSectionProps {
   userId: string;
@@ -45,7 +45,7 @@ export function ListsSection({ userId, isOwnProfile }: ListsSectionProps) {
     return (
       <View className="py-6">
         <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-lg font-semibold text-gray-900">Lists</Text>
+          <SectionTitle>Lists</SectionTitle>
         </View>
         <View className="items-center justify-center py-8">
           <ActivityIndicator size="large" color={colors.hex.purple600} />
@@ -58,9 +58,9 @@ export function ListsSection({ userId, isOwnProfile }: ListsSectionProps) {
     return (
       <View className="py-6 px-6">
         <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-lg font-semibold text-gray-900">Lists</Text>
+          <SectionTitle>Lists</SectionTitle>
         </View>
-        <Text className="text-sm text-red-600">{error}</Text>
+        <Caption className="text-red-600">{error}</Caption>
       </View>
     );
   }
@@ -72,7 +72,7 @@ export function ListsSection({ userId, isOwnProfile }: ListsSectionProps) {
   return (
     <View className="py-6">
       <View className="flex-row items-center justify-between mb-4">
-        <Text className="text-lg font-semibold text-gray-900">Lists</Text>
+        <SectionTitle>Lists</SectionTitle>
         {isOwnProfile && (
           <Pressable
             onPress={() => router.push("/create-list")}

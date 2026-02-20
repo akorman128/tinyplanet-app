@@ -9,7 +9,16 @@ import {
   Alert,
 } from "react-native";
 import { useLocalSearchParams, Stack } from "expo-router";
-import { colors, Avatar, Icons, Button, Text } from "@/design-system";
+import {
+  colors,
+  Avatar,
+  Icons,
+  Button,
+  Body,
+  Meta,
+  SectionTitle,
+  Text,
+} from "@/design-system";
 import { useVibe } from "@/hooks/useVibe";
 import { VibeWithSender } from "@/types/vibe";
 import { formatTimeAgo } from "@/utils";
@@ -107,12 +116,12 @@ export default function AllVibesScreen() {
       />
       <View className="flex-1 ml-3">
         <View className="flex-row justify-between items-center mb-2">
-          <Text className="text-base font-semibold text-purple-900">
+          <Body className="font-semibold text-purple-900">
             {item.giver.full_name}
-          </Text>
-          <Text className="text-xs font-medium text-gray-400">
+          </Body>
+          <Meta className="font-medium text-gray-400">
             {formatTimeAgo(item.created_at)}
-          </Text>
+          </Meta>
         </View>
         <View className="flex-row gap-2">
           {item.emojis.map((emoji, index) => (
@@ -149,11 +158,11 @@ export default function AllVibesScreen() {
           </View>
         ) : error ? (
           <View className="flex-1 justify-center items-center px-6">
-            <Text className="text-base text-gray-400 text-center">{error}</Text>
+            <Body className="text-gray-400 text-center">{error}</Body>
           </View>
         ) : vibes.length === 0 ? (
           <View className="flex-1 justify-center items-center">
-            <Text className="text-base text-gray-400">No vibes yet</Text>
+            <Body className="text-gray-400">No vibes yet</Body>
           </View>
         ) : (
           <FlatList
@@ -183,12 +192,12 @@ export default function AllVibesScreen() {
             className="bg-white rounded-2xl p-6 mx-6 w-[85%]"
             onPress={(e) => e.stopPropagation()}
           >
-            <Text className="text-xl font-bold text-purple-900 mb-4">
+            <SectionTitle className="text-xl font-bold text-purple-900 mb-4">
               Send a Vibe
-            </Text>
-            <Text className="text-sm text-gray-600 mb-4">
+            </SectionTitle>
+            <Body className="text-sm text-gray-600 mb-4">
               Enter 3 emojis to represent your vibe:
-            </Text>
+            </Body>
             <TextInput
               value={emojiInput}
               onChangeText={setEmojiInput}

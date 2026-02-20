@@ -26,8 +26,7 @@ export function ListChip({ list, size = "medium" }: ListChipProps) {
   return (
     <Pressable
       onPress={handlePress}
-      className={`flex-row items-center bg-purple-50 border border-purple-200 rounded-lg px-3 py-2
-      `}
+      className="flex-row items-center bg-purple-50  rounded-lg px-3 py-4"
     >
       <Icons.list size={isSmall ? 14 : 16} color={colors.hex.purple600} />
       <View className="flex-1 ml-2">
