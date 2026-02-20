@@ -69,7 +69,7 @@ export const Avatar = React.memo<AvatarProps>(
             width: config.pixels,
             height: config.pixels,
             borderRadius: config.pixels / 2,
-            backgroundColor: colors.hex.purple200,
+            backgroundColor: colors.hex.purple600,
             justifyContent: "center",
             alignItems: "center",
           }}
@@ -78,7 +78,7 @@ export const Avatar = React.memo<AvatarProps>(
             style={{
               fontSize: config.fontPixels,
               fontWeight: "600",
-              color: colors.hex.purple600,
+              color: colors.white,
               fontFamily: Platform.OS === "ios" ? "HelveticaNeue" : undefined,
             }}
           >

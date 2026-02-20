@@ -327,29 +327,6 @@ import { Button } from "@/design-system";
 4. **Location tracking**: PostGIS POINT for current location
 5. **Multi-step onboarding**: Progressive data collection with persisted state
 
-## Environment Setup
-
-Required environment variables in `.env`:
-
-```
-EXPO_PUBLIC_SUPABASE_URL=
-EXPO_PUBLIC_SUPABASE_KEY=
-```
-
-For Edge Functions (SMS via Twilio):
-
-```
-TWILIO_ACCOUNT_SID=
-TWILIO_AUTH_TOKEN=
-TWILIO_PHONE_NUMBER=
-```
-
-## Supabase Edge Functions
-
-- **send-invite-sms**: Deno function in `/supabase/functions/send-invite-sms/`
-- Sends SMS invites via Twilio integration
-- Called via `useInviteCodes` hook: `sendInviteCode({ phone_number, invite_code, inviter_name })`
-
 ## Code Quality Standards
 
 - **Prettier**: 2-space indentation, semicolons, double quotes, 80 char width
@@ -373,10 +350,3 @@ TWILIO_PHONE_NUMBER=
 - Colors (use design system color tokens when available)
 - Typography (text sizes, weights, colors)
 - Borders, shadows, and visual effects
-
-**Exceptions** (rare cases where StyleSheet may be needed):
-
-- Complex platform-specific styles that can't be expressed with Tailwind utilities
-- Dynamic styles that require runtime calculations
-
-**Migration Priority**: When editing existing files that use StyleSheet (like `edit-profile.tsx`), consider migrating to NativeWind if time permits, but prioritize the main task first.

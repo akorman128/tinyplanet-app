@@ -174,7 +174,7 @@ export function PostCard({
         {/* Header: Name • Time • Options */}
         <View className="flex-row items-center justify-between mb-1">
           <View className="flex-row items-center flex-1">
-            <Text className="text-base font-semibold text-gray-900">
+            <Text className="text-sm font-semibold text-gray-900">
               {post.author.full_name}
             </Text>
             <Text className="text-sm text-gray-500 ml-2">
@@ -189,7 +189,7 @@ export function PostCard({
         </View>
 
         {/* Post text */}
-        <Text className="text-base text-gray-900 leading-5 mb-2">
+        <Text className="text-sm text-gray-900 leading-5 mb-2">
           {post.text}
         </Text>
 

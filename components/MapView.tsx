@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useRef,
-  useMemo,
-} from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { View, ActivityIndicator, LayoutChangeEvent } from "react-native";
 import Mapbox, {
   Camera,
@@ -15,452 +9,269 @@ import Mapbox, {
   Images,
 } from "@rnmapbox/maps";
 import { MapMarker } from "./MapMarker";
-import { useFriends } from "@/hooks/useFriends";
-import { useTravelPlan } from "@/hooks/useTravelPlan";
-import {
-  GeoJSONFeatureCollection,
-  ConnectionLine,
-  PlatformStatistics,
-} from "@/types/friendship";
-import { TravelPlanMapLocation } from "@/types/travelPlan";
-import { useLocation } from "@/hooks/useLocation";
 import { colors, Text } from "@/design-system";
 import { useRouter } from "expo-router";
-import { getDurationInDays } from "@/utils";
 import { useMapStore } from "@/stores/mapStore";
+import { useMapData } from "@/hooks/useMapData";
+import {
+  buildConnectionLines,
+  connectionLinesToGeoJSON,
+  travelPlansToGeoJSON,
+} from "@/utils/mapUtils";
 
-interface MapViewProps {
-  onRefresh?: () => void;
-  refreshing?: boolean;
-}
+export const MapView: React.FC = React.memo(() => {
+  const { friendLocations, travelPlanLocations, userLocation, loading, error } =
+    useMapData();
+  const router = useRouter();
+  const showConnectionLines = useMapStore(
+    (state) => state.showConnectionLines
+  );
+  const [mapDimensions, setMapDimensions] = useState({ width: 0, height: 0 });
 
-export const MapView: React.FC<MapViewProps> = React.memo(
-  ({ onRefresh, refreshing = false }) => {
-    const { getFriendLocations, getPlatformStatistics } = useFriends();
-    const { getTravelPlanLocations } = useTravelPlan();
-    const {
-      location: userLocationObj,
-      getCurrentLocation,
-      updateLocationInDatabase,
-    } = useLocation();
-    const router = useRouter();
+  // GeoJSON transforms
+  const connectionLines = useMemo(() => {
+    if (!friendLocations || !userLocation) {
+      return { userToFriendLines: [], friendToMutualLines: [] };
+    }
+    return buildConnectionLines(friendLocations, userLocation);
+  }, [friendLocations, userLocation]);
 
-    const [friendLocations, setFriendLocations] =
-      useState<GeoJSONFeatureCollection | null>(null);
-    const [travelPlanLocations, setTravelPlanLocations] = useState<
-      TravelPlanMapLocation[]
-    >([]);
-    const [statistics, setStatistics] = useState<PlatformStatistics | null>(
-      null
-    );
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [isRefreshing, setIsRefreshing] = useState(false);
-    const [mapDimensions, setMapDimensions] = useState({ width: 0, height: 0 });
+  const userToFriendLinesGeoJSON = useMemo(() => {
+    if (!showConnectionLines || connectionLines.userToFriendLines.length === 0)
+      return null;
+    return connectionLinesToGeoJSON(connectionLines.userToFriendLines);
+  }, [connectionLines.userToFriendLines, showConnectionLines]);
 
-    // Connection line visibility from shared store
-    const showConnectionLines = useMapStore(
-      (state) => state.showConnectionLines
-    );
+  const friendToMutualLinesGeoJSON = useMemo(() => {
+    if (
+      !showConnectionLines ||
+      connectionLines.friendToMutualLines.length === 0
+    )
+      return null;
+    return connectionLinesToGeoJSON(connectionLines.friendToMutualLines);
+  }, [connectionLines.friendToMutualLines, showConnectionLines]);
 
-    // Convert user location object to [longitude, latitude] tuple for Mapbox
-    const userLocation: [number, number] | null = userLocationObj
-      ? [userLocationObj.longitude, userLocationObj.latitude]
-      : null;
+  const travelPlanGeoJSON = useMemo(() => {
+    if (!travelPlanLocations || travelPlanLocations.length === 0) return null;
+    return travelPlansToGeoJSON(travelPlanLocations);
+  }, [travelPlanLocations]);
 
-    // Calculate connection lines based on friend locations and user location
-    const connectionLines = useMemo(() => {
-      if (!friendLocations || !userLocation) {
-        return { userToFriendLines: [], friendToMutualLines: [] };
-      }
+  // Event handlers
+  const handleLayout = useCallback((event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    setMapDimensions({ width, height });
+  }, []);
 
-      const userToFriendLines: ConnectionLine[] = [];
-      const friendToMutualLines: ConnectionLine[] = [];
+  const handleFriendMarkerPress = useCallback(
+    (userId: string) => {
+      router.push({ pathname: "/profile", params: { userId } });
+    },
+    [router]
+  );
 
-      // Create a map of friend IDs to their coordinates for quick lookup
-      const friendCoordinatesMap = new Map<string, [number, number]>();
-
-      friendLocations.features.forEach((feature) => {
-        const { id, type, connecting_friend_id } = feature.properties;
-        const coordinates = feature.geometry.coordinates as [number, number];
-
-        if (type === "friend") {
-          // Store friend coordinates for later use
-          friendCoordinatesMap.set(id, coordinates);
-
-          // Create line from user to friend
-          userToFriendLines.push({
-            from: { id: "user", coordinates: userLocation },
-            to: { id, coordinates },
-            type: "user-to-friend",
-          });
-        } else if (type === "mutual" && connecting_friend_id) {
-          // Create line from connecting friend to mutual
-          const friendCoords = friendCoordinatesMap.get(connecting_friend_id);
-          if (friendCoords) {
-            friendToMutualLines.push({
-              from: { id: connecting_friend_id, coordinates: friendCoords },
-              to: { id, coordinates },
-              type: "friend-to-mutual",
-            });
-          }
-        }
-      });
-
-      return { userToFriendLines, friendToMutualLines };
-    }, [friendLocations, userLocation]);
-
-    // Convert connection lines to GeoJSON LineString format for Mapbox
-    const userToFriendLinesGeoJSON = useMemo(() => {
-      if (!showConnectionLines) return null;
-
-      return {
-        type: "FeatureCollection" as const,
-        features: connectionLines.userToFriendLines.map((line) => ({
-          type: "Feature" as const,
-          geometry: {
-            type: "LineString" as const,
-            coordinates: [line.from.coordinates, line.to.coordinates],
-          },
-          properties: {},
-        })),
-      };
-    }, [connectionLines.userToFriendLines, showConnectionLines]);
-
-    const friendToMutualLinesGeoJSON = useMemo(() => {
-      if (!showConnectionLines) return null;
-
-      return {
-        type: "FeatureCollection" as const,
-        features: connectionLines.friendToMutualLines.map((line) => ({
-          type: "Feature" as const,
-          geometry: {
-            type: "LineString" as const,
-            coordinates: [line.from.coordinates, line.to.coordinates],
-          },
-          properties: {},
-        })),
-      };
-    }, [connectionLines.friendToMutualLines, showConnectionLines]);
-
-    // Convert travel plans to GeoJSON for rocket markers
-    const travelPlanGeoJSON = useMemo(() => {
-      if (!travelPlanLocations || travelPlanLocations.length === 0) {
-        return null;
-      }
-
-      return {
-        type: "FeatureCollection" as const,
-        features: travelPlanLocations.map((tp) => ({
-          type: "Feature" as const,
-          geometry: {
-            type: "Point" as const,
-            coordinates: [tp.longitude, tp.latitude] as [number, number],
-          },
-          properties: {
-            id: tp.id,
-            user_id: tp.user_id,
-            name: tp.full_name,
-            destination_name: tp.destination_name,
-            start_date: tp.start_date,
-            end_date: tp.end_date,
-            type: tp.type,
-            title: `${tp.full_name} - ${getDurationInDays(tp.start_date, tp.end_date)} days`,
-          },
-        })),
-      };
-    }, [travelPlanLocations]);
-
-    // Load friend locations and travel plans with smart caching
-    const loadFriendLocations = useCallback(
-      async (forceRefresh: boolean = false) => {
-        try {
-          setError(null);
-
-          // Get user's current location (uses cache if not stale, unless forcing refresh)
-          await getCurrentLocation(forceRefresh);
-
-          // Update user's location in the database (applies distance threshold internally)
-          await updateLocationInDatabase(forceRefresh);
-
-          // Fetch friend/mutual locations, travel plans, and statistics in parallel
-          const [locations, travelPlans, stats] = await Promise.all([
-            getFriendLocations(),
-            getTravelPlanLocations(),
-            getPlatformStatistics(),
-          ]);
-
-          setFriendLocations(locations);
-          setTravelPlanLocations(travelPlans.data);
-          setStatistics(stats.data);
-        } catch (err) {
-          console.error("Error loading friend locations:", err);
-          const errorMessage = err instanceof Error ? err.message : String(err);
-          setError(errorMessage);
-        }
-      },
-      [
-        getFriendLocations,
-        getTravelPlanLocations,
-        getPlatformStatistics,
-        updateLocationInDatabase,
-        getCurrentLocation,
-      ]
-    );
-
-    // Initial load - only run once on mount
-    const hasInitiallyLoaded = useRef(false);
-    useEffect(() => {
-      if (!hasInitiallyLoaded.current) {
-        hasInitiallyLoaded.current = true;
-        const initialLoad = async () => {
-          setLoading(true);
-          await loadFriendLocations();
-          setLoading(false);
-        };
-        initialLoad();
-      }
-    }, [loadFriendLocations]);
-
-    // Handle manual refresh - force fresh location
-    useEffect(() => {
-      if (refreshing && !isRefreshing) {
-        setIsRefreshing(true);
-        loadFriendLocations(true).finally(() => {
-          setIsRefreshing(false);
-          onRefresh?.();
-        });
-      }
-    }, [refreshing, isRefreshing, loadFriendLocations, onRefresh]);
-
-    // Handle layout to ensure map has proper dimensions
-    const handleLayout = useCallback((event: LayoutChangeEvent) => {
-      const { width, height } = event.nativeEvent.layout;
-      setMapDimensions({ width, height });
-    }, []);
-
-    // Handle friend/mutual marker press (from MapMarker component)
-    const handleFriendMarkerPress = useCallback(
-      (userId: string) => {
+  const handleMarkerPress = useCallback(
+    (event: any) => {
+      const { features } = event;
+      if (features && features.length > 0) {
+        const feature = features[0];
+        const userId = feature.properties.user_id || feature.properties.id;
         router.push({ pathname: "/profile", params: { userId } });
-      },
-      [router]
-    );
+      }
+    },
+    [router]
+  );
 
-    // Handle travel plan marker press (from ShapeSource onPress)
-    const handleMarkerPress = useCallback(
-      (event: any) => {
-        const { features } = event;
-        if (features && features.length > 0) {
-          const feature = features[0];
-          const userId = feature.properties.user_id || feature.properties.id;
-          router.push({ pathname: "/profile", params: { userId } });
-        }
-      },
-      [router]
-    );
-
-    if (loading) {
-      return (
-        <View className="flex-1 justify-center items-center bg-white">
-          <ActivityIndicator size="large" color={colors.hex.purple600} />
-        </View>
-      );
-    }
-
-    if (error) {
-      return (
-        <View className="flex-1 justify-center items-center bg-white">
-          <Text className="text-error text-base text-center px-6">{error}</Text>
-        </View>
-      );
-    }
-
+  if (loading) {
     return (
-      <View className="flex-1" onLayout={handleLayout}>
-        {mapDimensions.width > 0 && mapDimensions.height > 0 && (
-          <Mapbox.MapView
-            style={{ width: mapDimensions.width, height: mapDimensions.height }}
-            // styleURL="mapbox://styles/mapbox/navigation-day-v1"
-            // styleURL={Mapbox.StyleURL.Street}
-            styleURL={Mapbox.StyleURL.Dark}
-            compassViewPosition={3}
-            scaleBarEnabled={false}
-            logoEnabled={false}
-          >
-            <Camera
-              zoomLevel={12}
-              centerCoordinate={userLocation || [0, 0]}
-              animationDuration={1000}
-              animationMode="flyTo"
-            />
-
-            {/* Register custom images */}
-            <Images
-              images={{
-                rocketIcon: require("../assets/rocket.png"),
-              }}
-            />
-
-            {/* User location marker */}
-            {userLocation && (
-              <ShapeSource
-                id="user-location"
-                shape={{
-                  type: "Feature",
-                  geometry: {
-                    type: "Point",
-                    coordinates: userLocation,
-                  },
-                  properties: {
-                    name: "You",
-                  },
-                }}
-              >
-                <CircleLayer
-                  id="user-marker"
-                  style={{
-                    circleRadius: 10,
-                    circleColor: "#53d769",
-                    circleOpacity: 0.85,
-                    circleStrokeWidth: 3,
-                    circleStrokeColor: colors.hex.white,
-                  }}
-                />
-                {/* Center dot for user marker */}
-                <CircleLayer
-                  id="user-marker-center"
-                  style={{
-                    circleRadius: 3,
-                    circleColor: colors.hex.white,
-                  }}
-                />
-                {/* User location label */}
-                <SymbolLayer
-                  id="user-label"
-                  style={{
-                    textField: ["get", "name"],
-                    textSize: 12,
-                    textColor: colors.hex.white,
-                    textHaloColor: colors.hex.purple800,
-                    textHaloWidth: 8,
-                    textHaloBlur: 0,
-                    textOffset: [0, 1.5],
-                    textAnchor: "top",
-                    textFont: [
-                      "Roboto Medium",
-                      "Noto Sans Regular",
-                      "Arial Unicode MS Regular",
-                    ],
-                  }}
-                />
-              </ShapeSource>
-            )}
-
-            {/* Connection lines: User → Friends */}
-            {userToFriendLinesGeoJSON &&
-              userToFriendLinesGeoJSON.features.length > 0 && (
-                <ShapeSource
-                  id="user-to-friend-lines"
-                  shape={userToFriendLinesGeoJSON}
-                >
-                  <LineLayer
-                    id="user-to-friend-line-layer"
-                    style={{
-                      lineColor: colors.hex.purple600,
-                      lineWidth: 2,
-                      lineOpacity: 0.6,
-                    }}
-                  />
-                </ShapeSource>
-              )}
-
-            {/* Connection lines: Friends → Mutuals */}
-            {friendToMutualLinesGeoJSON &&
-              friendToMutualLinesGeoJSON.features.length > 0 && (
-                <ShapeSource
-                  id="friend-to-mutual-lines"
-                  shape={friendToMutualLinesGeoJSON}
-                >
-                  <LineLayer
-                    id="friend-to-mutual-line-layer"
-                    style={{
-                      lineColor: colors.hex.purple200,
-                      lineWidth: 2,
-                      lineOpacity: 0.6,
-                      lineDasharray: [2, 2],
-                    }}
-                  />
-                </ShapeSource>
-              )}
-
-            {/* Friend and mutual avatar markers */}
-            {friendLocations &&
-              friendLocations.features.map((feature) => (
-                <MapMarker
-                  key={feature.properties.id}
-                  id={feature.properties.id}
-                  coordinate={feature.geometry.coordinates}
-                  name={feature.properties.name}
-                  avatarUrl={feature.properties.avatar_url}
-                  type={feature.properties.type}
-                  onPress={handleFriendMarkerPress}
-                />
-              ))}
-
-            {/* Travel plan destination markers with rocket icon */}
-            {travelPlanGeoJSON && travelPlanGeoJSON.features.length > 0 && (
-              <ShapeSource
-                id="travel-plan-destinations"
-                shape={travelPlanGeoJSON}
-                onPress={handleMarkerPress}
-              >
-                <CircleLayer
-                  id="travel-plan-marker-circles"
-                  style={{
-                    circleRadius: 16,
-                    circleColor: colors.hex.white,
-                    circleOpacity: 0.9,
-                    circleStrokeWidth: 3,
-                    circleStrokeColor: colors.hex.white,
-                  }}
-                />
-                {/* Rocket icon symbol */}
-                <SymbolLayer
-                  id="travel-plan-markers"
-                  style={{
-                    iconImage: "rocketIcon",
-                    iconSize: 0.15,
-                    iconAllowOverlap: true,
-                    iconIgnorePlacement: true,
-                    iconOpacity: 1,
-                  }}
-                />
-                {/* Travel plan title labels */}
-                <SymbolLayer
-                  id="travel-plan-labels"
-                  style={{
-                    textField: ["get", "title"],
-                    textSize: 12,
-                    textColor: colors.hex.white,
-                    textHaloColor: colors.hex.purple900,
-                    textHaloWidth: 8,
-                    textHaloBlur: 0,
-                    textOffset: [0, 2],
-                    textAnchor: "top",
-                    textFont: [
-                      "Roboto Medium",
-                      "Noto Sans Regular",
-                      "Arial Unicode MS Regular",
-                    ],
-                    textAllowOverlap: true,
-                  }}
-                />
-              </ShapeSource>
-            )}
-          </Mapbox.MapView>
-        )}
+      <View className="flex-1 justify-center items-center bg-white">
+        <ActivityIndicator size="large" color={colors.hex.purple600} />
       </View>
     );
   }
-);
+
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <Text className="text-error text-base text-center px-6">{error}</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View className="flex-1" onLayout={handleLayout}>
+      {mapDimensions.width > 0 && mapDimensions.height > 0 && (
+        <Mapbox.MapView
+          style={{ width: mapDimensions.width, height: mapDimensions.height }}
+          styleURL={Mapbox.StyleURL.Dark}
+          compassViewPosition={3}
+          scaleBarEnabled={false}
+          logoEnabled={false}
+        >
+          <Camera
+            zoomLevel={12}
+            centerCoordinate={userLocation || [0, 0]}
+            animationDuration={1000}
+            animationMode="flyTo"
+          />
+
+          <Images
+            images={{
+              rocketIcon: require("../assets/rocket.png"),
+            }}
+          />
+
+          {/* User location marker */}
+          {userLocation && (
+            <ShapeSource
+              id="user-location"
+              shape={{
+                type: "Feature",
+                geometry: {
+                  type: "Point",
+                  coordinates: userLocation,
+                },
+                properties: {
+                  name: "You",
+                },
+              }}
+            >
+              <CircleLayer
+                id="user-marker"
+                style={{
+                  circleRadius: 10,
+                  circleColor: "#53d769",
+                  circleOpacity: 0.85,
+                  circleStrokeWidth: 3,
+                  circleStrokeColor: colors.hex.white,
+                }}
+              />
+              <CircleLayer
+                id="user-marker-center"
+                style={{
+                  circleRadius: 3,
+                  circleColor: colors.hex.white,
+                }}
+              />
+              <SymbolLayer
+                id="user-label"
+                style={{
+                  textField: ["get", "name"],
+                  textSize: 12,
+                  textColor: colors.hex.white,
+                  textHaloColor: colors.hex.purple800,
+                  textHaloWidth: 8,
+                  textHaloBlur: 0,
+                  textOffset: [0, 1.5],
+                  textAnchor: "top",
+                  textFont: [
+                    "Roboto Medium",
+                    "Noto Sans Regular",
+                    "Arial Unicode MS Regular",
+                  ],
+                }}
+              />
+            </ShapeSource>
+          )}
+
+          {/* Connection lines: User → Friends */}
+          {userToFriendLinesGeoJSON && (
+            <ShapeSource
+              id="user-to-friend-lines"
+              shape={userToFriendLinesGeoJSON}
+            >
+              <LineLayer
+                id="user-to-friend-line-layer"
+                style={{
+                  lineColor: colors.hex.purple600,
+                  lineWidth: 2,
+                  lineOpacity: 0.6,
+                }}
+              />
+            </ShapeSource>
+          )}
+
+          {/* Connection lines: Friends → Mutuals */}
+          {friendToMutualLinesGeoJSON && (
+            <ShapeSource
+              id="friend-to-mutual-lines"
+              shape={friendToMutualLinesGeoJSON}
+            >
+              <LineLayer
+                id="friend-to-mutual-line-layer"
+                style={{
+                  lineColor: colors.hex.purple200,
+                  lineWidth: 2,
+                  lineOpacity: 0.6,
+                  lineDasharray: [2, 2],
+                }}
+              />
+            </ShapeSource>
+          )}
+
+          {/* Friend and mutual avatar markers */}
+          {friendLocations &&
+            friendLocations.features.map((feature) => (
+              <MapMarker
+                key={feature.properties.id}
+                id={feature.properties.id}
+                coordinate={feature.geometry.coordinates}
+                name={feature.properties.name}
+                avatarUrl={feature.properties.avatar_url}
+                type={feature.properties.type}
+                onPress={handleFriendMarkerPress}
+              />
+            ))}
+
+          {/* Travel plan destination markers with rocket icon */}
+          {travelPlanGeoJSON && (
+            <ShapeSource
+              id="travel-plan-destinations"
+              shape={travelPlanGeoJSON}
+              onPress={handleMarkerPress}
+            >
+              <CircleLayer
+                id="travel-plan-marker-circles"
+                style={{
+                  circleRadius: 16,
+                  circleColor: colors.hex.white,
+                  circleOpacity: 0.9,
+                  circleStrokeWidth: 3,
+                  circleStrokeColor: colors.hex.white,
+                }}
+              />
+              <SymbolLayer
+                id="travel-plan-markers"
+                style={{
+                  iconImage: "rocketIcon",
+                  iconSize: 0.15,
+                  iconAllowOverlap: true,
+                  iconIgnorePlacement: true,
+                  iconOpacity: 1,
+                }}
+              />
+              <SymbolLayer
+                id="travel-plan-labels"
+                style={{
+                  textField: ["get", "title"],
+                  textSize: 12,
+                  textColor: colors.hex.white,
+                  textHaloColor: colors.hex.purple900,
+                  textHaloWidth: 8,
+                  textHaloBlur: 0,
+                  textOffset: [0, 2],
+                  textAnchor: "top",
+                  textFont: [
+                    "Roboto Medium",
+                    "Noto Sans Regular",
+                    "Arial Unicode MS Regular",
+                  ],
+                  textAllowOverlap: true,
+                }}
+              />
+            </ShapeSource>
+          )}
+        </Mapbox.MapView>
+      )}
+    </View>
+  );
+});
