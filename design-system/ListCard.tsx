@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
+import { Text } from "./Text";
 import { ListWithPlaces, ListCategory } from "@/types/list";
 import { ListMiniMap } from "@/components/ListMiniMap";
 import { colors } from "./colors";

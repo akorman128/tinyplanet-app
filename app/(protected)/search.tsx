@@ -20,7 +20,6 @@ import {
   Caption,
   TabBar,
   Tab,
-  ScreenHeader,
 } from "@/design-system";
 import { UserSearchListItem } from "@/components/UserSearchList";
 import { FriendRequestItem } from "@/design-system/FriendRequestItem";
@@ -412,10 +411,8 @@ export default function SearchScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex-1 bg-white pt-12">
-        {/* Header */}
-        <ScreenHeader title="Search" />
+      <Stack.Screen options={{ title: "Search" }} />
+      <View className="flex-1 bg-white">
 
         {/* Tabs */}
         <TabBar

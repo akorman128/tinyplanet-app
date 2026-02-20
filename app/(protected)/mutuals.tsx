@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
-  Text,
   ActivityIndicator,
   Pressable,
   FlatList,
 } from "react-native";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
-import { colors, Avatar, ScreenHeader } from "@/design-system";
+import { colors, Avatar, Text } from "@/design-system";
 import { useFriends } from "@/hooks/useFriends";
 import { Friend } from "@/types/friendship";
 
@@ -72,9 +71,8 @@ export default function MutualsScreen() {
   if (loading) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex-1 bg-white pt-12">
-          <ScreenHeader title="Mutual Friends" showBackButton={true} />
+        <Stack.Screen options={{ title: "Mutual Friends" }} />
+        <View className="flex-1 bg-white">
           <View className="flex-1 justify-center items-center">
             <ActivityIndicator size="large" color={colors.hex.purple600} />
           </View>
@@ -85,9 +83,8 @@ export default function MutualsScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex-1 bg-white pt-12">
-        <ScreenHeader title="Mutual Friends" showBackButton={true} />
+      <Stack.Screen options={{ title: "Mutual Friends" }} />
+      <View className="flex-1 bg-white">
 
         {mutuals.length === 0 ? (
           <View className="flex-1 justify-center items-center px-6">

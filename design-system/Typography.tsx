@@ -1,4 +1,5 @@
-import { Text, TextProps } from "react-native";
+import { Text } from "./Text";
+import { TextProps } from "react-native";
 
 interface TypographyProps extends TextProps {
   className?: string;

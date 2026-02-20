@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, ScrollView, Pressable } from "react-native";
+import { View, TextInput, ScrollView, Pressable } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -7,6 +7,7 @@ import { Input } from "@/design-system/Input";
 import { Button } from "@/design-system/Button";
 import { Select, SelectOption } from "@/design-system/Select";
 import { colors } from "@/design-system/colors";
+import { Text } from "@/design-system";
 import { CreateListInput, ListCategory } from "@/types/list";
 import { LocationSearchInput } from "./LocationSearchInput";
 
@@ -201,7 +202,7 @@ export function ListForm({
                 multiline
                 numberOfLines={6}
                 textAlignVertical="top"
-                className="bg-white border-2 border-gray-300 rounded-xl px-4 py-3 text-base"
+                className="font-sans bg-white border-2 border-gray-300 rounded-xl px-4 py-3 text-base"
                 placeholderTextColor="#9CA3AF"
                 style={{ minHeight: 120 }}
               />

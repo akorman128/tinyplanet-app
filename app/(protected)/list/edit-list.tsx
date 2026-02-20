@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { View, ScrollView, Alert, TextInput, Pressable, Text } from "react-native";
+import { View, ScrollView, Alert, TextInput, Pressable } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import {
-  ScreenHeader,
   LoadingState,
   ErrorState,
   Select,
   SelectOption,
   colors,
+  Text,
 } from "@/design-system";
 import { useLists } from "@/hooks/useLists";
 import { ListWithPlaces, ListCategory } from "@/types/list";
@@ -96,9 +96,8 @@ export default function EditListScreen() {
   if (loading) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex-1 bg-white pt-12">
-          <ScreenHeader title="Edit List" showBackButton={true} />
+        <Stack.Screen options={{ title: "Edit List" }} />
+        <View className="flex-1 bg-white">
           <LoadingState />
         </View>
       </>
@@ -108,9 +107,8 @@ export default function EditListScreen() {
   if (error || !list) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex-1 bg-white pt-12">
-          <ScreenHeader title="Edit List" showBackButton={true} />
+        <Stack.Screen options={{ title: "Edit List" }} />
+        <View className="flex-1 bg-white">
           <ErrorState message={error || "List not found"} />
         </View>
       </>
@@ -119,12 +117,10 @@ export default function EditListScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex-1 bg-white pt-12">
-        <ScreenHeader
-          title="Edit List"
-          showBackButton={true}
-          rightComponent={
+      <Stack.Screen
+        options={{
+          title: "Edit List",
+          headerRight: () => (
             <Pressable
               onPress={handleSave}
               disabled={!hasChanges || isSubmitting}
@@ -137,8 +133,10 @@ export default function EditListScreen() {
                 {isSubmitting ? "Saving..." : "Save"}
               </Text>
             </Pressable>
-          }
-        />
+          ),
+        }}
+      />
+      <View className="flex-1 bg-white">
 
         <ScrollView
           className="flex-1"
@@ -150,7 +148,7 @@ export default function EditListScreen() {
             <TextInput
               value={title}
               onChangeText={setTitle}
-              className="border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-900"
+              className="font-sans border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-900"
               placeholder="List name"
               autoFocus
             />
@@ -170,7 +168,7 @@ export default function EditListScreen() {
             <TextInput
               value={note}
               onChangeText={setNote}
-              className="border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-900"
+              className="font-sans border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-900"
               placeholder="Add any notes about this list..."
               multiline
               numberOfLines={3}

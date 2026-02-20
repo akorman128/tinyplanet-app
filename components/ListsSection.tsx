@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
   View,
-  Text,
   ScrollView,
   Pressable,
   ActivityIndicator,
@@ -10,7 +9,7 @@ import { useRouter } from "expo-router";
 import { useLists } from "@/hooks/useLists";
 import { ListCard } from "@/design-system/ListCard";
 import { ListWithPlaces } from "@/types/list";
-import { colors } from "@/design-system";
+import { colors, Text } from "@/design-system";
 
 interface ListsSectionProps {
   userId: string;

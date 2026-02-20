@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Pressable, FlatList } from "react-native";
+import { View, Pressable, FlatList } from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { useLists } from "@/hooks/useLists";
 import { useListSelectionStore } from "@/stores/listSelectionStore";
 import { ViewableList } from "@/types/list";
 import {
-  ScreenHeader,
   LoadingState,
   EmptyState,
   Icons,
   colors,
+  Text,
 } from "@/design-system";
 
 export default function SelectListScreen() {
@@ -76,19 +76,19 @@ export default function SelectListScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex-1 bg-white pt-12">
-        <ScreenHeader
-          title="Select a List"
-          showBackButton={true}
-          rightComponent={
-            selectedList ? (
-              <Pressable onPress={handleClear} className="px-2">
-                <Text className="text-purple-600 font-medium">Clear</Text>
-              </Pressable>
-            ) : undefined
-          }
-        />
+      <Stack.Screen
+        options={{
+          title: "Select a List",
+          headerRight: selectedList
+            ? () => (
+                <Pressable onPress={handleClear} className="px-2">
+                  <Text className="text-purple-600 font-medium">Clear</Text>
+                </Pressable>
+              )
+            : undefined,
+        }}
+      />
+      <View className="flex-1 bg-white">
 
         {loading ? (
           <LoadingState />

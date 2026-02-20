@@ -4,7 +4,6 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  ScreenHeader,
   Button,
   OptionSelector,
   LoadingState,
@@ -92,9 +91,8 @@ export default function EditPostScreen() {
   if (loading) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex-1 bg-white pt-12">
-          <ScreenHeader title="Edit Post" showBackButton={true} />
+        <Stack.Screen options={{ title: "Edit Post" }} />
+        <View className="flex-1 bg-white">
           <LoadingState />
         </View>
       </>
@@ -104,9 +102,8 @@ export default function EditPostScreen() {
   if (error) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex-1 bg-white pt-12">
-          <ScreenHeader title="Edit Post" showBackButton={true} />
+        <Stack.Screen options={{ title: "Edit Post" }} />
+        <View className="flex-1 bg-white">
           <ErrorState message={error} />
         </View>
       </>
@@ -115,9 +112,8 @@ export default function EditPostScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex-1 bg-white pt-12">
-        <ScreenHeader title="Edit Post" showBackButton={true} />
+      <Stack.Screen options={{ title: "Edit Post" }} />
+      <View className="flex-1 bg-white">
 
         <ScrollView
           className="flex-1"

@@ -5,8 +5,8 @@ import {
   Pressable,
   KeyboardAvoidingView,
   Platform,
-  Text,
 } from "react-native";
+import { Text } from "./Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icons } from "./Icons";
 import { colors } from "./colors";
@@ -97,7 +97,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             placeholderTextColor={colors.hex.placeholder}
             multiline
             maxLength={1000}
-            className="flex-1 bg-gray-100 rounded-lg px-4 py-4 max-h-24"
+            className="font-sans flex-1 bg-gray-100 rounded-lg px-4 py-4 max-h-24"
             style={{ fontSize: 16 }}
           />
           <Pressable

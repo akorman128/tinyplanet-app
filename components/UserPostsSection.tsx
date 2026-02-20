@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { View, FlatList, RefreshControl, Text } from "react-native";
+import { View, FlatList, RefreshControl } from "react-native";
 import { PostCard } from "@/design-system/PostCard";
 import { TravelPlanCard } from "@/design-system/TravelPlanCard";
 import { useFeed } from "@/hooks/useFeed";
 import { useSavedPosts } from "@/hooks/useSavedPosts";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
 import { PostWithAuthor } from "@/types/post";
-import { colors, TabBar } from "@/design-system";
+import { colors, TabBar, Text } from "@/design-system";
 
 // Helper function to detect travel plan posts
 const isTravelPlanPost = (post: PostWithAuthor): boolean => {

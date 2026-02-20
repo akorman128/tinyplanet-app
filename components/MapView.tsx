@@ -5,7 +5,7 @@ import React, {
   useRef,
   useMemo,
 } from "react";
-import { View, ActivityIndicator, Text, LayoutChangeEvent } from "react-native";
+import { View, ActivityIndicator, LayoutChangeEvent } from "react-native";
 import Mapbox, {
   Camera,
   ShapeSource,
@@ -24,7 +24,7 @@ import {
 } from "@/types/friendship";
 import { TravelPlanMapLocation } from "@/types/travelPlan";
 import { useLocation } from "@/hooks/useLocation";
-import { colors } from "@/design-system";
+import { colors, Text } from "@/design-system";
 import { useRouter } from "expo-router";
 import { getDurationInDays } from "@/utils";
 import { useMapStore } from "@/stores/mapStore";

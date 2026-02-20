@@ -1,4 +1,5 @@
-import { Pressable, View, Text } from "react-native";
+import { Pressable, View } from "react-native";
+import { Text } from "./Text";
 import { Avatar } from "./Avatar";
 import { Badge } from "./Badge";
 import { MessageChannel } from "@/types/messageChannel";

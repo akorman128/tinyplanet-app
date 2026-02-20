@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, Linking, Alert, Pressable } from "react-native";
+import { View, Linking, Alert, Pressable } from "react-native";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { useContacts } from "@/hooks/useContacts";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
 import { Contact } from "@/types/contact";
 import {
-  ScreenHeader,
   LoadingState,
   ErrorState,
   GlassInfoCard,
   GlassInfoItem,
   Icons,
   colors,
+  Text,
 } from "@/design-system";
 
 export default function ContactDetailScreen() {
@@ -87,9 +87,8 @@ export default function ContactDetailScreen() {
   if (loading) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex-1 bg-white pt-12">
-          <ScreenHeader title="Contact" showBackButton={true} />
+        <Stack.Screen options={{ title: "Contact" }} />
+        <View className="flex-1 bg-white">
           <LoadingState />
         </View>
       </>
@@ -99,9 +98,8 @@ export default function ContactDetailScreen() {
   if (error || !contact) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex-1 bg-white pt-12">
-          <ScreenHeader title="Contact" showBackButton={true} />
+        <Stack.Screen options={{ title: "Contact" }} />
+        <View className="flex-1 bg-white">
           <ErrorState message={error || "Contact not found"} />
         </View>
       </>
@@ -110,19 +108,19 @@ export default function ContactDetailScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex-1 bg-white pt-8">
-        <ScreenHeader
-          title="Contact"
-          showBackButton={true}
-          rightComponent={
-            isOwnContact ? (
-              <Pressable onPress={handleDelete}>
-                <Icons.trash size={24} color={colors.hex.error} />
-              </Pressable>
-            ) : undefined
-          }
-        />
+      <Stack.Screen
+        options={{
+          title: "Contact",
+          headerRight: isOwnContact
+            ? () => (
+                <Pressable onPress={handleDelete}>
+                  <Icons.trash size={24} color={colors.hex.error} />
+                </Pressable>
+              )
+            : undefined,
+        }}
+      />
+      <View className="flex-1 bg-white">
 
         <View className="px-6 pt-6">
           {/* Name */}

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, Text, Pressable, Alert } from "react-native";
+import { View, Pressable, Alert } from "react-native";
+import { Text } from "./Text";
 import { useRouter } from "expo-router";
 import { Avatar } from "./Avatar";
 import { Icons } from "./Icons";

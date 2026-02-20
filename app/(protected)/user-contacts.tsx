@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Pressable } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { ScreenHeader, Icons, colors } from "@/design-system";
+import { Icons, colors } from "@/design-system";
 import { ContactsSection } from "@/components/ContactsSection";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
 
@@ -15,19 +15,19 @@ export default function UserContactsScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex-1 bg-white pt-8">
-        <ScreenHeader
-          title="Contacts"
-          showBackButton={true}
-          rightComponent={
-            isOwnProfile ? (
-              <Pressable onPress={() => router.push("/add-contact")}>
-                <Icons.plus size={24} color={colors.hex.purple600} />
-              </Pressable>
-            ) : undefined
-          }
-        />
+      <Stack.Screen
+        options={{
+          title: "Contacts",
+          headerRight: isOwnProfile
+            ? () => (
+                <Pressable onPress={() => router.push("/add-contact")}>
+                  <Icons.plus size={24} color={colors.hex.purple600} />
+                </Pressable>
+              )
+            : undefined,
+        }}
+      />
+      <View className="flex-1 bg-white">
         <ContactsSection userId={displayUserId} />
       </View>
     </>

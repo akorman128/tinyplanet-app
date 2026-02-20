@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { View, ScrollView, Alert, Text } from "react-native";
+import { View, ScrollView, Alert } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import {
-  ScreenHeader,
   LoadingState,
   ErrorState,
+  Text,
 } from "@/design-system";
 import {
   LocationSearchInput,
@@ -123,9 +123,8 @@ export default function EditPlaceScreen() {
   if (loading) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex-1 bg-white pt-12">
-          <ScreenHeader title="Edit Location" showBackButton={true} />
+        <Stack.Screen options={{ title: "Edit Location" }} />
+        <View className="flex-1 bg-white">
           <LoadingState />
         </View>
       </>
@@ -135,9 +134,8 @@ export default function EditPlaceScreen() {
   if (error || !place) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex-1 bg-white pt-12">
-          <ScreenHeader title="Edit Location" showBackButton={true} />
+        <Stack.Screen options={{ title: "Edit Location" }} />
+        <View className="flex-1 bg-white">
           <ErrorState message={error || "Place not found"} />
         </View>
       </>
@@ -146,9 +144,8 @@ export default function EditPlaceScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex-1 bg-white pt-12">
-        <ScreenHeader title="Edit Location" showBackButton={true} />
+      <Stack.Screen options={{ title: "Edit Location" }} />
+      <View className="flex-1 bg-white">
 
         <ScrollView
           className="flex-1"

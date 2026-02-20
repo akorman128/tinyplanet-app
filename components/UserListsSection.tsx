@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { View, FlatList, RefreshControl, Pressable, Text, ScrollView } from "react-native";
+import { View, FlatList, RefreshControl, Pressable, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { useLists } from "@/hooks/useLists";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
 import { ListCard } from "@/design-system/ListCard";
 import { ListWithPlaces, ListCategory } from "@/types/list";
-import { colors, EmptyState, LoadingState, ErrorState, Select, SelectOption } from "@/design-system";
+import { colors, EmptyState, LoadingState, ErrorState, Select, SelectOption, Text } from "@/design-system";
 
 const LISTS_PER_PAGE = 10;
 

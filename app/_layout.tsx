@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { View, ActivityIndicator, Text } from "react-native";
+import { View, ActivityIndicator } from "react-native";
 
 import { useSupabase } from "@/hooks/useSupabase";
 import { useLocationStore } from "@/stores/locationStore";
@@ -13,6 +13,7 @@ import { LocationPermissionProvider } from "../providers/LocationPermissionProvi
 import { LocationPermissionScreen } from "@/components/LocationPermissionScreen";
 import { initializeMapbox } from "@/utils/mapboxConfig";
 import { Button } from "@/design-system/Button";
+import { Text } from "@/design-system";
 import "../global.css";
 
 // Initialize Mapbox once at app startup

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, Text, Image } from "react-native";
+import { View, Image, Platform } from "react-native";
+import { Text } from "./Text";
 import { getInitials } from "@/utils";
 import { colors } from "./colors";
 
@@ -78,6 +79,7 @@ export const Avatar = React.memo<AvatarProps>(
               fontSize: config.fontPixels,
               fontWeight: "600",
               color: colors.hex.purple600,
+              fontFamily: Platform.OS === "ios" ? "HelveticaNeue" : undefined,
             }}
           >
             {initials}

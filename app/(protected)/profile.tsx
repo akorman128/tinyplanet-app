@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { View, Text, Pressable, ScrollView, Alert } from "react-native";
+import { View, Pressable, ScrollView, Alert } from "react-native";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 
 import {
   Avatar,
   GlassInfoCard,
   GlassInfoItem,
-  ScreenHeader,
   Badge,
   LoadingState,
   ErrorState,
@@ -15,6 +14,7 @@ import {
   colors,
   SocialMediaLinks,
   InfoRow,
+  Text,
 } from "@/design-system";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
 import { useProfile } from "@/hooks/useProfile";
@@ -180,9 +180,8 @@ export default function ProfileScreen() {
   if (loading || (!isViewingOwnProfile && !otherUserProfile)) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex-1 bg-white pt-12">
-          <ScreenHeader title="Profile" showBackButton={true} />
+        <Stack.Screen options={{ title: "Profile" }} />
+        <View className="flex-1 bg-white">
           <LoadingState />
         </View>
       </>
@@ -193,9 +192,8 @@ export default function ProfileScreen() {
   if (error || !displayProfile) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex-1 bg-white pt-12">
-          <ScreenHeader title="Profile" showBackButton={true} />
+        <Stack.Screen options={{ title: "Profile" }} />
+        <View className="flex-1 bg-white">
           <ErrorState message={error || "Profile not found"} />
         </View>
       </>
@@ -205,27 +203,24 @@ export default function ProfileScreen() {
   return (
     <>
       <Stack.Screen
-        options={{ headerShown: false, title: profile.full_name }}
+        options={{
+          title: "",
+          headerShadowVisible: false,
+          headerRight: isViewingOwnProfile
+            ? () => (
+                <View className="flex-row items-center gap-2">
+                  <Pressable onPress={() => router.push("/edit-profile")}>
+                    <Icons.edit size={24} color={colors.black} />
+                  </Pressable>
+                  <Pressable onPress={() => router.push("/settings")}>
+                    <Icons.settings size={24} color={colors.black} />
+                  </Pressable>
+                </View>
+              )
+            : undefined,
+        }}
       />
-      <View className="flex-1 bg-white pt-8">
-        {/* Header */}
-        <ScreenHeader
-          title={"Profile"}
-          showBackButton={true}
-          rightComponent={
-            isViewingOwnProfile ? (
-              <View className="flex-row items-center gap-2">
-                <Pressable onPress={() => router.push("/edit-profile")}>
-                  <Icons.edit size={24} color={colors.black} />
-                </Pressable>
-                <Pressable onPress={() => router.push("/settings")}>
-                  <Icons.settings size={24} color={colors.black} />
-                </Pressable>
-              </View>
-            ) : undefined
-          }
-        />
-
+      <View className="flex-1 bg-white">
         <ScrollView
           className="flex-1"
           contentContainerClassName="px-6 pt-4 pb-8 items-center"
@@ -243,6 +238,12 @@ export default function ProfileScreen() {
               {displayProfile.full_name}
             </Heading>
           </View>
+
+          <VibeDisplay
+            topVibes={topVibes}
+            totalVibeCount={totalVibeCount}
+            onPress={handleVibePress}
+          />
 
           <SocialMediaLinks
             website={displayProfile.website}
@@ -278,12 +279,6 @@ export default function ProfileScreen() {
               </Pressable>
             )}
           </View>
-
-          <VibeDisplay
-            topVibes={topVibes}
-            totalVibeCount={totalVibeCount}
-            onPress={handleVibePress}
-          />
 
           {activeTravelPlan && (
             <View className="w-full mb-4 px-4 py-3 bg-purple-50 rounded-lg flex-col  justify-between">

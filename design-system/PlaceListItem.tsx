@@ -1,4 +1,5 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
+import { Text } from "./Text";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { ListPlace } from "@/types/list";
 import { Badge } from "./Badge";

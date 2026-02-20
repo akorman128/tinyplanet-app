@@ -1,12 +1,12 @@
 import React, { forwardRef, useState, useEffect, useCallback } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import BottomSheet, {
   BottomSheetView,
   BottomSheetFlatList,
 } from "@gorhom/bottom-sheet";
 import { useLists } from "@/hooks/useLists";
 import { ViewableList } from "@/types/list";
-import { LoadingState, EmptyState, Icons, colors } from "@/design-system";
+import { LoadingState, EmptyState, Icons, colors, Text } from "@/design-system";
 
 interface ListPickerSheetProps {
   onSelect: (list: ViewableList | null) => void;

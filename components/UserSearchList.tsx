@@ -1,6 +1,6 @@
 import React from "react";
-import { View, Text, Pressable } from "react-native";
-import { Avatar, Badge } from "@/design-system";
+import { View, Pressable } from "react-native";
+import { Avatar, Badge, Text } from "@/design-system";
 import { Friend } from "@/types/friendship";
 
 type UserSearchListItemProps = {

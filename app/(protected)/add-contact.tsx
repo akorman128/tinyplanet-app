@@ -5,7 +5,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Input, Button, ScreenHeader, Icons, colors } from "@/design-system";
+import { Input, Button, Icons, colors } from "@/design-system";
 import { useContactPicker } from "@/hooks/useContactPicker";
 import { useContacts } from "@/hooks/useContacts";
 
@@ -86,16 +86,17 @@ export default function AddContactScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex-1 bg-white pt-12">
-        <ScreenHeader
-          title="Add Contact"
-          rightComponent={
+      <Stack.Screen
+        options={{
+          title: "Add Contact",
+          headerRight: () => (
             <Pressable onPress={handleImportFromPhone}>
               <Icons.userList size={24} color={colors.hex.purple600} />
             </Pressable>
-          }
-        />
+          ),
+        }}
+      />
+      <View className="flex-1 bg-white">
 
         <KeyboardAwareScrollView
           className="flex-1"

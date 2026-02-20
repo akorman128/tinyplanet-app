@@ -1,5 +1,6 @@
-import React from "react";
-import { View, Text, Pressable } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { View, Pressable, Animated, Easing } from "react-native";
+import { Text } from "./Text";
 import { colors } from "./colors";
 
 interface VibeDisplayProps {
@@ -10,20 +11,55 @@ interface VibeDisplayProps {
 
 export const VibeDisplay: React.FC<VibeDisplayProps> = ({
   topVibes,
-  totalVibeCount,
   onPress,
 }) => {
+  const bounceAnim = useRef(new Animated.Value(0)).current;
+  const shadowAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(bounceAnim, {
+            toValue: -6,
+            duration: 1200,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(shadowAnim, {
+            toValue: 0.6,
+            duration: 1200,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.parallel([
+          Animated.timing(bounceAnim, {
+            toValue: 0,
+            duration: 1200,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(shadowAnim, {
+            toValue: 1,
+            duration: 1200,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ]),
+      ])
+    );
+    animation.start();
+    return () => animation.stop();
+  }, [bounceAnim, shadowAnim]);
+
   return (
-    <View className=" items-center w-full">
+    <View className="items-center w-full">
       <Pressable className="mb-6 items-center w-full" onPress={onPress}>
-        <Text
-          className="text-sm font-semibold uppercase mb-2"
-          style={{ color: colors.hex.placeholder, letterSpacing: 0.5 }}
+        <Animated.View
+          className="flex-row flex-wrap gap-4 justify-center items-center"
+          style={{ transform: [{ translateY: bounceAnim }] }}
         >
-          Vibe ({totalVibeCount && totalVibeCount > 10 ? "10+" : totalVibeCount}
-          )
-        </Text>
-        <View className="flex-row flex-wrap gap-4 justify-center items-center">
           {topVibes.map(({ emoji, count }) => (
             <View key={emoji} className="relative">
               <Text className="text-[32px]">{emoji}</Text>
@@ -37,7 +73,15 @@ export const VibeDisplay: React.FC<VibeDisplayProps> = ({
               )}
             </View>
           ))}
-        </View>
+        </Animated.View>
+        <Animated.View
+          className="mt-2 h-1 rounded-full bg-black/8"
+          style={{
+            width: 120,
+            opacity: shadowAnim,
+            transform: [{ scaleX: shadowAnim }],
+          }}
+        />
       </Pressable>
     </View>
   );

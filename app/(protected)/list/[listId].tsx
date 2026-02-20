@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
 import {
   View,
-  Text,
   ScrollView,
   Pressable,
   Alert,
@@ -23,12 +22,12 @@ import { ListWithPlaces, ListPlace, ListCategory } from "@/types/list";
 import { filterValidPlaces } from "@/utils/mapUtils";
 import { ListMiniMap } from "@/components/ListMiniMap";
 import {
-  ScreenHeader,
   LoadingState,
   ErrorState,
   Icons,
   colors,
   PlaceListItem,
+  Text,
 } from "@/design-system";
 
 const CATEGORY_LABELS: Record<ListCategory, string> = {
@@ -198,9 +197,8 @@ export default function ListDetailScreen() {
   if (isLoading) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex-1 bg-white pt-12">
-          <ScreenHeader title="List" showBackButton={true} />
+        <Stack.Screen options={{ title: "List" }} />
+        <View className="flex-1 bg-white">
           <LoadingState />
         </View>
       </>
@@ -210,9 +208,8 @@ export default function ListDetailScreen() {
   if (error || !list) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex-1 bg-white pt-12">
-          <ScreenHeader title="List" showBackButton={true} />
+        <Stack.Screen options={{ title: "List" }} />
+        <View className="flex-1 bg-white">
           <ErrorState message={error || "List not found"} />
         </View>
       </>
@@ -221,14 +218,11 @@ export default function ListDetailScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <View className="flex-1 bg-white pt-12">
-          <ScreenHeader
-            title="List"
-            showBackButton={true}
-            rightComponent={
-              isOwnList ? (
+      <Stack.Screen
+        options={{
+          title: "List",
+          headerRight: isOwnList
+            ? () => (
                 <View className="flex-row items-center gap-4">
                   <Pressable onPress={handleEdit}>
                     <Icons.edit size={22} color={colors.black} />
@@ -237,9 +231,12 @@ export default function ListDetailScreen() {
                     <Icons.trash size={22} color={colors.hex.error} />
                   </Pressable>
                 </View>
-              ) : undefined
-            }
-          />
+              )
+            : undefined,
+        }}
+      />
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <View className="flex-1 bg-white">
 
           {/* Map */}
           <ListMiniMap

@@ -1,7 +1,6 @@
 import React from "react";
 import { View } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
-import { ScreenHeader } from "@/design-system";
 import { UserListsSection } from "@/components/UserListsSection";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
 
@@ -13,9 +12,8 @@ export default function UserListsScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex-1 bg-white pt-8">
-        <ScreenHeader title="Lists" showBackButton={true} />
+      <Stack.Screen options={{ title: "Lists" }} />
+      <View className="flex-1 bg-white">
         <UserListsSection userId={displayUserId} />
       </View>
     </>

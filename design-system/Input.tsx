@@ -1,4 +1,5 @@
-import { TextInput, TextInputProps, View, Text, Pressable } from "react-native";
+import { TextInput, TextInputProps, View, Pressable } from "react-native";
+import { Text } from "./Text";
 import { useState } from "react";
 import { Icons } from "./Icons";
 import { colors } from "./colors";
@@ -29,7 +30,7 @@ export function Input({
     props.value?.toString().length || props.defaultValue?.toString().length || 0
   );
   const baseStyles =
-    "py-3 px-4 rounded-xl border-2 border-gray-300 bg-white text-base text-gray-900 leading-5";
+    "font-sans py-3 px-4 rounded-xl border-2 border-gray-300 bg-white text-base text-gray-900 leading-5";
   const focusStyles = "focus:border-purple-600";
   const errorStyles = error ? "border-red-500" : "";
   const clearPadding = clearable ? "pr-12" : "";

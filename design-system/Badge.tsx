@@ -1,4 +1,5 @@
-import { View, Text, ViewProps } from "react-native";
+import { View, ViewProps } from "react-native";
+import { Text } from "./Text";
 
 type BadgeVariant = "default" | "primary" | "secondary" | "warning" | "error";
 type BadgeSize = "small" | "medium";

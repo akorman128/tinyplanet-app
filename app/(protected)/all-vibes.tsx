@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
   View,
-  Text,
   FlatList,
   ActivityIndicator,
   Pressable,
@@ -10,7 +9,7 @@ import {
   Alert,
 } from "react-native";
 import { useLocalSearchParams, Stack } from "expo-router";
-import { colors, Avatar, ScreenHeader, Icons, Button } from "@/design-system";
+import { colors, Avatar, Icons, Button, Text } from "@/design-system";
 import { useVibe } from "@/hooks/useVibe";
 import { VibeWithSender } from "@/types/vibe";
 import { formatTimeAgo } from "@/utils";
@@ -128,19 +127,20 @@ export default function AllVibesScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex-1 bg-white pt-12">
-        {/* Header */}
-        <ScreenHeader
-          title="Vibes"
-          rightComponent={
-            profile.id !== userId && !hasUserGivenVibe ? (
-              <Pressable onPress={() => setShowModal(true)}>
-                <Icons.plus size={24} color={colors.hex.purple600} />
-              </Pressable>
-            ) : null
-          }
-        />
+      <Stack.Screen
+        options={{
+          title: "Vibes",
+          headerRight:
+            profile.id !== userId && !hasUserGivenVibe
+              ? () => (
+                  <Pressable onPress={() => setShowModal(true)}>
+                    <Icons.plus size={24} color={colors.hex.purple600} />
+                  </Pressable>
+                )
+              : undefined,
+        }}
+      />
+      <View className="flex-1 bg-white">
 
         {/* Content */}
         {loading ? (
@@ -193,7 +193,7 @@ export default function AllVibesScreen() {
               value={emojiInput}
               onChangeText={setEmojiInput}
               placeholder="🔥💎✨"
-              className="border border-gray-300 rounded-lg p-3 mb-4 text-2xl"
+              className="font-sans border border-gray-300 rounded-lg p-3 mb-4 text-2xl"
               style={{ color: colors.hex.purple900 }}
               maxLength={50}
               autoFocus

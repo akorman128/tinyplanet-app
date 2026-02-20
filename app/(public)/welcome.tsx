@@ -1,7 +1,7 @@
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { router } from "expo-router";
-import { Button, Heading, Subheading, Caption } from "@/design-system";
+import { Button, Heading, Subheading, Caption, Text } from "@/design-system";
 
 export default function WelcomePage() {
   return (

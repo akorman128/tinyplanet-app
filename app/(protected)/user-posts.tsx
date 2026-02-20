@@ -1,7 +1,6 @@
 import React from "react";
 import { View } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
-import { ScreenHeader } from "@/design-system";
 import { UserPostsSection } from "@/components/UserPostsSection";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
 
@@ -14,9 +13,8 @@ export default function UserPostsScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex-1 bg-white pt-8">
-        <ScreenHeader title="Posts" showBackButton={true} />
+      <Stack.Screen options={{ title: "Posts" }} />
+      <View className="flex-1 bg-white">
         <UserPostsSection
           userId={displayUserId}
           onOpenComments={(postId, commentCount) => {

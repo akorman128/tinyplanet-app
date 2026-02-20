@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Animated } from "react-native";
+import { View, Animated } from "react-native";
+import { Text } from "./Text";
 
 interface TypingIndicatorProps {
   friendName: string;

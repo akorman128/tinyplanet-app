@@ -1,6 +1,6 @@
 import React from "react";
-import { View, Text } from "react-native";
-import { Button } from "@/design-system";
+import { View } from "react-native";
+import { Button, Text } from "@/design-system";
 import { TravelPlan } from "@/types/travelPlan";
 
 interface ActiveTravelPlanBannerProps {

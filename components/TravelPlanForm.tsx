@@ -1,9 +1,9 @@
 import React from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import { Controller, Control, FieldErrors } from "react-hook-form";
 import { z } from "zod";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Input } from "@/design-system";
+import { Input, Text } from "@/design-system";
 import { TravelPlan } from "@/types/travelPlan";
 import { LocationSearchInput } from "./LocationSearchInput";
 import { ActiveTravelPlanBanner } from "./ActiveTravelPlanBanner";

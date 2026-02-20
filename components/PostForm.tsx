@@ -1,8 +1,8 @@
 import React from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import { Controller, Control, FieldErrors } from "react-hook-form";
 import { z } from "zod";
-import { Input, Icons, colors, ListChip } from "@/design-system";
+import { Input, Icons, colors, ListChip, Text } from "@/design-system";
 import { AttachedList } from "@/types/post";
 
 // Post schema

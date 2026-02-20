@@ -1,4 +1,5 @@
-import { View, TouchableOpacity, Text } from "react-native";
+import { View, TouchableOpacity } from "react-native";
+import { Text } from "./Text";
 import { JSX } from "react";
 import { IconProps } from "./Icons";
 import { Badge } from "./Badge";

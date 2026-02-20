@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
-import { View, Text, Pressable, Modal, FlatList } from "react-native";
+import { View, Pressable, Modal, FlatList } from "react-native";
+import { Text } from "./Text";
 import { Icons } from "./Icons";
 import { colors } from "./colors";
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, TextInput, Pressable, ScrollView } from "react-native";
-import { colors } from "@/design-system";
+import { View, TextInput, Pressable, ScrollView } from "react-native";
+import { colors, Text } from "@/design-system";
 import { useLocationStore } from "@/stores/locationStore";
 
 const MAPBOX_ACCESS_TOKEN = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN;
@@ -204,7 +204,7 @@ export function LocationSearchInput({
           value={query}
           onChangeText={handleChangeText}
           placeholder={placeholder}
-          className={`bg-white border ${
+          className={`font-sans bg-white border ${
             error ? "border-red-500" : "border-gray-300"
           } rounded-lg px-4 py-3 text-base`}
           placeholderTextColor={colors.hex.gray500}

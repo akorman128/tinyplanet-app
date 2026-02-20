@@ -1,3 +1,4 @@
+export { Text } from "./Text";
 export { Button } from "./Button";
 export { ButtonGroup } from "./ButtonGroup";
 export type { ButtonGroupOption } from "./ButtonGroup";
@@ -14,8 +15,6 @@ export { Badge } from "./Badge";
 export type { BadgeProps } from "./Badge";
 export { TabBar } from "./TabBar";
 export type { Tab } from "./TabBar";
-export { ScreenHeader } from "./ScreenHeader";
-export type { ScreenHeaderProps } from "./ScreenHeader";
 export { EmptyState } from "./EmptyState";
 export type { EmptyStateProps } from "./EmptyState";
 export { LoadingState } from "./LoadingState";

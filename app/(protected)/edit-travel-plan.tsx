@@ -4,7 +4,6 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  ScreenHeader,
   Button,
   OptionSelector,
   LoadingState,
@@ -152,9 +151,8 @@ export default function EditTravelPlanScreen() {
   if (loading) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex-1 bg-white pt-12">
-          <ScreenHeader title="Edit Travel Plan" showBackButton={true} />
+        <Stack.Screen options={{ title: "Edit Travel Plan" }} />
+        <View className="flex-1 bg-white">
           <LoadingState />
         </View>
       </>
@@ -164,9 +162,8 @@ export default function EditTravelPlanScreen() {
   if (error) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex-1 bg-white pt-12">
-          <ScreenHeader title="Edit Travel Plan" showBackButton={true} />
+        <Stack.Screen options={{ title: "Edit Travel Plan" }} />
+        <View className="flex-1 bg-white">
           <ErrorState message={error} />
         </View>
       </>
@@ -175,9 +172,8 @@ export default function EditTravelPlanScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex-1 bg-white pt-12">
-        <ScreenHeader title="Edit Travel Plan" showBackButton={true} />
+      <Stack.Screen options={{ title: "Edit Travel Plan" }} />
+      <View className="flex-1 bg-white">
 
         <ScrollView
           className="flex-1"

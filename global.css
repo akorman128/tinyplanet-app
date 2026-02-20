@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @import "uniwind";
 
+@layer theme {
+  :root {
+    @media ios {
+      --font-sans: "HelveticaNeue";
+    }
+  }
+}
+
 @theme {
   /* Custom primary colors */
   --color-primary-light: #c7d2fe;

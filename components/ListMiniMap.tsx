@@ -1,8 +1,8 @@
 import React, { useMemo, ReactNode } from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import Mapbox from "@rnmapbox/maps";
 import { ListPlace } from "@/types/list";
-import { colors } from "@/design-system";
+import { colors, Text } from "@/design-system";
 import {
   filterValidPlaces,
   calculateMapBounds,

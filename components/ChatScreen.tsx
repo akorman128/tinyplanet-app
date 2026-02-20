@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { View, FlatList, Alert, ActivityIndicator } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
 import {
-  ScreenHeader,
   LoadingState,
   ErrorState,
   ChatInput,
@@ -369,9 +368,8 @@ export default function ChatScreen() {
   if (!friendId) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex-1 bg-white pt-12">
-          <ScreenHeader title="Chat" showBackButton={true} />
+        <Stack.Screen options={{ title: "Chat" }} />
+        <View className="flex-1 bg-white">
           <ErrorState message="Friend ID not provided" />
         </View>
       </>
@@ -381,9 +379,8 @@ export default function ChatScreen() {
   if (loading) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex-1 bg-white pt-12">
-          <ScreenHeader title={friendName} showBackButton={true} />
+        <Stack.Screen options={{ title: friendName || "Chat" }} />
+        <View className="flex-1 bg-white">
           <LoadingState />
         </View>
       </>
@@ -393,9 +390,8 @@ export default function ChatScreen() {
   if (error) {
     return (
       <>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View className="flex-1 bg-white pt-12">
-          <ScreenHeader title={friendName} showBackButton={true} />
+        <Stack.Screen options={{ title: friendName || "Chat" }} />
+        <View className="flex-1 bg-white">
           <ErrorState message={error} />
         </View>
       </>
@@ -404,9 +400,8 @@ export default function ChatScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex-1 bg-white pt-12">
-        <ScreenHeader title={friendName} showBackButton={true} />
+      <Stack.Screen options={{ title: friendName || "Chat" }} />
+      <View className="flex-1 bg-white">
 
         <FlatList
           ref={flatListRef}

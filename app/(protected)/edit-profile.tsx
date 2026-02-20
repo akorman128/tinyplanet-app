@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
   Pressable,
   TouchableOpacity,
   Platform,
@@ -18,8 +17,8 @@ import {
   Input,
   Button,
   Body,
-  ScreenHeader,
   TabBar,
+  Text,
 } from "@/design-system";
 import { useProfileStore } from "@/stores/profileStore";
 import { useProfile } from "@/hooks/useProfile";
@@ -147,10 +146,8 @@ export default function EditProfileScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <View className="flex-1 bg-white pt-12">
-        {/* Header */}
-        <ScreenHeader title="Edit Profile" />
+      <Stack.Screen options={{ title: "Edit Profile" }} />
+      <View className="flex-1 bg-white">
 
         {/* Tabs */}
         <TabBar

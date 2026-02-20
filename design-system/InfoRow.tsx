@@ -1,5 +1,6 @@
 import React, { ReactNode } from "react";
-import { View, Text, ActivityIndicator } from "react-native";
+import { View, ActivityIndicator } from "react-native";
+import { Text } from "./Text";
 import { colors } from "./colors";
 
 export interface InfoRowProps {

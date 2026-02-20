@@ -1,5 +1,5 @@
 import React, { forwardRef, useState, useEffect, useCallback } from "react";
-import { View, Text, Alert, Pressable } from "react-native";
+import { View, Alert, Pressable } from "react-native";
 import BottomSheet, {
   BottomSheetView,
   BottomSheetFlatList,
@@ -17,6 +17,7 @@ import {
   EmptyState,
   ListChip,
   CommentInput,
+  Text,
 } from "@/design-system";
 import { useComments } from "@/hooks/useComments";
 import { useLikes } from "@/hooks/useLikes";

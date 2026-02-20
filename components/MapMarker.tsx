@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
-import { View, Text, Image, Pressable, StyleSheet } from "react-native";
+import { View, Image, Pressable, StyleSheet, Platform } from "react-native";
 import { MarkerView } from "@rnmapbox/maps";
-import { colors } from "@/design-system";
+import { colors, Text } from "@/design-system";
 import { getInitials } from "@/utils";
 
 interface MapMarkerProps {
@@ -79,5 +79,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "600",
     color: colors.hex.purple600,
+    fontFamily: Platform.OS === "ios" ? "HelveticaNeue" : undefined,
   },
 });
