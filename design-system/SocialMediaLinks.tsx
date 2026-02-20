@@ -93,12 +93,12 @@ export const SocialMediaLinks: React.FC<SocialMediaLinksProps> = ({
   };
 
   return (
-    <View className="flex-row items-center gap-4 py-2">
+    <View className="w-full flex-row items-center justify-around  bg-gray-100 rounded-lg p-4">
       {activePlatforms.map((platform, index) => {
         const Icon = Icons[platform.icon];
         return (
           <Pressable key={index} onPress={() => handlePress(platform)}>
-            <Icon size={24} color={colors.black} />
+            <Icon size={32} color={colors.black} />
           </Pressable>
         );
       })}

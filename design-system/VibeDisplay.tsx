@@ -22,13 +22,13 @@ export const VibeDisplay: React.FC<VibeDisplayProps> = ({
         Animated.parallel([
           Animated.timing(bounceAnim, {
             toValue: -6,
-            duration: 1200,
+            duration: 1800,
             easing: Easing.inOut(Easing.ease),
             useNativeDriver: true,
           }),
           Animated.timing(shadowAnim, {
             toValue: 0.6,
-            duration: 1200,
+            duration: 1800,
             easing: Easing.inOut(Easing.ease),
             useNativeDriver: true,
           }),
@@ -36,13 +36,13 @@ export const VibeDisplay: React.FC<VibeDisplayProps> = ({
         Animated.parallel([
           Animated.timing(bounceAnim, {
             toValue: 0,
-            duration: 1200,
+            duration: 1800,
             easing: Easing.inOut(Easing.ease),
             useNativeDriver: true,
           }),
           Animated.timing(shadowAnim, {
             toValue: 1,
-            duration: 1200,
+            duration: 1800,
             easing: Easing.inOut(Easing.ease),
             useNativeDriver: true,
           }),

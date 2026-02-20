@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { View, Pressable, ScrollView, Alert } from "react-native";
+import { View, Pressable, ScrollView } from "react-native";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 
 import {
@@ -13,7 +13,6 @@ import {
   Icons,
   colors,
   SocialMediaLinks,
-  InfoRow,
   Text,
 } from "@/design-system";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
@@ -26,6 +25,37 @@ import { Profile } from "@/types/profile";
 import { TravelPlan } from "@/types/travelPlan";
 import { VibeDisplay } from "@/design-system/VibeDisplay";
 import { FriendStatusSection } from "@/components/FriendStatusSection";
+
+function ProfileNavItem({
+  icon,
+  label,
+  onPress,
+  position,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onPress: () => void;
+  position: "first" | "middle" | "last";
+}) {
+  const rounded =
+    position === "first"
+      ? "rounded-t-lg"
+      : position === "last"
+        ? "rounded-b-lg"
+        : "";
+  return (
+    <Pressable
+      onPress={onPress}
+      className={`w-full px-4 py-3 bg-gray-100 flex-row items-center justify-between ${rounded}`}
+    >
+      <View className="flex-row items-center gap-3">
+        {icon}
+        <Text className="text-base font-semibold text-black">{label}</Text>
+      </View>
+      <Icons.chevronRight size={20} color={colors.black} />
+    </Pressable>
+  );
+}
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -48,18 +78,17 @@ export default function ProfileScreen() {
     []
   );
   const [totalVibeCount, setTotalVibeCount] = useState(0);
-  const [vibesLoading, setVibesLoading] = useState(false);
-  const [mutualCount, setMutualCount] = useState(0);
   const [activeTravelPlan, setActiveTravelPlan] = useState<TravelPlan | null>(
     null
   );
 
-  // Determine which profile to display (memoized)
-  const isViewingOwnProfile = useMemo(() => !userId, [userId]);
+  const isViewingOwnProfile = !userId;
   const displayProfile = useMemo(
     () => (isViewingOwnProfile ? profile : otherUserProfile),
     [isViewingOwnProfile, profile, otherUserProfile]
   );
+  const mutualCount =
+    (!isViewingOwnProfile && displayProfile?.mutual_friend_count) || 0;
 
   // Fetch other user's profile if userId is provided
   const fetchOtherUserProfile = useCallback(async () => {
@@ -82,84 +111,71 @@ export default function ProfileScreen() {
     fetchOtherUserProfile();
   }, [fetchOtherUserProfile]);
 
-  // Set mutual count from profile data
+  // Fetch secondary data in parallel when displayProfile is available
   useEffect(() => {
-    if (displayProfile && !isViewingOwnProfile) {
-      setMutualCount(displayProfile.mutual_friend_count ?? 0);
+    if (!displayProfile?.id) return;
+
+    const promises: Promise<void>[] = [];
+
+    if (vibeIsLoaded) {
+      promises.push(
+        (async () => {
+          try {
+            const result = await getTopVibes({
+              userId: displayProfile.id,
+              limit: 5,
+            });
+            setTopVibes(result.data);
+            setTotalVibeCount(result.totalCount);
+          } catch {
+            // Silently fail for vibes
+          }
+        })()
+      );
+    }
+
+    if (displayProfile.latitude != null && displayProfile.longitude != null) {
+      promises.push(
+        (async () => {
+          setGeocoding(true);
+          try {
+            const result = await reverseGeocode(
+              displayProfile.longitude!,
+              displayProfile.latitude!,
+              (freshData) => {
+                setHumanReadableLocation(freshData.formattedAddress);
+              }
+            );
+            setHumanReadableLocation(result.formattedAddress);
+          } catch {
+            setHumanReadableLocation(
+              `${displayProfile.latitude!.toFixed(4)}, ${displayProfile.longitude!.toFixed(4)}`
+            );
+          } finally {
+            setGeocoding(false);
+          }
+        })()
+      );
     } else {
-      setMutualCount(0);
+      setHumanReadableLocation(null);
     }
-  }, [displayProfile, isViewingOwnProfile]);
 
-  // Fetch vibes for the displayed profile
-  const fetchVibes = useCallback(async () => {
-    if (!displayProfile?.id || !vibeIsLoaded) return;
-
-    setVibesLoading(true);
-    try {
-      const result = await getTopVibes({
-        userId: displayProfile.id,
-        limit: 5,
-      });
-      setTopVibes(result.data);
-      setTotalVibeCount(result.totalCount);
-    } catch (err) {
-      // Silently fail for vibes
-    } finally {
-      setVibesLoading(false);
+    if (isViewingOwnProfile) {
+      promises.push(
+        (async () => {
+          try {
+            const { data } = await getActiveTravelPlan();
+            setActiveTravelPlan(data);
+          } catch (err) {
+            console.error("Error loading travel plan:", err);
+          }
+        })()
+      );
     }
+
+    Promise.allSettled(promises);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [displayProfile?.id, vibeIsLoaded]);
-
-  useEffect(() => {
-    fetchVibes();
-  }, [fetchVibes]);
-
-  // Reverse geocode location when it changes
-  const geocodeLocation = useCallback(async () => {
-    if (!displayProfile?.latitude || !displayProfile?.longitude) {
-      setHumanReadableLocation(null);
-      return;
-    }
-
-    setGeocoding(true);
-    try {
-      const result = await reverseGeocode(
-        displayProfile.longitude,
-        displayProfile.latitude,
-        (freshData) => {
-          setHumanReadableLocation(freshData.formattedAddress);
-        }
-      );
-      setHumanReadableLocation(result.formattedAddress);
-    } catch (error) {
-      setHumanReadableLocation(
-        `${displayProfile.latitude.toFixed(4)}, ${displayProfile.longitude.toFixed(4)}`
-      );
-    } finally {
-      setGeocoding(false);
-    }
-  }, [displayProfile?.latitude, displayProfile?.longitude]);
-
-  useEffect(() => {
-    geocodeLocation();
-  }, [geocodeLocation]);
-
-  // Fetch active travel plan for own profile
-  const loadActivePlan = useCallback(async () => {
-    if (!isViewingOwnProfile) return;
-
-    try {
-      const { data } = await getActiveTravelPlan();
-      setActiveTravelPlan(data);
-    } catch (err) {
-      console.error("Error loading travel plan:", err);
-    }
-  }, [isViewingOwnProfile, getActiveTravelPlan]);
-
-  useEffect(() => {
-    loadActivePlan();
-  }, [loadActivePlan]);
 
   const handleVibePress = () => {
     if (displayProfile?.id) {
@@ -223,7 +239,7 @@ export default function ProfileScreen() {
       <View className="flex-1 bg-white">
         <ScrollView
           className="flex-1"
-          contentContainerClassName="px-6 pt-4 pb-8 items-center"
+          contentContainerClassName="px-6 pt-2  items-center"
         >
           <View className="mb-4">
             <Avatar
@@ -253,7 +269,7 @@ export default function ProfileScreen() {
             beli={displayProfile.beli}
           />
 
-          <View className="flex-row items-center justify-center gap-2 mb-2">
+          <View className="flex-row items-center justify-center gap-2 mb-6">
             {!isViewingOwnProfile && userId && (
               <FriendStatusSection
                 userId={userId}
@@ -262,17 +278,14 @@ export default function ProfileScreen() {
             )}
 
             {!isViewingOwnProfile && mutualCount > 0 && (
-              <Pressable onPress={handleMutualsPress} className="mb-4">
+              <Pressable onPress={handleMutualsPress}>
                 <Badge variant="secondary" size="small">
                   {mutualCount === 1 ? "1 mutual" : `${mutualCount} mutuals`}
                 </Badge>
               </Pressable>
             )}
             {!isViewingOwnProfile && userId && (
-              <Pressable
-                onPress={() => router.push(`/chat/${userId}`)}
-                className="mb-4"
-              >
+              <Pressable onPress={() => router.push(`/chat/${userId}`)}>
                 <Badge variant="default" size="small">
                   Message
                 </Badge>
@@ -281,7 +294,7 @@ export default function ProfileScreen() {
           </View>
 
           {activeTravelPlan && (
-            <View className="w-full mb-4 px-4 py-3 bg-purple-50 rounded-lg flex-col  justify-between">
+            <View className="w-full mb-6 px-4 py-3 bg-purple-100 rounded-lg border border-purple-200 flex-col justify-between">
               <Text className="text-base font-semibold text-purple-900 mb-1">
                 🚀 {activeTravelPlan.destination_name}
               </Text>
@@ -292,66 +305,43 @@ export default function ProfileScreen() {
             </View>
           )}
 
-          {/* Posts Link */}
-          {displayProfile && (
-            <Pressable
+          <View className="w-full mb-6">
+            <ProfileNavItem
+              icon={<Icons.posts size={32} color={colors.black} />}
+              label="Posts"
               onPress={() =>
                 router.push({
                   pathname: "/user-posts",
                   params: { userId: displayProfile.id },
                 })
               }
-              className="w-full px-4 py-3 bg-purple-50 rounded-t-lg flex-row items-center justify-between"
-            >
-              <View className="flex-row items-center gap-3">
-                <Icons.posts size={32} color={colors.hex.purple900} />
-                <Text className="text-base font-semibold text-purple-900">
-                  Posts
-                </Text>
-              </View>
-              <Icons.chevronRight size={20} color={colors.hex.purple900} />
-            </Pressable>
-          )}
+              position="first"
+            />
+            <ProfileNavItem
+              icon={<Icons.list size={32} color={colors.black} />}
+              label="Lists"
+              onPress={() =>
+                router.push({
+                  pathname: "/user-lists",
+                  params: { userId: displayProfile.id },
+                })
+              }
+              position="middle"
+            />
+            <ProfileNavItem
+              icon={<Icons.userList size={32} color={colors.black} />}
+              label="Contacts"
+              onPress={() =>
+                router.push({
+                  pathname: "/user-contacts",
+                  params: { userId: displayProfile.id },
+                })
+              }
+              position="last"
+            />
+          </View>
 
-          {/* Lists Link */}
-          <Pressable
-            onPress={() =>
-              router.push({
-                pathname: "/user-lists",
-                params: { userId: displayProfile.id },
-              })
-            }
-            className="w-full px-4 py-3 bg-purple-50 flex-row items-center justify-between"
-          >
-            <View className="flex-row items-center gap-3">
-              <Icons.list size={32} color={colors.hex.purple900} />
-              <Text className="text-base font-semibold text-purple-900">
-                Lists
-              </Text>
-            </View>
-            <Icons.chevronRight size={20} color={colors.hex.purple900} />
-          </Pressable>
-
-          {/* Verified Contacts Link */}
-          <Pressable
-            onPress={() =>
-              router.push({
-                pathname: "/user-contacts",
-                params: { userId: displayProfile.id },
-              })
-            }
-            className="w-full mb-4 px-4 py-3 bg-purple-50 rounded-b-lg flex-row items-center justify-between"
-          >
-            <View className="flex-row items-center gap-3">
-              <Icons.userList size={32} color={colors.hex.purple900} />
-              <Text className="text-base font-semibold text-purple-900">
-                Contacts
-              </Text>
-            </View>
-            <Icons.chevronRight size={20} color={colors.hex.purple900} />
-          </Pressable>
-
-          <GlassInfoCard className="w-full mb-4">
+          <GlassInfoCard className="w-full">
             {displayProfile.birthday && (
               <GlassInfoItem
                 label="Birthday"

@@ -39,7 +39,7 @@ export const colors = {
     purple200: "#c7d2fe",
     purple400: "#6057db",
     purple500: "#564ec2",
-    purple600: "#6b61f3", // Main brand color
+    purple600: "#5863F8", // Main brand color
     purple700: "#5a52d5",
     purple800: "#4a44b8",
     purple900: "#3a369a",

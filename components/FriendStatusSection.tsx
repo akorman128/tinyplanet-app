@@ -225,7 +225,7 @@ export function FriendStatusSection({
   const buttonConfig = getButtonConfig();
 
   return (
-    <Pressable onPress={buttonConfig.onPress} className="mb-4">
+    <Pressable onPress={buttonConfig.onPress}>
       <Badge variant="default" size="small">
         {buttonConfig.text}
       </Badge>
