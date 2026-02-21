@@ -13,6 +13,14 @@ export default function ProtectedLayout() {
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="create-post"
+        options={{ presentation: "modal", title: "New Post" }}
+      />
+      <Stack.Screen
+        name="create-travel-plan"
+        options={{ presentation: "modal", title: "New Travel Plan" }}
+      />
     </Stack>
   );
 }

@@ -1,0 +1,92 @@
+import React, { useState, useEffect } from "react";
+import { View, ScrollView, Alert } from "react-native";
+import { Stack, useRouter } from "expo-router";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button, OptionSelector, Icons } from "@/design-system";
+import { PostForm, postSchema, PostFormData } from "@/components/PostForm";
+import { usePosts } from "@/hooks/usePosts";
+import { PostVisibility } from "@/types/post";
+import { useListSelectionStore } from "@/stores/listSelectionStore";
+
+export default function CreatePostScreen() {
+  const router = useRouter();
+  const { createPost } = usePosts();
+  const { selectedList, clear: clearListSelection } = useListSelectionStore();
+
+  const [visibility, setVisibility] = useState<PostVisibility>("public");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const form = useForm<PostFormData>({
+    resolver: zodResolver(postSchema),
+    defaultValues: { text: "" },
+    mode: "onChange",
+  });
+
+  // Clear list selection on unmount
+  useEffect(() => {
+    return () => clearListSelection();
+  }, [clearListSelection]);
+
+  const onSubmit = async (data: PostFormData) => {
+    setIsSubmitting(true);
+    try {
+      await createPost({
+        text: data.text,
+        visibility,
+        list_id: selectedList?.id || null,
+      });
+      router.back();
+    } catch (err) {
+      console.error("Error creating post:", err);
+      Alert.alert("Error", "Failed to create post. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const visibilityOptions: {
+    value: PostVisibility;
+    label: string;
+    icon?: any;
+  }[] = [
+    { value: "public", label: "Public", icon: Icons.globe },
+    { value: "friends", label: "Friends", icon: Icons.unlocked },
+  ];
+
+  return (
+    <>
+      <Stack.Screen options={{ title: "New Post" }} />
+      <View className="flex-1 bg-white">
+        <ScrollView
+          className="flex-1"
+          contentContainerClassName="px-6 pt-6 pb-8"
+        >
+          <PostForm
+            control={form.control}
+            errors={form.formState.errors}
+            selectedList={selectedList}
+            onAttachList={() => router.push("/select-list")}
+            onRemoveList={clearListSelection}
+          />
+
+          <OptionSelector
+            label="Who can see this?"
+            options={visibilityOptions}
+            value={visibility}
+            onChange={setVisibility}
+            className="mt-6 mb-6"
+          />
+
+          <Button
+            variant="primary"
+            onPress={form.handleSubmit(onSubmit)}
+            disabled={isSubmitting || !!form.formState.errors.text}
+          >
+            {isSubmitting ? "Posting..." : "Post"}
+          </Button>
+        </ScrollView>
+      </View>
+    </>
+  );
+}
