@@ -23,9 +23,7 @@ export const MapView: React.FC = React.memo(() => {
   const { friendLocations, travelPlanLocations, userLocation, loading, error } =
     useMapData();
   const router = useRouter();
-  const showConnectionLines = useMapStore(
-    (state) => state.showConnectionLines
-  );
+  const showConnectionLines = useMapStore((state) => state.showConnectionLines);
   const [mapDimensions, setMapDimensions] = useState({ width: 0, height: 0 });
 
   // GeoJSON transforms
@@ -62,12 +60,9 @@ export const MapView: React.FC = React.memo(() => {
     setMapDimensions({ width, height });
   }, []);
 
-  const handleFriendMarkerPress = useCallback(
-    (userId: string) => {
-      router.push({ pathname: "/profile", params: { userId } });
-    },
-    [router]
-  );
+  const handleFriendMarkerPress = (userId: string) => {
+    router.push({ pathname: "/profile", params: { userId } });
+  };
 
   const handleMarkerPress = useCallback(
     (event: any) => {
