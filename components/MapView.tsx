@@ -18,13 +18,15 @@ import {
   buildConnectionLines,
   connectionLinesToGeoJSON,
   travelPlansToGeoJSON,
+  listsToGeoJSON,
 } from "@/utils/mapUtils";
 
 export const MapView: React.FC = React.memo(() => {
-  const { friendLocations, hometownLocations, travelPlanLocations, userLocation, loading, error } =
+  const { friendLocations, hometownLocations, travelPlanLocations, listLocations, userLocation, loading, error } =
     useMapData();
   const router = useRouter();
   const showConnectionLines = useMapStore((state) => state.showConnectionLines);
+  const mapFilter = useMapStore((state) => state.mapFilter);
   const [mapDimensions, setMapDimensions] = useState({ width: 0, height: 0 });
 
   // GeoJSON transforms
@@ -55,6 +57,11 @@ export const MapView: React.FC = React.memo(() => {
     return travelPlansToGeoJSON(travelPlanLocations);
   }, [travelPlanLocations]);
 
+  const listLocationsGeoJSON = useMemo(() => {
+    if (!listLocations || listLocations.length === 0) return null;
+    return listsToGeoJSON(listLocations);
+  }, [listLocations]);
+
   // Event handlers
   const handleLayout = useCallback((event: LayoutChangeEvent) => {
     const { width, height } = event.nativeEvent.layout;
@@ -72,6 +79,17 @@ export const MapView: React.FC = React.memo(() => {
         const feature = features[0];
         const userId = feature.properties.user_id || feature.properties.id;
         router.push({ pathname: "/profile", params: { userId } });
+      }
+    },
+    [router]
+  );
+
+  const handleListMarkerPress = useCallback(
+    (event: any) => {
+      const { features } = event;
+      if (features && features.length > 0) {
+        const listId = features[0].properties.id;
+        router.push({ pathname: "/list/[listId]", params: { listId } });
       }
     },
     [router]
@@ -169,57 +187,112 @@ export const MapView: React.FC = React.memo(() => {
             </ShapeSource>
           )}
 
-          {/* Connection lines: User → Friends */}
-          {userToFriendLinesGeoJSON && (
-            <ShapeSource
-              id="user-to-friend-lines"
-              shape={userToFriendLinesGeoJSON}
-            >
-              <LineLayer
-                id="user-to-friend-line-layer"
-                style={{
-                  lineColor: colors.hex.purple600,
-                  lineWidth: 2,
-                  lineOpacity: 0.6,
-                }}
-              />
-            </ShapeSource>
+          {/* === Friends filter === */}
+          {mapFilter === "friends" && (
+            <>
+              {/* Connection lines: User → Friends */}
+              {userToFriendLinesGeoJSON && (
+                <ShapeSource
+                  id="user-to-friend-lines"
+                  shape={userToFriendLinesGeoJSON}
+                >
+                  <LineLayer
+                    id="user-to-friend-line-layer"
+                    style={{
+                      lineColor: colors.hex.purple600,
+                      lineWidth: 2,
+                      lineOpacity: 0.6,
+                    }}
+                  />
+                </ShapeSource>
+              )}
+
+              {/* Connection lines: Friends → Mutuals */}
+              {friendToMutualLinesGeoJSON && (
+                <ShapeSource
+                  id="friend-to-mutual-lines"
+                  shape={friendToMutualLinesGeoJSON}
+                >
+                  <LineLayer
+                    id="friend-to-mutual-line-layer"
+                    style={{
+                      lineColor: colors.hex.purple200,
+                      lineWidth: 2,
+                      lineOpacity: 0.6,
+                      lineDasharray: [2, 2],
+                    }}
+                  />
+                </ShapeSource>
+              )}
+
+              {/* Friend and mutual avatar markers */}
+              {friendLocations &&
+                friendLocations.features.map((feature) => (
+                  <MapMarker
+                    key={feature.properties.id}
+                    id={feature.properties.id}
+                    coordinate={feature.geometry.coordinates}
+                    name={feature.properties.name}
+                    avatarUrl={feature.properties.avatar_url}
+                    type={feature.properties.type as "friend" | "mutual"}
+                    onPress={handleFriendMarkerPress}
+                  />
+                ))}
+
+              {/* Travel plan destination markers with rocket icon */}
+              {travelPlanGeoJSON && (
+                <ShapeSource
+                  id="travel-plan-destinations"
+                  shape={travelPlanGeoJSON}
+                  onPress={handleMarkerPress}
+                >
+                  <CircleLayer
+                    id="travel-plan-marker-circles"
+                    style={{
+                      circleRadius: 16,
+                      circleColor: colors.hex.white,
+                      circleOpacity: 0.9,
+                      circleStrokeWidth: 3,
+                      circleStrokeColor: colors.hex.white,
+                    }}
+                  />
+                  <SymbolLayer
+                    id="travel-plan-markers"
+                    style={{
+                      iconImage: "rocketIcon",
+                      iconSize: 0.15,
+                      iconAllowOverlap: true,
+                      iconIgnorePlacement: true,
+                      iconOpacity: 1,
+                    }}
+                  />
+                  <SymbolLayer
+                    id="travel-plan-labels"
+                    style={{
+                      textField: ["get", "title"],
+                      textSize: 12,
+                      textColor: colors.hex.white,
+                      textHaloColor: colors.hex.purple900,
+                      textHaloWidth: 8,
+                      textHaloBlur: 0,
+                      textOffset: [0, 2],
+                      textAnchor: "top",
+                      textFont: [
+                        "Roboto Medium",
+                        "Noto Sans Regular",
+                        "Arial Unicode MS Regular",
+                      ],
+                      textAllowOverlap: true,
+                    }}
+                  />
+                </ShapeSource>
+              )}
+            </>
           )}
 
-          {/* Connection lines: Friends → Mutuals */}
-          {friendToMutualLinesGeoJSON && (
-            <ShapeSource
-              id="friend-to-mutual-lines"
-              shape={friendToMutualLinesGeoJSON}
-            >
-              <LineLayer
-                id="friend-to-mutual-line-layer"
-                style={{
-                  lineColor: colors.hex.purple200,
-                  lineWidth: 2,
-                  lineOpacity: 0.6,
-                  lineDasharray: [2, 2],
-                }}
-              />
-            </ShapeSource>
-          )}
-
-          {/* Friend and mutual avatar markers */}
-          {friendLocations &&
-            friendLocations.features.map((feature) => (
-              <MapMarker
-                key={feature.properties.id}
-                id={feature.properties.id}
-                coordinate={feature.geometry.coordinates}
-                name={feature.properties.name}
-                avatarUrl={feature.properties.avatar_url}
-                type={feature.properties.type as "friend" | "mutual"}
-                onPress={handleFriendMarkerPress}
-              />
-            ))}
-
-          {/* Hometown markers */}
-          {hometownLocations &&
+          {/* === Hometown filter === */}
+          {mapFilter === "hometown" &&
+            hometownLocations &&
             hometownLocations.features.map((feature) => (
               <HometownMarker
                 key={`hometown-${feature.properties.id}`}
@@ -231,43 +304,33 @@ export const MapView: React.FC = React.memo(() => {
               />
             ))}
 
-          {/* Travel plan destination markers with rocket icon */}
-          {travelPlanGeoJSON && (
+          {/* === Lists filter === */}
+          {mapFilter === "lists" && listLocationsGeoJSON && (
             <ShapeSource
-              id="travel-plan-destinations"
-              shape={travelPlanGeoJSON}
-              onPress={handleMarkerPress}
+              id="list-locations"
+              shape={listLocationsGeoJSON}
+              onPress={handleListMarkerPress}
             >
               <CircleLayer
-                id="travel-plan-marker-circles"
+                id="list-marker-circles"
                 style={{
-                  circleRadius: 16,
-                  circleColor: colors.hex.white,
-                  circleOpacity: 0.9,
-                  circleStrokeWidth: 3,
+                  circleRadius: 10,
+                  circleColor: colors.hex.purple600,
+                  circleOpacity: 0.85,
+                  circleStrokeWidth: 2,
                   circleStrokeColor: colors.hex.white,
                 }}
               />
               <SymbolLayer
-                id="travel-plan-markers"
+                id="list-marker-labels"
                 style={{
-                  iconImage: "rocketIcon",
-                  iconSize: 0.15,
-                  iconAllowOverlap: true,
-                  iconIgnorePlacement: true,
-                  iconOpacity: 1,
-                }}
-              />
-              <SymbolLayer
-                id="travel-plan-labels"
-                style={{
-                  textField: ["get", "title"],
+                  textField: ["get", "label"],
                   textSize: 12,
                   textColor: colors.hex.white,
                   textHaloColor: colors.hex.purple900,
                   textHaloWidth: 8,
                   textHaloBlur: 0,
-                  textOffset: [0, 2],
+                  textOffset: [0, 1.5],
                   textAnchor: "top",
                   textFont: [
                     "Roboto Medium",

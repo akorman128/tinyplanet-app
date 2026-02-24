@@ -1,13 +1,16 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useFriends } from "./useFriends";
 import { useTravelPlan } from "./useTravelPlan";
+import { useLists } from "./useLists";
 import { useLocation } from "./useLocation";
 import { GeoJSONFeatureCollection } from "@/types/friendship";
 import { TravelPlanMapLocation } from "@/types/travelPlan";
+import { ViewableList } from "@/types/list";
 
 export const useMapData = () => {
   const { getFriendLocations, getFriendHometownLocations } = useFriends();
   const { getTravelPlanLocations } = useTravelPlan();
+  const { getViewableLists } = useLists();
   const {
     location: userLocationObj,
     getCurrentLocation,
@@ -21,6 +24,7 @@ export const useMapData = () => {
   const [travelPlanLocations, setTravelPlanLocations] = useState<
     TravelPlanMapLocation[]
   >([]);
+  const [listLocations, setListLocations] = useState<ViewableList[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,15 +41,18 @@ export const useMapData = () => {
         await getCurrentLocation(forceRefresh);
         await updateLocationInDatabase(forceRefresh);
 
-        const [locations, hometowns, travelPlans] = await Promise.all([
-          getFriendLocations(),
-          getFriendHometownLocations(),
-          getTravelPlanLocations(),
-        ]);
+        const [locations, hometowns, travelPlans, viewableLists] =
+          await Promise.all([
+            getFriendLocations(),
+            getFriendHometownLocations(),
+            getTravelPlanLocations(),
+            getViewableLists(),
+          ]);
 
         setFriendLocations(locations);
         setHometownLocations(hometowns);
         setTravelPlanLocations(travelPlans.data);
+        setListLocations(viewableLists.data);
       } catch (err) {
         console.error("Error loading friend locations:", err);
         const errorMessage =
@@ -57,6 +64,7 @@ export const useMapData = () => {
       getFriendLocations,
       getFriendHometownLocations,
       getTravelPlanLocations,
+      getViewableLists,
       updateLocationInDatabase,
       getCurrentLocation,
     ]
@@ -80,6 +88,7 @@ export const useMapData = () => {
     friendLocations,
     hometownLocations,
     travelPlanLocations,
+    listLocations,
     userLocation,
     loading,
     error,

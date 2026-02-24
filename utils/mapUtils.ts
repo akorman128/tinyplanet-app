@@ -1,4 +1,4 @@
-import { ListPlace } from "@/types/list";
+import { ListPlace, ViewableList } from "@/types/list";
 import {
   GeoJSONFeatureCollection,
   ConnectionLine,
@@ -175,5 +175,34 @@ export function travelPlansToGeoJSON(travelPlans: TravelPlanMapLocation[]) {
         title: `${tp.full_name} - ${getDurationInDays(tp.start_date, tp.end_date)} days`,
       },
     })),
+  };
+}
+
+/**
+ * Converts viewable lists to a GeoJSON FeatureCollection for map display
+ */
+export function listsToGeoJSON(lists: ViewableList[]) {
+  return {
+    type: "FeatureCollection" as const,
+    features: lists
+      .filter((list) => list.location !== null)
+      .map((list) => ({
+        type: "Feature" as const,
+        geometry: {
+          type: "Point" as const,
+          coordinates: [
+            list.location!.longitude,
+            list.location!.latitude,
+          ] as [number, number],
+        },
+        properties: {
+          id: list.id,
+          title: list.title,
+          category: list.category,
+          location_name: list.location_name,
+          owner_name: list.owner_name,
+          label: `${list.title} · ${list.location_name}`,
+        },
+      })),
   };
 }

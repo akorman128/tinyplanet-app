@@ -14,7 +14,7 @@ export default function MapTab() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { profileState } = useProfileStore();
-  const { showConnectionLines, setShowConnectionLines } = useMapStore();
+  const { showConnectionLines, setShowConnectionLines, mapFilter, setMapFilter } = useMapStore();
   const { getPlatformStatistics } = useFriends();
   const [statistics, setStatistics] = useState<PlatformStatistics | null>(null);
   const [showStats, setShowStats] = useState(false);
@@ -71,6 +71,33 @@ export default function MapTab() {
                 }}
               />
             </TouchableOpacity>
+          </View>
+
+          {/* Filter Badges */}
+          <View className="flex-row gap-2 mt-2">
+            {(["friends", "hometown", "lists"] as const).map((filter) => (
+              <TouchableOpacity
+                key={filter}
+                className={`px-4 py-1.5 rounded-full shadow-md ${
+                  mapFilter === filter ? "bg-white/80" : "bg-white/40"
+                }`}
+                onPress={() => setMapFilter(filter)}
+              >
+                <Caption
+                  className={
+                    mapFilter === filter
+                      ? "font-semibold text-gray-900"
+                      : "text-gray-600"
+                  }
+                >
+                  {filter === "friends"
+                    ? "Friends"
+                    : filter === "hometown"
+                      ? "Hometown"
+                      : "Lists"}
+                </Caption>
+              </TouchableOpacity>
+            ))}
           </View>
 
           {showStats && statistics && (
