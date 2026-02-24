@@ -154,7 +154,7 @@ export const MapView: React.FC = React.memo(() => {
                   textSize: 12,
                   textColor: colors.hex.white,
                   textHaloColor: colors.hex.purple800,
-                  textHaloWidth: 8,
+                  textHaloWidth: 12,
                   textHaloBlur: 0,
                   textOffset: [0, 1.5],
                   textAnchor: "top",

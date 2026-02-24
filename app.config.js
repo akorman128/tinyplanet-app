@@ -30,7 +30,7 @@ export default {
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
-        backgroundColor: "#e8e8e8",
+        backgroundColor: "#ffffff",
       },
       edgeToEdgeEnabled: true,
       package: "com.alexkorman.tinyplanet",
@@ -59,7 +59,7 @@ export default {
           image: "./assets/splash-icon.png",
           imageWidth: 250,
           resizeMode: "contain",
-          backgroundColor: "#e8e8e8",
+          backgroundColor: "#ffffff",
         },
       ],
     ],

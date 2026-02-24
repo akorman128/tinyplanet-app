@@ -8,6 +8,10 @@ import { z } from "zod";
 import { Input, Button, Icons, colors } from "@/design-system";
 import { useContactPicker } from "@/hooks/useContactPicker";
 import { useContacts } from "@/hooks/useContacts";
+import {
+  LocationSearchInput,
+  LocationSearchValue,
+} from "@/components/LocationSearchInput";
 
 const addContactSchema = z.object({
   name: z.string().min(1, "Name is required").trim(),
@@ -31,6 +35,8 @@ export default function AddContactScreen() {
   const { pickFullContact } = useContactPicker();
   const { createContact } = useContacts();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [contactLocation, setContactLocation] =
+    useState<LocationSearchValue | null>(null);
 
   const {
     control,
@@ -69,6 +75,13 @@ export default function AddContactScreen() {
         email: data.email || undefined,
         company: data.company || undefined,
         note: data.note || undefined,
+        location: contactLocation
+          ? {
+              latitude: contactLocation.latitude,
+              longitude: contactLocation.longitude,
+              name: contactLocation.name,
+            }
+          : undefined,
       });
 
       Alert.alert("Success", "Contact added successfully", [
@@ -91,13 +104,12 @@ export default function AddContactScreen() {
           title: "Add Contact",
           headerRight: () => (
             <Pressable onPress={handleImportFromPhone}>
-              <Icons.userList size={24} color={colors.hex.purple600} />
+              <Icons.download4 size={24} color={colors.black} />
             </Pressable>
           ),
         }}
       />
       <View className="flex-1 bg-white">
-
         <KeyboardAwareScrollView
           className="flex-1"
           contentContainerClassName="px-6 pt-6 pb-12"
@@ -105,11 +117,6 @@ export default function AddContactScreen() {
           extraScrollHeight={20}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Import Button
-          <Button size="sm" onPress={handleImportFromPhone} className="mb-6">
-            Add Contact
-          </Button> */}
-
           <View className="gap-5">
             {/* Name */}
             <Controller
@@ -196,6 +203,14 @@ export default function AddContactScreen() {
                   error={errors.note?.message}
                 />
               )}
+            />
+
+            {/* Location */}
+            <LocationSearchInput
+              label="Location"
+              value={contactLocation}
+              onChange={setContactLocation}
+              placeholder="Search for a place..."
             />
 
             {/* Save Button */}

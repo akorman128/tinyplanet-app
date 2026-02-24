@@ -15,22 +15,19 @@ interface ReverseGeocodeResult {
 }
 
 /**
- * Converts a PostGIS POINT string to coordinates
- * @param pointString - PostGIS POINT format: "POINT(longitude latitude)"
+ * Converts a PostGIS POINT WKT string to coordinates.
  * @returns Tuple of [longitude, latitude] or null
  */
 export const parsePostGISPoint = (
   pointString: string
 ): [number, number] | null => {
   const match = pointString.match(/POINT\(([^ ]+) ([^ ]+)\)/);
-  if (!match) return null;
-
-  const longitude = parseFloat(match[1]);
-  const latitude = parseFloat(match[2]);
-
-  if (isNaN(longitude) || isNaN(latitude)) return null;
-
-  return [longitude, latitude];
+  if (match) {
+    const longitude = parseFloat(match[1]);
+    const latitude = parseFloat(match[2]);
+    if (!isNaN(longitude) && !isNaN(latitude)) return [longitude, latitude];
+  }
+  return null;
 };
 
 /**

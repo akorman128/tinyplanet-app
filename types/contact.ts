@@ -7,6 +7,10 @@ export interface Contact {
   email: string | null;
   company: string | null;
   note: string | null;
+  location: string | null;
+  location_name: string | null;
+  latitude?: number;
+  longitude?: number;
   created_at: string;
   updated_at: string;
 }
@@ -27,6 +31,7 @@ export interface CreateContactInput {
   email?: string;
   company?: string;
   note?: string;
+  location?: { latitude: number; longitude: number; name: string };
 }
 
 export interface UpdateContactInput {
@@ -36,6 +41,7 @@ export interface UpdateContactInput {
   email?: string;
   company?: string;
   note?: string;
+  location?: { latitude: number; longitude: number; name: string };
 }
 
 // Output DTOs

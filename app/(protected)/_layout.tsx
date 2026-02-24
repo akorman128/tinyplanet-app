@@ -21,6 +21,10 @@ export default function ProtectedLayout() {
         name="create-travel-plan"
         options={{ presentation: "modal", title: "New Travel Plan" }}
       />
+      <Stack.Screen
+        name="search"
+        options={{ presentation: "fullScreenModal", headerShown: false }}
+      />
     </Stack>
   );
 }

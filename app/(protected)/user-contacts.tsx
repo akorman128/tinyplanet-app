@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Pressable } from "react-native";
+import { Pressable } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Icons, colors } from "@/design-system";
 import { ContactsSection } from "@/components/ContactsSection";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
@@ -21,15 +22,15 @@ export default function UserContactsScreen() {
           headerRight: isOwnProfile
             ? () => (
                 <Pressable onPress={() => router.push("/add-contact")}>
-                  <Icons.plus size={24} color={colors.hex.purple600} />
+                  <Icons.plus size={24} color={colors.black} />
                 </Pressable>
               )
             : undefined,
         }}
       />
-      <View className="flex-1 bg-white">
+      <GestureHandlerRootView className="flex-1 bg-white">
         <ContactsSection userId={displayUserId} />
-      </View>
+      </GestureHandlerRootView>
     </>
   );
 }

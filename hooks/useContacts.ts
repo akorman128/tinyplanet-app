@@ -21,18 +21,16 @@ export const useContacts = () => {
   ): Promise<GetContactsOutput> => {
     const targetUserId = userId ?? profile.id;
 
-    const { data, error } = await supabase
-      .from("contacts")
-      .select("*")
-      .eq("user_id", targetUserId)
-      .order("name", { ascending: true });
+    const { data, error } = await supabase.rpc("get_contacts_ordered", {
+      p_user_id: targetUserId,
+    });
 
     if (error) {
       throw new Error(`Failed to fetch contacts: ${error.message}`);
     }
 
     return {
-      data: data || [],
+      data: (data as Contact[]) || [],
       total: data?.length || 0,
     };
   };
@@ -73,6 +71,10 @@ export const useContacts = () => {
         email: input.email || null,
         company: input.company || null,
         note: input.note || null,
+        location: input.location
+          ? `POINT(${input.location.longitude} ${input.location.latitude})`
+          : null,
+        location_name: input.location?.name || null,
       })
       .select()
       .single();
@@ -99,6 +101,10 @@ export const useContacts = () => {
     if (updates.company !== undefined)
       updateData.company = updates.company || null;
     if (updates.note !== undefined) updateData.note = updates.note || null;
+    if (updates.location !== undefined) {
+      updateData.location = `POINT(${updates.location.longitude} ${updates.location.latitude})`;
+      updateData.location_name = updates.location.name;
+    }
 
     const { data, error } = await supabase
       .from("contacts")

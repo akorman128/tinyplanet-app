@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Pressable, ScrollView } from "react-native";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
-
+import { Body } from "@/design-system/Typography";
 import {
   LoadingState,
   ErrorState,
@@ -110,7 +110,13 @@ export default function ProfileScreen() {
 
           <View className="w-full mb-6">
             <MenuRow
-              icon={<Icons.posts size={32} color={colors.black} />}
+              icon={<Body>✨</Body>}
+              label="Friends"
+              onPress={() => router.push("/friends")}
+              position="standalone"
+            />
+            <MenuRow
+              icon={<Body>💌</Body>}
               label="Posts"
               onPress={() =>
                 router.push({
@@ -121,7 +127,7 @@ export default function ProfileScreen() {
               position="first"
             />
             <MenuRow
-              icon={<Icons.list size={32} color={colors.black} />}
+              icon={<Body>📋</Body>}
               label="Lists"
               onPress={() =>
                 router.push({
@@ -132,7 +138,7 @@ export default function ProfileScreen() {
               position="middle"
             />
             <MenuRow
-              icon={<Icons.userList size={32} color={colors.black} />}
+              icon={<Body>☎️</Body>}
               label="Contacts"
               onPress={() =>
                 router.push({

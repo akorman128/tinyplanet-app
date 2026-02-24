@@ -34,6 +34,7 @@ const FAB_SHADOW: ViewStyle = {
 
 const MENU_ITEMS = [
   { label: "Travel Plan", emoji: "✈", route: "/create-travel-plan" as const },
+  { label: "List", emoji: "📋", route: "/create-list" as const },
   { label: "Post", emoji: "💌", route: "/create-post" as const },
 ];
 

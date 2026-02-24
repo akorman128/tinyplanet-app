@@ -164,6 +164,12 @@ export default function ContactDetailScreen() {
             {contact.company && (
               <GlassInfoItem label="Company" value={contact.company} />
             )}
+            {contact.location_name && (
+              <GlassInfoItem
+                label="Location"
+                value={contact.location_name}
+              />
+            )}
           </GlassInfoCard>
 
           {/* Note */}

@@ -133,7 +133,7 @@ export function Navigation({
 
       {/* Search Button (Top Right) */}
       <TouchableOpacity
-        className="absolute right-5 w-12 h-12 rounded-full bg-white opacity-70 justify-center items-center z-10 shadow-md"
+        className="absolute right-5 w-12 h-12 rounded-full bg-white/50 blur-2xl justify-center items-center z-10 shadow-lg"
         style={{ top: insets.top + 20 }}
         onPress={onSearchPress}
       >
