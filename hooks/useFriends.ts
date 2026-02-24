@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useRequireProfile } from "./useRequireProfile";
 import { useSupabase } from "./useSupabase";
 import {
@@ -86,7 +87,7 @@ export const useFriends = () => {
     return { data: (data as Friend[]) ?? [] };
   };
 
-  const getFriendLocations = async (): Promise<GeoJSONFeatureCollection> => {
+  const getFriendLocations = useCallback(async (): Promise<GeoJSONFeatureCollection> => {
     const userId = profile.id;
 
     // Call RPC functions to get friend and mutual locations with coordinates
@@ -124,9 +125,9 @@ export const useFriends = () => {
       type: "FeatureCollection",
       features,
     };
-  };
+  }, [supabase, profile.id]);
 
-  const getFriendHometownLocations = async (): Promise<GeoJSONFeatureCollection> => {
+  const getFriendHometownLocations = useCallback(async (): Promise<GeoJSONFeatureCollection> => {
     const userId = profile.id;
 
     const { data, error } = await supabase.rpc("get_friend_hometown_locations", {
@@ -154,7 +155,7 @@ export const useFriends = () => {
       type: "FeatureCollection",
       features,
     };
-  };
+  }, [supabase, profile.id]);
 
   const searchFriends = async (
     input: SearchFriendsInput

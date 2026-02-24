@@ -1,5 +1,7 @@
+import { useCallback } from "react";
 import { useSupabase } from "./useSupabase";
 import { useRequireProfile } from "./useRequireProfile";
+import { parsePostGISPoint } from "@/utils/postgis";
 import {
   List,
   ListPlace,
@@ -19,35 +21,6 @@ import {
   PlaceAlternative,
   PaginationOptions,
 } from "@/types/list";
-
-function parseGeographyPoint(
-  location: any
-): { longitude: number; latitude: number } | null {
-  if (!location) return null;
-  // If it's already a parsed object with coordinates
-  if (
-    typeof location === "object" &&
-    typeof location.longitude === "number" &&
-    typeof location.latitude === "number"
-  ) {
-    return { longitude: location.longitude, latitude: location.latitude };
-  }
-  // If it's a GeoJSON string
-  if (typeof location === "string") {
-    try {
-      const parsed = JSON.parse(location);
-      if (parsed.type === "Point" && Array.isArray(parsed.coordinates)) {
-        return {
-          longitude: parsed.coordinates[0],
-          latitude: parsed.coordinates[1],
-        };
-      }
-    } catch {
-      // Not JSON — likely hex EWKB, can't parse client-side
-    }
-  }
-  return null;
-}
 
 export const useLists = () => {
   const { isLoaded, supabase } = useSupabase();
@@ -165,27 +138,11 @@ export const useLists = () => {
       throw new Error(`Failed to fetch friends' lists: ${friendError.message}`);
     }
 
-    // Fetch places for all lists
-    const allListIds = [
-      ...(ownLists || []).map((l) => l.id),
-      ...(friendLists || []).map((l) => l.id),
-    ];
-
-    // Get place counts for all lists
-    const placeCounts = new Map<string, number>();
-    for (const listId of allListIds) {
-      const { count } = await supabase
-        .from("list_places")
-        .select("*", { count: "exact", head: true })
-        .eq("list_id", listId);
-      placeCounts.set(listId, count || 0);
-    }
-
     // Transform own lists
     const transformedOwnLists: ViewableList[] = (ownLists || []).map(
       (list: any) => ({
         ...list,
-        location: parseGeographyPoint(list.location),
+        location: typeof list.location === "string" ? parsePostGISPoint(list.location) : null,
         places: [], // Empty for picker (we don't need full places)
         owner_name: "You",
       })
@@ -195,7 +152,7 @@ export const useLists = () => {
     const transformedFriendLists: ViewableList[] = (friendLists || []).map(
       (list: any) => ({
         ...list,
-        location: parseGeographyPoint(list.location),
+        location: typeof list.location === "string" ? parsePostGISPoint(list.location) : null,
         places: [],
         owner_name: list.owner?.full_name || "Unknown",
       })
@@ -214,7 +171,7 @@ export const useLists = () => {
    * Get list locations for the map via server-side coordinate extraction.
    * Returns own lists + friends' lists with proper longitude/latitude.
    */
-  const getListLocations = async (): Promise<ListLocation[]> => {
+  const getListLocations = useCallback(async (): Promise<ListLocation[]> => {
     const { data, error } = await supabase.rpc(
       "get_viewable_list_locations",
       { p_user_id: profile.id }
@@ -232,7 +189,7 @@ export const useLists = () => {
       location: { longitude: row.longitude, latitude: row.latitude },
       owner_name: row.owner_name,
     }));
-  };
+  }, [supabase, profile.id]);
 
   // ––– MUTATIONS –––
 

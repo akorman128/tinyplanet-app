@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useFriends } from "./useFriends";
 import { useTravelPlan } from "./useTravelPlan";
 import { useLists } from "./useLists";
@@ -70,18 +70,14 @@ export const useMapData = () => {
     ]
   );
 
-  // Initial load - only run once on mount
-  const hasInitiallyLoaded = useRef(false);
+  // Initial load
   useEffect(() => {
-    if (!hasInitiallyLoaded.current) {
-      hasInitiallyLoaded.current = true;
-      const initialLoad = async () => {
-        setLoading(true);
-        await loadFriendLocations();
-        setLoading(false);
-      };
-      initialLoad();
-    }
+    const initialLoad = async () => {
+      setLoading(true);
+      await loadFriendLocations();
+      setLoading(false);
+    };
+    initialLoad();
   }, [loadFriendLocations]);
 
   return {

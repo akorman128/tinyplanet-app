@@ -86,7 +86,7 @@ export default function SearchScreen() {
     <View className="flex-1 bg-white">
       <View className="px-6 pt-3 pb-3 gap-3">
         <Input
-          placeholder="Search by name..."
+          placeholder="Search friends..."
           value={searchQuery}
           onChangeText={setSearchQuery}
           returnKeyType="search"
