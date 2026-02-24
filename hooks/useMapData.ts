@@ -6,7 +6,7 @@ import { GeoJSONFeatureCollection } from "@/types/friendship";
 import { TravelPlanMapLocation } from "@/types/travelPlan";
 
 export const useMapData = () => {
-  const { getFriendLocations } = useFriends();
+  const { getFriendLocations, getFriendHometownLocations } = useFriends();
   const { getTravelPlanLocations } = useTravelPlan();
   const {
     location: userLocationObj,
@@ -15,6 +15,8 @@ export const useMapData = () => {
   } = useLocation();
 
   const [friendLocations, setFriendLocations] =
+    useState<GeoJSONFeatureCollection | null>(null);
+  const [hometownLocations, setHometownLocations] =
     useState<GeoJSONFeatureCollection | null>(null);
   const [travelPlanLocations, setTravelPlanLocations] = useState<
     TravelPlanMapLocation[]
@@ -35,12 +37,14 @@ export const useMapData = () => {
         await getCurrentLocation(forceRefresh);
         await updateLocationInDatabase(forceRefresh);
 
-        const [locations, travelPlans] = await Promise.all([
+        const [locations, hometowns, travelPlans] = await Promise.all([
           getFriendLocations(),
+          getFriendHometownLocations(),
           getTravelPlanLocations(),
         ]);
 
         setFriendLocations(locations);
+        setHometownLocations(hometowns);
         setTravelPlanLocations(travelPlans.data);
       } catch (err) {
         console.error("Error loading friend locations:", err);
@@ -51,6 +55,7 @@ export const useMapData = () => {
     },
     [
       getFriendLocations,
+      getFriendHometownLocations,
       getTravelPlanLocations,
       updateLocationInDatabase,
       getCurrentLocation,
@@ -73,6 +78,7 @@ export const useMapData = () => {
 
   return {
     friendLocations,
+    hometownLocations,
     travelPlanLocations,
     userLocation,
     loading,

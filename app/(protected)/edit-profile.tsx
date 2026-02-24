@@ -20,8 +20,10 @@ import {
   TabBar,
   Text,
 } from "@/design-system";
+import { LocationSearchInput, LocationSearchValue } from "@/components/LocationSearchInput";
 import { useProfileStore } from "@/stores/profileStore";
 import { useProfile } from "@/hooks/useProfile";
+import { parsePostGISPoint } from "@/utils/postgis";
 
 // Zod schema for profile edit validation
 const editProfileSchema = z.object({
@@ -34,10 +36,13 @@ const editProfileSchema = z.object({
     error: "Birthday is required",
   }),
   hometown: z
-    .string()
-    .min(1, "Hometown is required")
-    .min(2, "Hometown must be at least 2 characters")
-    .trim(),
+    .object({
+      name: z.string(),
+      latitude: z.number(),
+      longitude: z.number(),
+    })
+    .nullable()
+    .refine((val) => val !== null, { message: "Hometown is required" }),
   website: z.string().trim().optional(),
   avatarUrl: z.string().trim().optional(),
   instagram: z.string().trim().optional(),
@@ -70,7 +75,16 @@ export default function EditProfileScreen() {
       birthday: profileState?.birthday
         ? new Date(profileState.birthday)
         : undefined,
-      hometown: profileState?.hometown || "",
+      hometown: (() => {
+        if (!profileState?.hometown) return null;
+        const coords = profileState.hometown_location
+          ? parsePostGISPoint(profileState.hometown_location)
+          : null;
+        if (coords) {
+          return { name: profileState.hometown, ...coords };
+        }
+        return null;
+      })(),
       website: profileState?.website || "",
       avatarUrl: profileState?.avatar_url || "",
       instagram: profileState?.instagram || "",
@@ -84,11 +98,13 @@ export default function EditProfileScreen() {
   const onSubmit = async (data: EditProfileForm) => {
     setIsSubmitting(true);
     try {
+      const hometown = data.hometown!; // refine guarantees non-null
       await updateProfile({
         updateData: {
           full_name: data.fullName.trim(),
           birthday: data.birthday.toISOString(),
-          hometown: data.hometown.trim(),
+          hometown: hometown.name,
+          hometown_location: `POINT(${hometown.longitude} ${hometown.latitude})`,
           website: data.website?.trim() || "",
           avatar_url: data.avatarUrl?.trim() || "",
           instagram: data.instagram?.trim() || "",
@@ -257,14 +273,12 @@ export default function EditProfileScreen() {
                 <Controller
                   control={control}
                   name="hometown"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <Input
+                  render={({ field: { onChange, value } }) => (
+                    <LocationSearchInput
                       label="Hometown"
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
                       placeholder="Where are you from?"
-                      autoCapitalize="words"
+                      value={value}
+                      onChange={onChange}
                       error={errors.hometown?.message}
                     />
                   )}

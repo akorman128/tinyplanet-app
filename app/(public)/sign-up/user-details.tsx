@@ -8,6 +8,7 @@ import { z } from "zod";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 import { Button, Heading, Subheading, Body, Label, Input } from "@/design-system";
+import { LocationSearchInput, LocationSearchValue } from "@/components/LocationSearchInput";
 import { useSignupStore } from "@/stores/signupStore";
 
 // Zod schema for user details validation
@@ -21,10 +22,13 @@ const userDetailsSchema = z.object({
     error: "Birthday is required",
   }),
   hometown: z
-    .string()
-    .min(1, "Hometown is required")
-    .min(2, "Hometown must be at least 2 characters")
-    .trim(),
+    .object({
+      name: z.string(),
+      latitude: z.number(),
+      longitude: z.number(),
+    })
+    .nullable()
+    .refine((val) => val !== null, { message: "Hometown is required" }),
 });
 
 type UserDetailsForm = z.infer<typeof userDetailsSchema>;
@@ -45,16 +49,28 @@ export default function UserDetailsPage() {
     defaultValues: {
       fullName: signupData.fullName || "",
       birthday: signupData.birthday ? new Date(signupData.birthday) : undefined,
-      hometown: signupData.hometown || "",
+      hometown:
+        signupData.hometown && signupData.hometownLocation
+          ? {
+              name: signupData.hometown,
+              latitude: signupData.hometownLocation.latitude,
+              longitude: signupData.hometownLocation.longitude,
+            }
+          : null,
     },
     mode: "all",
   });
 
   const onSubmit = (data: UserDetailsForm) => {
+    const hometown = data.hometown!; // refine guarantees non-null
     setSignupData({
       fullName: data.fullName.trim(),
       birthday: data.birthday.toISOString(),
-      hometown: data.hometown.trim(),
+      hometown: hometown.name,
+      hometownLocation: {
+        latitude: hometown.latitude,
+        longitude: hometown.longitude,
+      },
     });
 
     // Navigate to next screen
@@ -177,14 +193,12 @@ export default function UserDetailsPage() {
           <Controller
             control={control}
             name="hometown"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <Input
+            render={({ field: { onChange, value } }) => (
+              <LocationSearchInput
                 label="Hometown"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
                 placeholder="Where are you from?"
-                autoCapitalize="words"
+                value={value}
+                onChange={onChange}
                 error={errors.hometown?.message}
               />
             )}

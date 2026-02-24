@@ -10,6 +10,7 @@ export interface Profile {
   beli?: string;
   location: string;
   hometown: string;
+  hometown_location?: string; // PostGIS POINT as WKT string
   birthday: string;
   phone_number: string;
   invited_by?: string;

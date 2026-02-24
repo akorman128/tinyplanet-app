@@ -91,6 +91,7 @@ export const useSignUp = () => {
         hometown: signupData.hometown,
         birthday: signupData.birthday,
         location: signupData.location,
+        hometown_location: signupData.hometownLocation,
         invited_by: signupData.inviteCode.inviter_id,
       });
     } catch (error) {

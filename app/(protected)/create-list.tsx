@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { View, Alert } from "react-native";
-import { useRouter, Stack, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { ScreenHeader } from "@/design-system";
 import { ListForm } from "@/components/ListForm";
 import { useLists } from "@/hooks/useLists";
 import { CreateListInput } from "@/types/list";
@@ -55,11 +57,9 @@ export default function CreateListScreen() {
   };
 
   return (
-    <>
-      <Stack.Screen
-        options={{ title: "Create List", headerBackTitle: "Back" }}
-      />
-      <View className="flex-1 bg-white">
+    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }} edges={["top"]}>
+      <ScreenHeader title="Create List" onClose={handleCancel} />
+      <View className="flex-1">
         <ListForm
           onSubmit={handleSubmit}
           onCancel={handleCancel}
@@ -67,6 +67,6 @@ export default function CreateListScreen() {
           initialPlaces={initialPlaces}
         />
       </View>
-    </>
+    </SafeAreaView>
   );
 }

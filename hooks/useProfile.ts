@@ -45,6 +45,10 @@ export const useProfile = () => {
       latitude: number;
       longitude: number;
     };
+    hometown_location?: {
+      latitude: number;
+      longitude: number;
+    };
     invited_by?: string;
   }
 
@@ -57,6 +61,7 @@ export const useProfile = () => {
         hometown,
         birthday,
         location,
+        hometown_location,
         invited_by,
       } = input;
 
@@ -72,6 +77,9 @@ export const useProfile = () => {
           birthday,
           location: location
             ? `POINT(${location.longitude} ${location.latitude})`
+            : null,
+          hometown_location: hometown_location
+            ? `POINT(${hometown_location.longitude} ${hometown_location.latitude})`
             : null,
           invited_by,
         })

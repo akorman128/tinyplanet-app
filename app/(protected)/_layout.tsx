@@ -17,18 +17,16 @@ export default function ProtectedLayout() {
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen
+        name="create-list"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
         name="create-post"
-        options={{
-          title: "New Post",
-          headerBackTitle: "Back",
-        }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="create-travel-plan"
-        options={{
-          title: "New Travel Plan",
-          headerBackTitle: "Back",
-        }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="search"

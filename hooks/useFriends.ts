@@ -126,6 +126,36 @@ export const useFriends = () => {
     };
   };
 
+  const getFriendHometownLocations = async (): Promise<GeoJSONFeatureCollection> => {
+    const userId = profile.id;
+
+    const { data, error } = await supabase.rpc("get_friend_hometown_locations", {
+      p_user_id: userId,
+    });
+
+    if (error) throw error;
+
+    const features: GeoJSONFeature[] = (data || []).map((loc: any) => ({
+      type: "Feature" as const,
+      geometry: {
+        type: "Point" as const,
+        coordinates: [loc.longitude, loc.latitude],
+      },
+      properties: {
+        id: loc.id,
+        name: loc.full_name,
+        type: loc.type as "friend_hometown" | "mutual_hometown",
+        avatar_url: loc.avatar_url,
+        hometown_name: loc.hometown_name,
+      },
+    }));
+
+    return {
+      type: "FeatureCollection",
+      features,
+    };
+  };
+
   const searchFriends = async (
     input: SearchFriendsInput
   ): Promise<SearchFriendsOutput> => {
@@ -414,6 +444,7 @@ export const useFriends = () => {
     getFriends,
     getFriendsOfFriends,
     getFriendLocations,
+    getFriendHometownLocations,
     searchFriends,
     getPendingRequests,
     getFriendshipStatus,

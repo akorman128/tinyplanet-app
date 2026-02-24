@@ -9,6 +9,7 @@ import Mapbox, {
   Images,
 } from "@rnmapbox/maps";
 import { MapMarker } from "./MapMarker";
+import { HometownMarker } from "./HometownMarker";
 import { colors, Text } from "@/design-system";
 import { useRouter } from "expo-router";
 import { useMapStore } from "@/stores/mapStore";
@@ -20,7 +21,7 @@ import {
 } from "@/utils/mapUtils";
 
 export const MapView: React.FC = React.memo(() => {
-  const { friendLocations, travelPlanLocations, userLocation, loading, error } =
+  const { friendLocations, hometownLocations, travelPlanLocations, userLocation, loading, error } =
     useMapData();
   const router = useRouter();
   const showConnectionLines = useMapStore((state) => state.showConnectionLines);
@@ -212,7 +213,20 @@ export const MapView: React.FC = React.memo(() => {
                 coordinate={feature.geometry.coordinates}
                 name={feature.properties.name}
                 avatarUrl={feature.properties.avatar_url}
-                type={feature.properties.type}
+                type={feature.properties.type as "friend" | "mutual"}
+                onPress={handleFriendMarkerPress}
+              />
+            ))}
+
+          {/* Hometown markers */}
+          {hometownLocations &&
+            hometownLocations.features.map((feature) => (
+              <HometownMarker
+                key={`hometown-${feature.properties.id}`}
+                id={feature.properties.id}
+                coordinate={feature.geometry.coordinates}
+                name={feature.properties.name}
+                hometownName={feature.properties.hometown_name}
                 onPress={handleFriendMarkerPress}
               />
             ))}

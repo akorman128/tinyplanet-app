@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, ScrollView, Alert } from "react-native";
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -9,6 +10,7 @@ import {
   Icons,
   LoadingState,
   ActiveTravelPlanBanner,
+  ScreenHeader,
 } from "@/design-system";
 import {
   TravelPlanForm,
@@ -18,6 +20,7 @@ import {
 import { useTravelPlan } from "@/hooks/useTravelPlan";
 import { PostVisibility } from "@/types/post";
 import { TravelPlan, CreateTravelPlanInput } from "@/types/travelPlan";
+import { Caption } from "@/design-system/Typography";
 
 export default function CreateTravelPlanScreen() {
   const router = useRouter();
@@ -127,15 +130,16 @@ export default function CreateTravelPlanScreen() {
   ];
 
   return (
-    <>
-      <Stack.Screen options={{ title: "New Travel Plan" }} />
-      <View className="flex-1 bg-white">
+    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }} edges={["top"]}>
+      <ScreenHeader title="Create Plan" onClose={() => router.back()} />
+
+      <View className="flex-1">
         {loading ? (
           <LoadingState />
         ) : (
           <ScrollView
             className="flex-1"
-            contentContainerClassName="px-6 pt-6 pb-8"
+            contentContainerClassName="px-6 pt-2 pb-8"
           >
             {activeTravelPlan ? (
               <ActiveTravelPlanBanner
@@ -173,6 +177,6 @@ export default function CreateTravelPlanScreen() {
           </ScrollView>
         )}
       </View>
-    </>
+    </SafeAreaView>
   );
 }

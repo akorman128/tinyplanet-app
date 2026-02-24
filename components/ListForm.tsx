@@ -109,11 +109,8 @@ export function ListForm({
   };
 
   return (
-    <ScrollView className="flex-1 bg-white px-6 pt-6">
+    <ScrollView className="flex-1 bg-white px-6 pt-2">
       <View className="mb-6">
-        <Heading className="mb-2">
-          Create List
-        </Heading>
         <Caption className="text-gray-600">
           📍 Add your favorite places in a city. Places will be automatically
           located on a map.
@@ -187,9 +184,7 @@ export function ListForm({
 
         {/* Places Input */}
         <View>
-          <Label className="mb-2">
-            Places (one per line)
-          </Label>
+          <Label className="mb-2">Places (one per line)</Label>
           <Controller
             control={control}
             name="places"
@@ -217,22 +212,15 @@ export function ListForm({
         </View>
 
         {/* Buttons */}
-        <View className="flex-row gap-2 mb-8">
-          <View className="flex-1">
-            <Button variant="secondary" onPress={onCancel} disabled={isLoading}>
-              Cancel
-            </Button>
-          </View>
-          <View className="flex-1">
-            <Button
-              variant="primary"
-              onPress={handleSubmit(handleFormSubmit)}
-              disabled={isLoading}
-            >
-              {isLoading ? "Creating..." : "Create List"}
-            </Button>
-          </View>
-        </View>
+
+        <Button
+          variant="primary"
+          onPress={handleSubmit(handleFormSubmit)}
+          disabled={isLoading}
+          className="w-full mb-4"
+        >
+          {isLoading ? "Creating..." : "Create List"}
+        </Button>
       </View>
     </ScrollView>
   );

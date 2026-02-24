@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { View, ScrollView, Alert } from "react-native";
 import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, OptionSelector, Icons } from "@/design-system";
+import { Button, OptionSelector, Icons, ScreenHeader } from "@/design-system";
 import { PostForm, postSchema, PostFormData } from "@/components/PostForm";
 import { usePosts } from "@/hooks/usePosts";
 import { PostVisibility } from "@/types/post";
@@ -55,7 +56,8 @@ export default function CreatePostScreen() {
   ];
 
   return (
-    <View className="flex-1 bg-white">
+    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }} edges={["top"]}>
+      <ScreenHeader title="New Post" onClose={() => router.back()} />
       <ScrollView
         className="flex-1"
         contentContainerClassName="px-6 pt-3 pb-8"
@@ -84,6 +86,6 @@ export default function CreatePostScreen() {
           {isSubmitting ? "Posting..." : "Post"}
         </Button>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

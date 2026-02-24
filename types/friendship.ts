@@ -120,9 +120,10 @@ export interface GeoJSONFeature {
   properties: {
     id: string;
     name: string;
-    type: "friend" | "mutual";
+    type: "friend" | "mutual" | "friend_hometown" | "mutual_hometown";
     avatar_url?: string;
     connecting_friend_id?: string; // For mutuals: the friend that connects them
+    hometown_name?: string;
   };
 }
 

@@ -12,6 +12,10 @@ export interface SignupData {
     latitude: number;
     longitude: number;
   };
+  hometownLocation?: {
+    latitude: number;
+    longitude: number;
+  };
 }
 
 export interface SignupState {
