@@ -69,7 +69,7 @@ export const Avatar = React.memo<AvatarProps>(
             width: config.pixels,
             height: config.pixels,
             borderRadius: config.pixels / 2,
-            backgroundColor: colors.hex.purple600,
+            backgroundColor: colors.hex.purple200,
             justifyContent: "center",
             alignItems: "center",
           }}
