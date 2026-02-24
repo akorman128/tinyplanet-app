@@ -20,13 +20,17 @@ import {
   travelPlansToGeoJSON,
   listsToGeoJSON,
 } from "@/utils/mapUtils";
+import type { MapFilter } from "@/stores/mapStore";
 
-export const MapView: React.FC = React.memo(() => {
+interface MapViewProps {
+  mapFilter: MapFilter;
+}
+
+export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
   const { friendLocations, hometownLocations, travelPlanLocations, listLocations, userLocation, loading, error } =
     useMapData();
   const router = useRouter();
   const showConnectionLines = useMapStore((state) => state.showConnectionLines);
-  const mapFilter = useMapStore((state) => state.mapFilter);
   const [mapDimensions, setMapDimensions] = useState({ width: 0, height: 0 });
 
   // GeoJSON transforms
@@ -187,107 +191,103 @@ export const MapView: React.FC = React.memo(() => {
             </ShapeSource>
           )}
 
-          {/* === Friends filter === */}
-          {mapFilter === "friends" && (
-            <>
-              {/* Connection lines: User → Friends */}
-              {userToFriendLinesGeoJSON && (
-                <ShapeSource
-                  id="user-to-friend-lines"
-                  shape={userToFriendLinesGeoJSON}
-                >
-                  <LineLayer
-                    id="user-to-friend-line-layer"
-                    style={{
-                      lineColor: colors.hex.purple600,
-                      lineWidth: 2,
-                      lineOpacity: 0.6,
-                    }}
-                  />
-                </ShapeSource>
-              )}
+          {/* === Friends filter: Connection lines User → Friends === */}
+          {mapFilter === "friends" && userToFriendLinesGeoJSON && (
+            <ShapeSource
+              id="user-to-friend-lines"
+              shape={userToFriendLinesGeoJSON}
+            >
+              <LineLayer
+                id="user-to-friend-line-layer"
+                style={{
+                  lineColor: colors.hex.purple600,
+                  lineWidth: 2,
+                  lineOpacity: 0.6,
+                }}
+              />
+            </ShapeSource>
+          )}
 
-              {/* Connection lines: Friends → Mutuals */}
-              {friendToMutualLinesGeoJSON && (
-                <ShapeSource
-                  id="friend-to-mutual-lines"
-                  shape={friendToMutualLinesGeoJSON}
-                >
-                  <LineLayer
-                    id="friend-to-mutual-line-layer"
-                    style={{
-                      lineColor: colors.hex.purple200,
-                      lineWidth: 2,
-                      lineOpacity: 0.6,
-                      lineDasharray: [2, 2],
-                    }}
-                  />
-                </ShapeSource>
-              )}
+          {/* Friends filter: Connection lines Friends → Mutuals */}
+          {mapFilter === "friends" && friendToMutualLinesGeoJSON && (
+            <ShapeSource
+              id="friend-to-mutual-lines"
+              shape={friendToMutualLinesGeoJSON}
+            >
+              <LineLayer
+                id="friend-to-mutual-line-layer"
+                style={{
+                  lineColor: colors.hex.purple200,
+                  lineWidth: 2,
+                  lineOpacity: 0.6,
+                  lineDasharray: [2, 2],
+                }}
+              />
+            </ShapeSource>
+          )}
 
-              {/* Friend and mutual avatar markers */}
-              {friendLocations &&
-                friendLocations.features.map((feature) => (
-                  <MapMarker
-                    key={feature.properties.id}
-                    id={feature.properties.id}
-                    coordinate={feature.geometry.coordinates}
-                    name={feature.properties.name}
-                    avatarUrl={feature.properties.avatar_url}
-                    type={feature.properties.type as "friend" | "mutual"}
-                    onPress={handleFriendMarkerPress}
-                  />
-                ))}
+          {/* Friends filter: Friend and mutual avatar markers */}
+          {mapFilter === "friends" &&
+            friendLocations &&
+            friendLocations.features.map((feature) => (
+              <MapMarker
+                key={feature.properties.id}
+                id={feature.properties.id}
+                coordinate={feature.geometry.coordinates}
+                name={feature.properties.name}
+                avatarUrl={feature.properties.avatar_url}
+                type={feature.properties.type as "friend" | "mutual"}
+                onPress={handleFriendMarkerPress}
+              />
+            ))}
 
-              {/* Travel plan destination markers with rocket icon */}
-              {travelPlanGeoJSON && (
-                <ShapeSource
-                  id="travel-plan-destinations"
-                  shape={travelPlanGeoJSON}
-                  onPress={handleMarkerPress}
-                >
-                  <CircleLayer
-                    id="travel-plan-marker-circles"
-                    style={{
-                      circleRadius: 16,
-                      circleColor: colors.hex.white,
-                      circleOpacity: 0.9,
-                      circleStrokeWidth: 3,
-                      circleStrokeColor: colors.hex.white,
-                    }}
-                  />
-                  <SymbolLayer
-                    id="travel-plan-markers"
-                    style={{
-                      iconImage: "rocketIcon",
-                      iconSize: 0.15,
-                      iconAllowOverlap: true,
-                      iconIgnorePlacement: true,
-                      iconOpacity: 1,
-                    }}
-                  />
-                  <SymbolLayer
-                    id="travel-plan-labels"
-                    style={{
-                      textField: ["get", "title"],
-                      textSize: 12,
-                      textColor: colors.hex.white,
-                      textHaloColor: colors.hex.purple900,
-                      textHaloWidth: 8,
-                      textHaloBlur: 0,
-                      textOffset: [0, 2],
-                      textAnchor: "top",
-                      textFont: [
-                        "Roboto Medium",
-                        "Noto Sans Regular",
-                        "Arial Unicode MS Regular",
-                      ],
-                      textAllowOverlap: true,
-                    }}
-                  />
-                </ShapeSource>
-              )}
-            </>
+          {/* Friends filter: Travel plan destination markers */}
+          {mapFilter === "friends" && travelPlanGeoJSON && (
+            <ShapeSource
+              id="travel-plan-destinations"
+              shape={travelPlanGeoJSON}
+              onPress={handleMarkerPress}
+            >
+              <CircleLayer
+                id="travel-plan-marker-circles"
+                style={{
+                  circleRadius: 16,
+                  circleColor: colors.hex.white,
+                  circleOpacity: 0.9,
+                  circleStrokeWidth: 3,
+                  circleStrokeColor: colors.hex.white,
+                }}
+              />
+              <SymbolLayer
+                id="travel-plan-markers"
+                style={{
+                  iconImage: "rocketIcon",
+                  iconSize: 0.15,
+                  iconAllowOverlap: true,
+                  iconIgnorePlacement: true,
+                  iconOpacity: 1,
+                }}
+              />
+              <SymbolLayer
+                id="travel-plan-labels"
+                style={{
+                  textField: ["get", "title"],
+                  textSize: 12,
+                  textColor: colors.hex.white,
+                  textHaloColor: colors.hex.purple900,
+                  textHaloWidth: 8,
+                  textHaloBlur: 0,
+                  textOffset: [0, 2],
+                  textAnchor: "top",
+                  textFont: [
+                    "Roboto Medium",
+                    "Noto Sans Regular",
+                    "Arial Unicode MS Regular",
+                  ],
+                  textAllowOverlap: true,
+                }}
+              />
+            </ShapeSource>
           )}
 
           {/* === Hometown filter === */}

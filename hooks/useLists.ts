@@ -3,6 +3,7 @@ import { useRequireProfile } from "./useRequireProfile";
 import {
   List,
   ListPlace,
+  ListLocation,
   ListWithPlaces,
   ViewableList,
   CreateListInput,
@@ -18,6 +19,35 @@ import {
   PlaceAlternative,
   PaginationOptions,
 } from "@/types/list";
+
+function parseGeographyPoint(
+  location: any
+): { longitude: number; latitude: number } | null {
+  if (!location) return null;
+  // If it's already a parsed object with coordinates
+  if (
+    typeof location === "object" &&
+    typeof location.longitude === "number" &&
+    typeof location.latitude === "number"
+  ) {
+    return { longitude: location.longitude, latitude: location.latitude };
+  }
+  // If it's a GeoJSON string
+  if (typeof location === "string") {
+    try {
+      const parsed = JSON.parse(location);
+      if (parsed.type === "Point" && Array.isArray(parsed.coordinates)) {
+        return {
+          longitude: parsed.coordinates[0],
+          latitude: parsed.coordinates[1],
+        };
+      }
+    } catch {
+      // Not JSON — likely hex EWKB, can't parse client-side
+    }
+  }
+  return null;
+}
 
 export const useLists = () => {
   const { isLoaded, supabase } = useSupabase();
@@ -155,10 +185,7 @@ export const useLists = () => {
     const transformedOwnLists: ViewableList[] = (ownLists || []).map(
       (list: any) => ({
         ...list,
-        location:
-          list.longitude && list.latitude
-            ? { longitude: list.longitude, latitude: list.latitude }
-            : null,
+        location: parseGeographyPoint(list.location),
         places: [], // Empty for picker (we don't need full places)
         owner_name: "You",
       })
@@ -168,10 +195,7 @@ export const useLists = () => {
     const transformedFriendLists: ViewableList[] = (friendLists || []).map(
       (list: any) => ({
         ...list,
-        location:
-          list.longitude && list.latitude
-            ? { longitude: list.longitude, latitude: list.latitude }
-            : null,
+        location: parseGeographyPoint(list.location),
         places: [],
         owner_name: list.owner?.full_name || "Unknown",
       })
@@ -184,6 +208,30 @@ export const useLists = () => {
       data: allLists,
       total: allLists.length,
     };
+  };
+
+  /**
+   * Get list locations for the map via server-side coordinate extraction.
+   * Returns own lists + friends' lists with proper longitude/latitude.
+   */
+  const getListLocations = async (): Promise<ListLocation[]> => {
+    const { data, error } = await supabase.rpc(
+      "get_viewable_list_locations",
+      { p_user_id: profile.id }
+    );
+
+    if (error) {
+      throw new Error(`Failed to fetch list locations: ${error.message}`);
+    }
+
+    return (data || []).map((row: any) => ({
+      id: row.id,
+      title: row.title,
+      category: row.category,
+      location_name: row.location_name,
+      location: { longitude: row.longitude, latitude: row.latitude },
+      owner_name: row.owner_name,
+    }));
   };
 
   // ––– MUTATIONS –––
@@ -386,6 +434,7 @@ export const useLists = () => {
     getList,
     getLists,
     getViewableLists,
+    getListLocations,
     // Mutations
     createList,
     updateList,

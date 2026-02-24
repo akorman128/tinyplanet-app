@@ -55,6 +55,16 @@ export interface ViewableList extends ListWithPlaces {
   owner_name: string;
 }
 
+// Lightweight list location for map display (from RPC)
+export interface ListLocation {
+  id: string;
+  title: string;
+  category: ListCategory;
+  location_name: string;
+  location: { longitude: number; latitude: number };
+  owner_name: string;
+}
+
 // LLM Response schema (matches required JSON output)
 export interface LLMPlaceResolution {
   original_text: string;

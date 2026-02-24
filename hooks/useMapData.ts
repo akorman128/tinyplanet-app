@@ -5,12 +5,12 @@ import { useLists } from "./useLists";
 import { useLocation } from "./useLocation";
 import { GeoJSONFeatureCollection } from "@/types/friendship";
 import { TravelPlanMapLocation } from "@/types/travelPlan";
-import { ViewableList } from "@/types/list";
+import { ListLocation } from "@/types/list";
 
 export const useMapData = () => {
   const { getFriendLocations, getFriendHometownLocations } = useFriends();
   const { getTravelPlanLocations } = useTravelPlan();
-  const { getViewableLists } = useLists();
+  const { getListLocations } = useLists();
   const {
     location: userLocationObj,
     getCurrentLocation,
@@ -24,7 +24,7 @@ export const useMapData = () => {
   const [travelPlanLocations, setTravelPlanLocations] = useState<
     TravelPlanMapLocation[]
   >([]);
-  const [listLocations, setListLocations] = useState<ViewableList[]>([]);
+  const [listLocations, setListLocations] = useState<ListLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,13 +46,13 @@ export const useMapData = () => {
             getFriendLocations(),
             getFriendHometownLocations(),
             getTravelPlanLocations(),
-            getViewableLists(),
+            getListLocations(),
           ]);
 
         setFriendLocations(locations);
         setHometownLocations(hometowns);
         setTravelPlanLocations(travelPlans.data);
-        setListLocations(viewableLists.data);
+        setListLocations(viewableLists);
       } catch (err) {
         console.error("Error loading friend locations:", err);
         const errorMessage =
@@ -64,7 +64,7 @@ export const useMapData = () => {
       getFriendLocations,
       getFriendHometownLocations,
       getTravelPlanLocations,
-      getViewableLists,
+      getListLocations,
       updateLocationInDatabase,
       getCurrentLocation,
     ]

@@ -14,7 +14,12 @@ export default function MapTab() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { profileState } = useProfileStore();
-  const { showConnectionLines, setShowConnectionLines, mapFilter, setMapFilter } = useMapStore();
+  const {
+    showConnectionLines,
+    setShowConnectionLines,
+    mapFilter,
+    setMapFilter,
+  } = useMapStore();
   const { getPlatformStatistics } = useFriends();
   const [statistics, setStatistics] = useState<PlatformStatistics | null>(null);
   const [showStats, setShowStats] = useState(false);
@@ -28,7 +33,7 @@ export default function MapTab() {
   return (
     <GestureHandlerRootView className="flex-1">
       <View className="flex-1">
-        <MapView />
+        <MapView mapFilter={mapFilter} />
 
         {/* Top Overlay: Avatar, Search, Stats */}
         <View
@@ -36,7 +41,10 @@ export default function MapTab() {
           style={{ top: insets.top + 12 }}
           pointerEvents="box-none"
         >
-          <View className="flex-row items-center gap-3" pointerEvents="box-none">
+          <View
+            className="flex-row items-center gap-3"
+            pointerEvents="box-none"
+          >
             {/* Profile Button */}
             <TouchableOpacity
               className="w-12 h-12 rounded-full justify-center items-center shadow-lg"
@@ -91,10 +99,10 @@ export default function MapTab() {
                   }
                 >
                   {filter === "friends"
-                    ? "Friends"
+                    ? "✨ Friends"
                     : filter === "hometown"
-                      ? "Hometown"
-                      : "Lists"}
+                      ? "🏠 Hometowns"
+                      : "📋 Lists"}
                 </Caption>
               </TouchableOpacity>
             ))}
