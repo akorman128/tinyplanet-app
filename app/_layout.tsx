@@ -62,9 +62,12 @@ function RootNavigator() {
       // If profile exists but lacks location data, re-fetch to populate computed fields
       if (
         profileState &&
-        (profileState.latitude === undefined || profileState.longitude === undefined)
+        (profileState.latitude === undefined ||
+          profileState.longitude === undefined)
       ) {
-        console.log("Profile loaded from cache but missing location - re-fetching");
+        console.log(
+          "Profile loaded from cache but missing location - re-fetching"
+        );
         setLoading(true);
 
         try {
@@ -73,7 +76,9 @@ function RootNavigator() {
           console.log("Profile location refreshed successfully");
         } catch (error) {
           const profileError =
-            error instanceof Error ? error : new Error("Failed to refresh profile");
+            error instanceof Error
+              ? error
+              : new Error("Failed to refresh profile");
           setProfileError(profileError);
           console.error("Failed to refresh profile:", profileError);
         }
@@ -92,7 +97,9 @@ function RootNavigator() {
           console.log("Profile loaded successfully:", profile.id);
         } catch (error) {
           const profileError =
-            error instanceof Error ? error : new Error("Failed to load profile");
+            error instanceof Error
+              ? error
+              : new Error("Failed to load profile");
           setProfileError(profileError);
           console.error("Failed to load profile:", profileError);
         }
@@ -138,9 +145,7 @@ function RootNavigator() {
         <SectionTitle className="text-purple-900 mb-2">
           Failed to Load Profile
         </SectionTitle>
-        <Body className="text-gray-500 mb-6 text-center">
-          {error.message}
-        </Body>
+        <Body className="text-gray-500 mb-6 text-center">{error.message}</Body>
         <Button
           onPress={() => {
             setError(null);
@@ -179,13 +184,12 @@ function RootNavigator() {
       }}
     >
       <Stack.Protected guard={!!session && !!profileState}>
-        <Stack.Screen name="(protected)" />
+        <Stack.Screen name="(protected)" options={{ headerShown: false }} />
       </Stack.Protected>
 
       <Stack.Protected guard={!session}>
-        <Stack.Screen name="(public)" />
+        <Stack.Screen name="(public)" options={{ headerShown: false }} />
       </Stack.Protected>
     </Stack>
   );
 }
-

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, ScrollView, Alert } from "react-native";
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, OptionSelector, Icons } from "@/design-system";
@@ -55,38 +55,35 @@ export default function CreatePostScreen() {
   ];
 
   return (
-    <>
-      <Stack.Screen options={{ title: "New Post" }} />
-      <View className="flex-1 bg-white">
-        <ScrollView
-          className="flex-1"
-          contentContainerClassName="px-6 pt-6 pb-8"
+    <View className="flex-1 bg-white">
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="px-6 pt-3 pb-8"
+      >
+        <PostForm
+          control={form.control}
+          errors={form.formState.errors}
+          selectedList={selectedList}
+          onAttachList={() => router.push("/select-list")}
+          onRemoveList={clearListSelection}
+        />
+
+        <OptionSelector
+          label="Who can see this?"
+          options={visibilityOptions}
+          value={visibility}
+          onChange={setVisibility}
+          className="mt-6 mb-6"
+        />
+
+        <Button
+          variant="primary"
+          onPress={form.handleSubmit(onSubmit)}
+          disabled={isSubmitting || !!form.formState.errors.text}
         >
-          <PostForm
-            control={form.control}
-            errors={form.formState.errors}
-            selectedList={selectedList}
-            onAttachList={() => router.push("/select-list")}
-            onRemoveList={clearListSelection}
-          />
-
-          <OptionSelector
-            label="Who can see this?"
-            options={visibilityOptions}
-            value={visibility}
-            onChange={setVisibility}
-            className="mt-6 mb-6"
-          />
-
-          <Button
-            variant="primary"
-            onPress={form.handleSubmit(onSubmit)}
-            disabled={isSubmitting || !!form.formState.errors.text}
-          >
-            {isSubmitting ? "Posting..." : "Post"}
-          </Button>
-        </ScrollView>
-      </View>
-    </>
+          {isSubmitting ? "Posting..." : "Post"}
+        </Button>
+      </ScrollView>
+    </View>
   );
 }

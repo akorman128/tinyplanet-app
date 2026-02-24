@@ -114,7 +114,6 @@ export default function EditPostScreen() {
     <>
       <Stack.Screen options={{ title: "Edit Post" }} />
       <View className="flex-1 bg-white">
-
         <ScrollView
           className="flex-1"
           contentContainerClassName="px-6 pt-6 pb-8"

@@ -32,7 +32,6 @@ export default {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff",
       },
-      edgeToEdgeEnabled: true,
       package: "com.alexkorman.tinyplanet",
       permissions: [
         "READ_CONTACTS",

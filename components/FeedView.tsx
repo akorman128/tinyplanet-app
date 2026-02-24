@@ -218,7 +218,7 @@ export function FeedView({ onCommentsSheetChange }: FeedViewProps) {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
         ListFooterComponent={renderFooter}
-        contentContainerClassName="pt-36 pb-20"
+        contentContainerClassName="pb-20"
       />
 
       {activePost && (

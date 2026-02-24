@@ -146,7 +146,7 @@ export function MessagesView() {
       ListFooterComponent={
         loadingMore ? <ActivityIndicator color={colors.hex.purple600} /> : null
       }
-      contentContainerClassName="pt-36 pb-20"
+      contentContainerClassName="pb-20"
     />
   );
 }

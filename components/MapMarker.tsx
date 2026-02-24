@@ -14,15 +14,10 @@ interface MapMarkerProps {
 }
 
 const AVATAR_SIZE = 28;
-const BORDER_WIDTH = 2;
-const OUTER_SIZE = AVATAR_SIZE + BORDER_WIDTH * 2;
 
 export const MapMarker = React.memo<MapMarkerProps>(
   ({ id, coordinate, name, avatarUrl, type, onPress }) => {
     const [imageError, setImageError] = useState(false);
-
-    const borderColor =
-      type === "friend" ? colors.hex.purple600 : colors.hex.purple200;
 
     const handlePress = useCallback(() => {
       onPress?.(id);
@@ -32,8 +27,8 @@ export const MapMarker = React.memo<MapMarkerProps>(
 
     return (
       <MarkerView id={`marker-${id}`} coordinate={coordinate}>
-        <Pressable onPress={handlePress}>
-          <View style={[styles.outer, { borderColor }]}>
+        <Pressable onPress={handlePress} style={styles.container}>
+          <View style={styles.outer}>
             {showImage ? (
               <Image
                 source={{ uri: avatarUrl }}
@@ -47,6 +42,9 @@ export const MapMarker = React.memo<MapMarkerProps>(
               </View>
             )}
           </View>
+          <Text style={styles.nameLabel} numberOfLines={1}>
+            {name}
+          </Text>
         </Pressable>
       </MarkerView>
     );
@@ -54,11 +52,13 @@ export const MapMarker = React.memo<MapMarkerProps>(
 );
 
 const styles = StyleSheet.create({
+  container: {
+    alignItems: "center",
+  },
   outer: {
-    width: OUTER_SIZE,
-    height: OUTER_SIZE,
-    borderRadius: OUTER_SIZE / 2,
-    borderWidth: BORDER_WIDTH,
+    width: AVATAR_SIZE,
+    height: AVATAR_SIZE,
+    borderRadius: AVATAR_SIZE / 2,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -71,14 +71,28 @@ const styles = StyleSheet.create({
     width: AVATAR_SIZE,
     height: AVATAR_SIZE,
     borderRadius: AVATAR_SIZE / 2,
-    backgroundColor: colors.hex.purple200,
+    backgroundColor: colors.hex.purple600,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 2,
+    borderColor: "white",
   },
   initialsText: {
     fontSize: 11,
     fontWeight: "600",
-    color: colors.hex.purple600,
+    color: colors.hex.white,
+    fontFamily: Platform.OS === "ios" ? "HelveticaNeue" : undefined,
+  },
+  nameLabel: {
+    marginTop: 2,
+    fontSize: 10,
+    fontWeight: "100",
+    color: colors.hex.white,
+    textShadowColor: colors.hex.purple800,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 4,
+
+    textAlign: "center" as const,
     fontFamily: Platform.OS === "ios" ? "HelveticaNeue" : undefined,
   },
 });

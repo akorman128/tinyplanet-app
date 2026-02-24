@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { View, FlatList, RefreshControl, Pressable, ScrollView } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, Link } from "expo-router";
 import { useLists } from "@/hooks/useLists";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
 import { ListCard } from "@/design-system/ListCard";
@@ -125,10 +125,6 @@ export function UserListsSection({ userId }: UserListsSectionProps) {
     }
   };
 
-  const handleListPress = (listId: string) => {
-    router.push(`/list/${listId}`);
-  };
-
   const handleCreateList = () => {
     router.push("/create-list");
   };
@@ -228,11 +224,15 @@ export function UserListsSection({ userId }: UserListsSectionProps) {
             gap: 16,
           }}
           renderItem={({ item }) => (
-            <ListCard
-              list={item}
-              onPress={() => handleListPress(item.id)}
-              fullWidth
-            />
+            <Link href={`/list/${item.id}`} asChild>
+              <Pressable>
+                <Link.AppleZoom>
+                  <View collapsable={false}>
+                    <ListCard list={item} fullWidth />
+                  </View>
+                </Link.AppleZoom>
+              </Pressable>
+            </Link>
           )}
           refreshControl={
             <RefreshControl

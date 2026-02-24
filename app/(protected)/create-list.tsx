@@ -4,10 +4,7 @@ import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { ListForm } from "@/components/ListForm";
 import { useLists } from "@/hooks/useLists";
 import { CreateListInput } from "@/types/list";
-import {
-  getSharedNote,
-  clearSharedNote,
-} from "@/modules/SharedNoteModule";
+import { getSharedNote, clearSharedNote } from "@/modules/SharedNoteModule";
 
 export default function CreateListScreen() {
   const router = useRouter();
@@ -59,7 +56,9 @@ export default function CreateListScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: "Create List" }} />
+      <Stack.Screen
+        options={{ title: "Create List", headerBackTitle: "Back" }}
+      />
       <View className="flex-1 bg-white">
         <ListForm
           onSubmit={handleSubmit}

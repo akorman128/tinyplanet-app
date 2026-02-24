@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Pressable, Alert } from "react-native";
 import { Text } from "./Text";
-import { useRouter } from "expo-router";
+import { useRouter, Link } from "expo-router";
 import { Avatar } from "./Avatar";
 import { Icons } from "./Icons";
 import { colors } from "./colors";
@@ -38,10 +38,6 @@ export function TravelPlanCard({
   const { deletePost } = usePosts();
   const [isLiking, setIsLiking] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
-  const handleProfilePress = () => {
-    router.push({ pathname: "/profile", params: { userId: post.author.id } });
-  };
 
   const handleLikeToggle = async () => {
     if (isLiking) return;
@@ -198,13 +194,22 @@ export function TravelPlanCard({
 
   return (
     <View className="flex-row px-5 py-4 border-b border-gray-200 bg-orange-50">
-      <Pressable onPress={handleProfilePress}>
-        <Avatar
-          fullName={post.author.full_name}
-          avatarUrl={post.author.avatar_url}
-          size="small"
-        />
-      </Pressable>
+      <Link
+        href={{ pathname: "/profile", params: { userId: post.author.id } }}
+        asChild
+      >
+        <Pressable>
+          <Link.AppleZoom>
+            <View collapsable={false}>
+              <Avatar
+                fullName={post.author.full_name}
+                avatarUrl={post.author.avatar_url}
+                size="small"
+              />
+            </View>
+          </Link.AppleZoom>
+        </Pressable>
+      </Link>
 
       <View className="flex-1 ml-3">
         {/* Header: Name • Time • Options */}

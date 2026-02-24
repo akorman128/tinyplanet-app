@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Pressable, Alert } from "react-native";
 import { Text } from "./Text";
-import { useRouter } from "expo-router";
+import { useRouter, Link } from "expo-router";
 import { Avatar } from "./Avatar";
 import { Icons } from "./Icons";
 import { colors } from "./colors";
@@ -150,10 +150,6 @@ export function PostCard({
     ]);
   };
 
-  const handleProfilePress = () => {
-    router.push({ pathname: "/profile", params: { userId: post.author.id } });
-  };
-
   const visibilityIcon = {
     public: null,
     friends: <Icons.unlocked size={14} color={colors.hex.gray500} />,
@@ -162,13 +158,22 @@ export function PostCard({
 
   return (
     <Pressable className="flex-row px-5 py-4 border-b border-gray-200">
-      <Pressable onPress={handleProfilePress}>
-        <Avatar
-          fullName={post.author.full_name}
-          avatarUrl={post.author.avatar_url}
-          size="small"
-        />
-      </Pressable>
+      <Link
+        href={{ pathname: "/profile", params: { userId: post.author.id } }}
+        asChild
+      >
+        <Pressable>
+          <Link.AppleZoom>
+            <View collapsable={false}>
+              <Avatar
+                fullName={post.author.full_name}
+                avatarUrl={post.author.avatar_url}
+                size="small"
+              />
+            </View>
+          </Link.AppleZoom>
+        </Pressable>
+      </Link>
 
       <View className="flex-1 ml-3">
         {/* Header: Name • Time • Options */}

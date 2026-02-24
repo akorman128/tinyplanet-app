@@ -5,10 +5,9 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
-  Pressable,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { colors, Input, Body, Icons, SectionTitle } from "@/design-system";
+import { colors, Input, Body } from "@/design-system";
 import { UserSearchListItem } from "@/components/UserSearchList";
 import { useFriends } from "@/hooks/useFriends";
 import { Friend } from "@/types/friendship";
@@ -85,13 +84,7 @@ export default function SearchScreen() {
 
   return (
     <View className="flex-1 bg-white">
-      <View className="pt-14 px-6 pb-3 gap-3">
-        <View className="flex-row items-center justify-between mb-2">
-          <SectionTitle>Search</SectionTitle>
-          <Pressable onPress={() => router.back()} hitSlop={8}>
-            <Icons.close size={24} color={colors.hex.gray900} />
-          </Pressable>
-        </View>
+      <View className="px-6 pt-3 pb-3 gap-3">
         <Input
           placeholder="Search by name..."
           value={searchQuery}
@@ -129,10 +122,7 @@ export default function SearchScreen() {
           )}
           contentContainerClassName="pb-6"
           refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-            />
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
           }
         />
       )}

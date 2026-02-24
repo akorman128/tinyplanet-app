@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable } from "react-native";
+import { Pressable, Platform } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Icons, colors } from "@/design-system";
@@ -19,7 +19,7 @@ export default function UserContactsScreen() {
       <Stack.Screen
         options={{
           title: "Contacts",
-          headerRight: isOwnProfile
+          headerRight: Platform.OS === "android" && isOwnProfile
             ? () => (
                 <Pressable onPress={() => router.push("/add-contact")}>
                   <Icons.plus size={24} color={colors.black} />
@@ -28,6 +28,14 @@ export default function UserContactsScreen() {
             : undefined,
         }}
       />
+      {Platform.OS === "ios" && isOwnProfile && (
+        <Stack.Toolbar placement="right">
+          <Stack.Toolbar.Button
+            icon="plus"
+            onPress={() => router.push("/add-contact")}
+          />
+        </Stack.Toolbar>
+      )}
       <GestureHandlerRootView className="flex-1 bg-white">
         <ContactsSection userId={displayUserId} />
       </GestureHandlerRootView>

@@ -7,6 +7,7 @@ import {
   Modal,
   TextInput,
   Alert,
+  Platform,
 } from "react-native";
 import { useLocalSearchParams, Stack } from "expo-router";
 import {
@@ -140,7 +141,7 @@ export default function AllVibesScreen() {
         options={{
           title: "Vibes",
           headerRight:
-            profile.id !== userId && !hasUserGivenVibe
+            Platform.OS === "android" && profile.id !== userId && !hasUserGivenVibe
               ? () => (
                   <Pressable onPress={() => setShowModal(true)}>
                     <Icons.plus size={24} color={colors.hex.purple600} />
@@ -149,6 +150,15 @@ export default function AllVibesScreen() {
               : undefined,
         }}
       />
+      {Platform.OS === "ios" && profile.id !== userId && !hasUserGivenVibe && (
+        <Stack.Toolbar placement="right">
+          <Stack.Toolbar.Button
+            icon="plus"
+            tintColor={colors.hex.purple600}
+            onPress={() => setShowModal(true)}
+          />
+        </Stack.Toolbar>
+      )}
       <View className="flex-1 bg-white">
 
         {/* Content */}

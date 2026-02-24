@@ -1,59 +1,33 @@
-import React, { useEffect, useState } from "react";
-import { Tabs, useRouter, usePathname } from "expo-router";
-import { Navigation } from "@/design-system";
-import { useProfileStore } from "@/stores/profileStore";
-import { useMapStore } from "@/stores/mapStore";
-import { useFriends } from "@/hooks/useFriends";
-import type { PlatformStatistics } from "@/types/friendship";
+import { NativeTabs } from "expo-router/unstable-native-tabs";
 
 export default function TabsLayout() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const { profileState } = useProfileStore();
-  const { showConnectionLines, setShowConnectionLines } = useMapStore();
-  const { getPlatformStatistics } = useFriends();
-  const [statistics, setStatistics] = useState<PlatformStatistics | null>(null);
-
-  useEffect(() => {
-    getPlatformStatistics().then((result) => {
-      setStatistics(result.data);
-    });
-  }, [getPlatformStatistics]);
-
-  // Determine active tab index from pathname
-  const getActiveIndex = () => {
-    if (pathname.includes("/map")) return 0;
-    if (pathname.includes("/feed")) return 1;
-    if (pathname.includes("/messages")) return 2;
-    return 0; // Default to map
-  };
-
   return (
-    <>
-      <Tabs
-        screenOptions={{
-          headerShown: false,
-        }}
-        tabBar={() => null} // Hide default tab bar
-      >
-        <Tabs.Screen name="map" />
-        <Tabs.Screen name="feed" />
-        <Tabs.Screen name="messages" />
-      </Tabs>
-
-      <Navigation
-        activeTabIndex={getActiveIndex()}
-        onMapPress={() => router.push("/(protected)/(tabs)/map")}
-        onFeedPress={() => router.push("/(protected)/(tabs)/feed")}
-        onMessagesPress={() => router.push("/(protected)/(tabs)/messages")}
-        onProfilePress={() => router.push("/profile")}
-        onSearchPress={() => router.push("/search")}
-        profileFullName={profileState?.full_name}
-        profileAvatarUrl={profileState?.avatar_url}
-        statistics={statistics || undefined}
-        showLines={showConnectionLines}
-        onToggleLines={setShowConnectionLines}
-      />
-    </>
+    <NativeTabs tintColor="#9333ea" minimizeBehavior="onScrollDown">
+      <NativeTabs.Trigger name="map">
+        <NativeTabs.Trigger.Icon sf="globe" md="public" />
+        <NativeTabs.Trigger.Label>Map</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="feed">
+        <NativeTabs.Trigger.Icon
+          sf={{ default: "doc.richtext", selected: "doc.richtext.fill" }}
+          md="dynamic_feed"
+        />
+        <NativeTabs.Trigger.Label>Feed</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="messages">
+        <NativeTabs.Trigger.Icon
+          sf={{ default: "message", selected: "message.fill" }}
+          md="chat"
+        />
+        <NativeTabs.Trigger.Label>Messages</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="create" role="search">
+        <NativeTabs.Trigger.Icon
+          sf={{ default: "plus.circle", selected: "plus.circle.fill" }}
+          md="add_circle"
+        />
+        <NativeTabs.Trigger.Label hidden>Create</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+    </NativeTabs>
   );
 }

@@ -6,24 +6,36 @@ export default function ProtectedLayout() {
       screenOptions={{
         headerShown: true,
         headerStyle: { backgroundColor: "#ffffff" },
-        headerTitleStyle: { fontWeight: "bold", fontSize: 20, color: "#111827" },
+        headerTitleStyle: {
+          fontWeight: "bold",
+          fontSize: 20,
+          color: "#111827",
+        },
         headerTintColor: "#111827",
-        headerBackTitle: "Back",
+        headerBackTitle: "",
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       <Stack.Screen
         name="create-post"
-        options={{ presentation: "modal", title: "New Post" }}
+        options={{
+          title: "New Post",
+          headerBackTitle: "Back",
+        }}
       />
       <Stack.Screen
         name="create-travel-plan"
-        options={{ presentation: "modal", title: "New Travel Plan" }}
+        options={{
+          title: "New Travel Plan",
+          headerBackTitle: "Back",
+        }}
       />
       <Stack.Screen
         name="search"
-        options={{ presentation: "fullScreenModal", headerShown: false }}
+        options={{
+          title: "Search",
+          headerBackTitle: "Back",
+        }}
       />
     </Stack>
   );

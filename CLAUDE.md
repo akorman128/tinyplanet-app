@@ -1,352 +1,62 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-## Project Overview
-
-**Tiny Planet** is an invite-only React Native social networking mobile application (iOS & Android) built with Expo and Supabase. Users connect with friends through invite codes, send "vibes" (3-emoji messages), create posts with privacy controls, and invite new users via SMS.
-
-## Tech Stack
-
-- **Mobile**: React Native 0.81.5 + Expo SDK 54 (with new architecture and React Compiler experimental features)
-- **Routing**: Expo Router 6.0 (file-based routing with typed routes)
-- **Styling**: NativeWind 4.2.1 (Tailwind CSS for React Native)
-- **State**: Zustand 5.0.8 with AsyncStorage persistence
-- **Forms**: React Hook Form 7.66 + Zod 4.1.12 validation
-- **Backend**: Supabase (PostgreSQL with PostGIS, Auth, Row Level Security)
-- **Edge Functions**: Deno functions for SMS via Twilio
-- **Language**: TypeScript 5.9
-
-## Development Commands
-
-```bash
-# Start dev server
-npm start
-
-# Clear cache if needed (Metro/Expo issues)
-npm run start:nocash
-# or: npx expo start --clear --reset-cache
-
-# Platform builds
-npm run android
-npm run ios
-
-# Linting with auto-fix
-npm run lint
-```
-
-## Use Context7 by Default
-
-Always use context7 when I need code generation, setup or configuration steps, or library/API documentation. This means you should automatically use the Context7 MCP tools to resolve library id and get library docs without me having to explicitly ask.
-
-## Architecture Patterns
-
-### File-Based Routing Structure
-
-Expo Router uses route groups for auth flow separation:
-
-```
-app/
-├── _layout.tsx                 # Root layout with auth guard
-├── (public)/                   # Unauthenticated routes
-│   ├── welcome.tsx
-│   ├── sign-in/
-│   │   ├── index.tsx
-│   │   ├── sign-in.tsx
-│   │   └── verify-otp.tsx
-│   └── sign-up/               # Multi-step signup flow
-│       ├── index.tsx
-│       ├── invite-code.tsx    # Step 1: Validate invite
-│       ├── location-permission.tsx
-│       ├── user-details.tsx
-│       ├── phone-number.tsx
-│       └── verify-otp.tsx     # Final step
-└── (protected)/               # Authenticated routes
-    ├── index.tsx              # Home/landing
-    ├── profile.tsx
-    ├── edit-profile.tsx
-    ├── settings.tsx
-    ├── search.tsx
-    ├── mutuals.tsx
-    ├── all-vibes.tsx
-    ├── user-posts.tsx
-    ├── edit-post.tsx
-    ├── edit-travel-plan.tsx
-    ├── create-list.tsx
-    ├── chat/[friendId].tsx    # Dynamic chat route
-    ├── list/[listId].tsx      # Dynamic list route
-    ├── onboarding/
-    │   └── send-invites.tsx
-    └── (tabs)/                # Main app tabs
-        ├── map.tsx
-        ├── feed.tsx
-        └── messages.tsx
-```
-
-**Key Pattern**: `Stack.Protected` guards routes based on session state from `useSupabase` hook.
-
-### Data Layer: Custom Hooks Pattern
-
-All data operations are encapsulated in custom hooks following a consistent pattern:
-
-**Core Hooks** (`/hooks/`):
-
-- `useSupabase` - Auth & Supabase client
-- `useProfile` - User profiles (get, create, update)
-- `useFriends` - Friend relationships (get, create, accept, reject)
-- `useVibe` - Vibe (emoji) messages (get, create, link to invite)
-- `useInviteCodes` - Invite code management (validate, create, send SMS)
-- `usePosts` - Post CRUD with visibility controls
-- `useComments` - Comment operations
-- `useLikes` - Like/unlike posts or comments
-- `useSignUp` - Multi-step signup orchestration
-- `useSignIn` - Sign-in flow orchestration
-- `useFeed` - Feed data aggregation
-- `useChat` - Real-time messaging
-- `useMessageChannels` - Message channel management
-- `useSavedPosts` - Bookmark/save posts
-- `useTravelPlan` - Travel plan CRUD
-- `useLocation` - Device location services
-- `useLists` - User-created place lists
-- `useRequireProfile` - Profile requirement guard
-- `useContactPicker` - Device contacts access
-
-**Hook Pattern**:
-
-- Queries prefixed with `get` (e.g., `getProfile`, `getFriends`)
-- Mutations for create/update/delete operations
-- DTOs (Data Transfer Objects) for type safety
-
-**Example**:
-
-```typescript
-const { getProfile, createProfile, updateProfile } = useProfile();
-
-await createProfile({
-  id: userId,
-  phone_number: phone,
-  full_name: name,
-  birthday: new Date(birthday),
-  hometown: hometown,
-});
-```
-
-### State Management with Zustand
-
-**Global Stores**:
-
-- `profileStore` - Current user profile (persisted)
-- `signupStore` - Multi-step signup form data (persisted)
-- `locationStore` - User's current device location (persisted)
-
-**Pattern**: All stores use Zustand's persist middleware with AsyncStorage for automatic persistence across app restarts.
-
-```typescript
-export const useProfileStore = create<ProfileState>()(
-  persist(
-    (set) => ({
-      profileState: null,
-      setProfileState: (profileState) => set({ profileState }),
-      removeProfile: () => set({ profileState: null }),
-    }),
-    {
-      name: "profile-storage",
-      storage: createJSONStorage(() => AsyncStorage),
-    }
-  )
-);
-```
-
-### Design System Components
-
-Centralized UI components in `/design-system/`:
-
-- `Button`, `ButtonGroup` - Action buttons with variants
-- `Input`, `ChatInput` - Form inputs with labels, errors, character count
-- `Typography` - Text components
-- `Avatar`, `Badge` - User display elements
-- `PostCard`, `TravelPlanCard`, `ListCard` - Content cards
-- `CommentItem`, `ChannelListItem`, `FriendRequestItem` - List items
-- `MessageBubble`, `TypingIndicator` - Chat UI
-- `ScreenHeader`, `TabBar`, `Navigation` - Navigation elements
-- `MapLegend` - Map overlay component
-- `OptionSelector`, `InfoRow`, `VibeDisplay` - Utility components
-- `EmptyState`, `LoadingState`, `ErrorState` - Status displays
-- `SocialMediaLinks` - Social profile links
-- `colors.ts`, `Icons.tsx` - Design tokens and icons
-
-All components use NativeWind (Tailwind) for styling.
-
-### Form Validation Pattern
-
-**Stack**: React Hook Form + Zod schemas + `@hookform/resolvers`
-
-```typescript
-const schema = z.object({
-  inviteCode: z.string().min(1, "Required").trim(),
-});
-
-const {
-  control,
-  handleSubmit,
-  formState: { errors },
-} = useForm({
-  resolver: zodResolver(schema),
-  mode: "all",
-});
-```
-
-**Integration with Design System**:
-
-```tsx
-<Controller
-  control={control}
-  name="inviteCode"
-  render={({ field }) => (
-    <Input {...field} error={errors.inviteCode?.message} />
-  )}
-/>
-```
-
-### Multi-Step Form Pattern
-
-For signup flow (5 steps: invite code → location → details → phone → OTP):
-
-1. **State Persistence**: `signupStore` (Zustand) persists form data across steps
-2. **Navigation**: Expo Router for step transitions
-3. **Validation**: Each step validates independently before allowing navigation
-4. **Cleanup**: Store cleared after successful completion
-
-## Database Architecture
-
-### Core Tables
-
-- **profiles**: User profiles with location (PostGIS POINT), `invited_by` tracking, social media links
-- **friendships**: Bidirectional relationships (user_a, user_b, status)
-- **vibes**: 3-emoji messages between users (with optional `invite_code_id` for linking)
-- **invite_codes**: Invite system (code, status, expiry, redeemed_by)
-- **posts**: User posts with visibility enum (friends/mutuals/public)
-- **comments**: Nested comments with `parent_comment_id`
-- **likes**: Polymorphic likes (post_id OR comment_id, not both)
-- **messages**: Real-time chat messages between users
-- **conversation_reads**: Read receipt tracking for chats
-- **travel_plans**: User travel plans with dates and locations
-- **saved_posts**: Bookmarked posts by users
-- **lists**: User-created place lists
-- **list_places**: Places within lists (with PostGIS location)
-
-### Row Level Security (RLS)
-
-All tables have RLS enabled with friend-based access control:
-
-- Users can only modify their own content
-- Complex visibility policies for posts (friends/mutuals/public require JOIN queries)
-- Friend-based access throughout (vibes only visible to sender/recipient and their friends)
-
-### Database Conventions
-
-- **Bidirectional friendships**: Single row represents friendship (user_a < user_b constraint)
-- **Polymorphic likes**: Single table with post_id OR comment_id (CHECK constraint)
-- **Soft references**: `invite_code_id` in vibes allows tracking invite origin
-- **Migrations**: Located in `/supabase/migrations/`, timestamped naming
-- **Indexes**: All foreign keys and frequently queried columns indexed
-
-### RPC Functions
-
-Key Supabase RPC functions (defined in migrations):
-
-- `get_profile` - Optimized profile fetching with social fields
-- `get_mutual_friends` - Find mutual connections between users
-- `count_mutual_friends` - Count shared friends
-- `search_friends` - Search friend list
-- `get_top_vibes` - Aggregate vibe statistics
-- `get_feed_*` - Optimized feed queries with pagination
-- `get_friend_locations` - Map data with friend positions
-- `get_travel_plan_with_coordinates` - Travel plan with geo data
-- `get_message_channels` - Chat channel list with unread counts
-- `get_platform_statistics` - App-wide stats
-- `get_list_places_with_coordinates` - List places with geo
-- `get_lists_with_places` - Bulk list fetching with pagination
-
-## Authentication Flow
-
-**Provider**: Supabase Auth with Phone (SMS OTP)
-
-**Signup Flow** (invite-only):
-
-1. User enters invite code → validated against database
-2. Location permission requested (optional)
-3. User details collected (name, birthday, hometown)
-4. Phone number + SMS OTP verification
-5. Profile creation with automatic friend relationship to inviter
-6. Vibe linking (if inviter sent vibes via invite code)
-
-**Session Management**:
-
-- Context: `SupabaseContext` provides session state
-- Hook: `useSupabase` returns `{ session, isLoaded, signOut }`
-- Guard: `Stack.Protected` routes require valid session
-- Persistence: AsyncStorage via Supabase client config
-- Auto-refresh: Tokens refreshed on app state changes
-
-## Key Conventions
-
-### Path Aliases
-
-```typescript
-// Configured in tsconfig.json & babel.config.js
-import { useProfile } from "@/hooks/useProfile";
-import { Button } from "@/design-system";
-```
-
-### TypeScript Conventions
-
-- **Interfaces**: Data models (Profile, Friendship, Vibe, Post, etc.)
-- **DTOs**: Input/output types (CreateProfileDto, GetProfileDto)
-- **Enums**: Status fields (FriendshipStatus, InviteCodeStatus, PostVisibility)
-- **Type exports**: Centralized in `/types/` directory
-
-### File Naming
-
-- Components: PascalCase (`Button.tsx`)
-- Hooks: camelCase with `use` prefix (`useProfile.ts`)
-- Types: camelCase (`profile.ts`, `friendship.ts`)
-- Routes: kebab-case (`invite-code.tsx`)
-
-### Component Organization
-
-**components/** - Feature-specific components containing Tiny Planet business logic (posts, vibes, friends) and data fetching hooks.
-
-**design-system/** - Generic presentational UI primitives with no business logic that could be reused in any app.
-
-## Important Architectural Decisions
-
-1. **Invite-only system**: All signups require valid invite code (checked before phone verification)
-2. **Auto-friending**: Creating profile automatically creates accepted friendship with inviter
-3. **Vibe linking**: Pre-created vibes (emojis) can be linked to user during signup via `invite_code_id`
-4. **Location tracking**: PostGIS POINT for current location
-5. **Multi-step onboarding**: Progressive data collection with persisted state
-
-## Code Quality Standards
-
-- **Prettier**: 2-space indentation, semicolons, double quotes, 80 char width
-- **ESLint**: Expo config with TypeScript support
-- **Type Safety**: Heavy use of TypeScript, Zod validation, DTOs throughout
-- **Error Handling**: Try-catch in hooks, error states in forms
-- **Optimization**: `useMemo` for Supabase client and hook callbacks
-
-## Styling Guidelines
-
-**IMPORTANT**: Always use **NativeWind (Tailwind CSS)** for styling instead of StyleSheet.
-
-- ✅ **Preferred**: `<View className="flex-1 bg-white pt-12">`
-- ❌ **Avoid**: `<View style={styles.container}>` with `StyleSheet.create()`
-
-**When to use NativeWind**:
-
-- All new components and screens
-- Refactoring existing components
-- Layout (flexbox, spacing, sizing)
-- Colors (use design system color tokens when available)
-- Typography (text sizes, weights, colors)
-- Borders, shadows, and visual effects
+## Workflow Orchestration
+
+### 1. Plan Mode Default
+
+- Enter plan mode for ANY non-trivial task (3+ steps or architectural decisions)
+- If something goes sideways, STOP and re-plan immediately — don't keep pushing
+- Use plan mode for verification steps, not just building
+- Write detailed specs upfront to reduce ambiguity
+
+### 2. Subagent Strategy
+
+- Use subagents liberally to keep main context window clean
+- Offload research, exploration, and parallel analysis to subagents
+- For complex problems, throw more compute at it via subagents
+- One task per subagent for focused execution
+
+### 3. Self-Improvement Loop
+
+- After ANY correction from the user: update `tasks/lessons.md` with the pattern
+- Write rules for yourself that prevent the same mistake
+- Ruthlessly iterate on these lessons until mistake rate drops
+- Review lessons at session start for relevant project
+
+### 4. Verification Before Done
+
+- Never mark a task complete without proving it works
+- Diff behavior between main and your changes when relevant
+- Ask yourself: "Would a staff engineer approve this?"
+- Run tests, check logs, demonstrate correctness
+
+### 5. Demand Elegance (Balanced)
+
+- For non-trivial changes: pause and ask "is there a more elegant way?"
+- If a fix feels hacky: "Knowing everything I know now, implement the elegant solution"
+- Skip this for simple, obvious fixes — don't over-engineer
+- Challenge your own work before presenting it
+
+### 6. Autonomous Bug Fixing
+
+- When given a bug report: just fix it. Don't ask for hand-holding
+- Point at logs, errors, failing tests — then resolve them
+- Zero context switching required from the user
+- Go fix failing CI tests without being told how
+
+---
+
+## Task Management
+
+1. **Plan First**: Write plan to `tasks/todo.md` with checkable items
+2. **Verify Plan**: Check in before starting implementation
+3. **Track Progress**: Mark items complete as you go
+4. **Explain Changes**: High-level summary at each step
+5. **Document Results**: Add review section to `tasks/todo.md`
+6. **Capture Lessons**: Update `tasks/lessons.md` after corrections
+
+---
+
+## Core Principles
+
+- **Simplicity First**: Make every change as simple as possible. Impact minimal code.
+- **No Laziness**: Find root causes. No temporary fixes. Senior developer standards.
+- **Minimal Impact**: Changes should only touch what's necessary. Avoid introducing bugs.

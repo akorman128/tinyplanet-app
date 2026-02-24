@@ -1,6 +1,6 @@
 import React from "react";
-import { View, Pressable, ScrollView } from "react-native";
-import { useRouter, Stack, useLocalSearchParams } from "expo-router";
+import { View, Pressable, ScrollView, Platform } from "react-native";
+import { useRouter, Stack, useLocalSearchParams, Link } from "expo-router";
 import { Body } from "@/design-system/Typography";
 import {
   LoadingState,
@@ -62,20 +62,34 @@ export default function ProfileScreen() {
         options={{
           title: "",
           headerShadowVisible: false,
-          headerRight: isViewingOwnProfile
-            ? () => (
-                <View className="flex-row items-center gap-2">
-                  <Pressable onPress={() => router.push("/edit-profile")}>
-                    <Icons.edit size={24} color={colors.black} />
-                  </Pressable>
-                  <Pressable onPress={() => router.push("/settings")}>
-                    <Icons.settings size={24} color={colors.black} />
-                  </Pressable>
-                </View>
-              )
-            : undefined,
+          headerRight:
+            Platform.OS === "android" && isViewingOwnProfile
+              ? () => (
+                  <View className="flex-row items-center gap-2">
+                    <Pressable onPress={() => router.push("/edit-profile")}>
+                      <Icons.edit size={24} color={colors.black} />
+                    </Pressable>
+                    <Pressable onPress={() => router.push("/settings")}>
+                      <Icons.settings size={24} color={colors.black} />
+                    </Pressable>
+                  </View>
+                )
+              : undefined,
         }}
       />
+      {Platform.OS === "ios" && isViewingOwnProfile && (
+        <Stack.Toolbar placement="right">
+          <Stack.Toolbar.Button
+            icon="pencil"
+            onPress={() => router.push("/edit-profile")}
+          />
+          <Stack.Toolbar.Button
+            icon="gearshape"
+            onPress={() => router.push("/settings")}
+          />
+        </Stack.Toolbar>
+      )}
+      <Link.AppleZoomTarget />
       <View className="flex-1 bg-white">
         <ScrollView
           className="flex-1"

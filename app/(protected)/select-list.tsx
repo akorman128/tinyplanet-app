@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Pressable, FlatList } from "react-native";
+import { View, Pressable, FlatList, Platform } from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { useLists } from "@/hooks/useLists";
 import { useListSelectionStore } from "@/stores/listSelectionStore";
@@ -79,7 +79,7 @@ export default function SelectListScreen() {
       <Stack.Screen
         options={{
           title: "Select a List",
-          headerRight: selectedList
+          headerRight: Platform.OS === "android" && selectedList
             ? () => (
                 <Pressable onPress={handleClear} className="px-2">
                   <Text className="text-purple-600 font-medium">Clear</Text>
@@ -88,6 +88,14 @@ export default function SelectListScreen() {
             : undefined,
         }}
       />
+      {Platform.OS === "ios" && selectedList && (
+        <Stack.Toolbar placement="right">
+          <Stack.Toolbar.Button
+            icon="xmark"
+            onPress={handleClear}
+          />
+        </Stack.Toolbar>
+      )}
       <View className="flex-1 bg-white">
 
         {loading ? (

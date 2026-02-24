@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Alert, Pressable } from "react-native";
+import { View, Alert, Pressable, Platform } from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useForm, Controller } from "react-hook-form";
@@ -102,13 +102,23 @@ export default function AddContactScreen() {
       <Stack.Screen
         options={{
           title: "Add Contact",
-          headerRight: () => (
-            <Pressable onPress={handleImportFromPhone}>
-              <Icons.download4 size={24} color={colors.black} />
-            </Pressable>
-          ),
+          headerRight: Platform.OS === "android"
+            ? () => (
+                <Pressable onPress={handleImportFromPhone}>
+                  <Icons.download4 size={24} color={colors.black} />
+                </Pressable>
+              )
+            : undefined,
         }}
       />
+      {Platform.OS === "ios" && (
+        <Stack.Toolbar placement="right">
+          <Stack.Toolbar.Button
+            icon="square.and.arrow.down"
+            onPress={handleImportFromPhone}
+          />
+        </Stack.Toolbar>
+      )}
       <View className="flex-1 bg-white">
         <KeyboardAwareScrollView
           className="flex-1"

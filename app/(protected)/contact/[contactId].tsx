@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Linking, Alert, Pressable } from "react-native";
+import { View, Linking, Alert, Pressable, Platform } from "react-native";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { useContacts } from "@/hooks/useContacts";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
@@ -111,7 +111,7 @@ export default function ContactDetailScreen() {
       <Stack.Screen
         options={{
           title: "Contact",
-          headerRight: isOwnContact
+          headerRight: Platform.OS === "android" && isOwnContact
             ? () => (
                 <Pressable onPress={handleDelete}>
                   <Icons.trash size={24} color={colors.hex.error} />
@@ -120,6 +120,15 @@ export default function ContactDetailScreen() {
             : undefined,
         }}
       />
+      {Platform.OS === "ios" && isOwnContact && (
+        <Stack.Toolbar placement="right">
+          <Stack.Toolbar.Button
+            icon="trash"
+            tintColor={colors.hex.error}
+            onPress={handleDelete}
+          />
+        </Stack.Toolbar>
+      )}
       <View className="flex-1 bg-white">
 
         <View className="px-6 pt-6">

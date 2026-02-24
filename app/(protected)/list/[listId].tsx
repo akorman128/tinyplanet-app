@@ -13,6 +13,7 @@ import {
   Stack,
   useLocalSearchParams,
   useFocusEffect,
+  Link,
 } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Mapbox from "@rnmapbox/maps";
@@ -222,7 +223,7 @@ export default function ListDetailScreen() {
       <Stack.Screen
         options={{
           title: "List",
-          headerRight: isOwnList
+          headerRight: Platform.OS === "android" && isOwnList
             ? () => (
                 <View className="flex-row items-center gap-4">
                   <Pressable onPress={handleEdit}>
@@ -236,6 +237,20 @@ export default function ListDetailScreen() {
             : undefined,
         }}
       />
+      {Platform.OS === "ios" && isOwnList && (
+        <Stack.Toolbar placement="right">
+          <Stack.Toolbar.Button
+            icon="pencil"
+            onPress={handleEdit}
+          />
+          <Stack.Toolbar.Button
+            icon="trash"
+            tintColor={colors.hex.error}
+            onPress={handleDelete}
+          />
+        </Stack.Toolbar>
+      )}
+      <Link.AppleZoomTarget />
       <GestureHandlerRootView style={{ flex: 1 }}>
         <View className="flex-1 bg-white">
 
