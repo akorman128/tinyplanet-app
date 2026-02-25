@@ -6,26 +6,21 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
-import BottomSheet from "@gorhom/bottom-sheet";
+import { useFocusEffect } from "expo-router";
 import { useFeed } from "@/hooks/useFeed";
 import { PostCard } from "../design-system/PostCard";
 import { TravelPlanCard } from "../design-system/TravelPlanCard";
-import { CommentsSheet } from "./CommentsSheet";
 import { EmptyState, LoadingState, ErrorState, colors } from "@/design-system";
 import { PostWithAuthor } from "@/types/post";
-import { useListSelectionStore } from "@/stores/listSelectionStore";
+import { useCommentCountStore } from "@/stores/commentCountStore";
 
 const isTravelPlanPost = (post: PostWithAuthor): boolean => {
   return post.text.startsWith("🚀 Traveling to");
 };
 
-interface FeedViewProps {
-  onCommentsSheetChange?: (isOpen: boolean) => void;
-}
-
 const PAGE_SIZE = 10;
 
-export function FeedView({ onCommentsSheetChange }: FeedViewProps) {
+export function FeedView() {
   const router = useRouter();
   const { getFeed } = useFeed();
   const [posts, setPosts] = useState<PostWithAuthor[]>([]);
@@ -44,13 +39,22 @@ export function FeedView({ onCommentsSheetChange }: FeedViewProps) {
   const hasLoadedRef = useRef(false);
   const isLoadingRef = useRef(false);
 
-  const commentsSheetRef = useRef<BottomSheet>(null);
-  const [activePost, setActivePost] = useState<{
-    id: string;
-    commentCount: number;
-  } | null>(null);
+  const consume = useCommentCountStore((s) => s.consume);
 
-  const { selectedList, clear: clearListSelection } = useListSelectionStore();
+  // Sync comment counts when returning from comments screen
+  useFocusEffect(
+    useCallback(() => {
+      setPosts((prev) =>
+        prev.map((post) => {
+          const newCount = consume(post.id);
+          if (newCount !== undefined) {
+            return { ...post, comment_count: newCount };
+          }
+          return post;
+        })
+      );
+    }, [consume])
+  );
 
   const loadFeed = useCallback(async () => {
     if (isLoadingRef.current) {
@@ -125,43 +129,13 @@ export function FeedView({ onCommentsSheetChange }: FeedViewProps) {
 
   const handleOpenComments = useCallback(
     (postId: string, commentCount: number) => {
-      setActivePost({ id: postId, commentCount });
-      commentsSheetRef.current?.snapToIndex(0);
+      router.push({
+        pathname: "/comments",
+        params: { postId, commentCount: String(commentCount) },
+      });
     },
-    []
+    [router]
   );
-
-  const handleCommentCountChange = useCallback(
-    (postId: string, newCount: number) => {
-      setActivePost((prev) =>
-        prev ? { ...prev, commentCount: newCount } : null
-      );
-      setPosts((prev) =>
-        prev.map((p) =>
-          p.id === postId ? { ...p, comment_count: newCount } : p
-        )
-      );
-    },
-    []
-  );
-
-  const handleCommentsSheetChange = useCallback(
-    (index: number) => {
-      onCommentsSheetChange?.(index >= 0);
-      if (index < 0) {
-        clearListSelection();
-      }
-    },
-    [onCommentsSheetChange, clearListSelection]
-  );
-
-  const handleOpenCommentListPicker = useCallback(() => {
-    router.push("/select-list");
-  }, [router]);
-
-  const handleRemoveCommentList = useCallback(() => {
-    clearListSelection();
-  }, [clearListSelection]);
 
   if (loading && !refreshing) {
     return <LoadingState />;
@@ -185,54 +159,39 @@ export function FeedView({ onCommentsSheetChange }: FeedViewProps) {
   };
 
   return (
-    <>
-      <FlatList
-        data={posts}
-        renderItem={({ item }) =>
-          isTravelPlanPost(item) ? (
-            <TravelPlanCard
-              post={item}
-              onLike={handleLikePost}
-              onSave={handleSavePost}
-              onDelete={handlePostDelete}
-              onOpenComments={handleOpenComments}
-            />
-          ) : (
-            <PostCard
-              post={item}
-              onLike={handleLikePost}
-              onSave={handleSavePost}
-              onDelete={handlePostDelete}
-              onOpenComments={handleOpenComments}
-            />
-          )
-        }
-        keyExtractor={(item) => item.id}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor={colors.hex.purple600}
+    <FlatList
+      data={posts}
+      renderItem={({ item }) =>
+        isTravelPlanPost(item) ? (
+          <TravelPlanCard
+            post={item}
+            onLike={handleLikePost}
+            onSave={handleSavePost}
+            onDelete={handlePostDelete}
+            onOpenComments={handleOpenComments}
           />
-        }
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={renderFooter}
-        contentContainerClassName="pb-20"
-      />
-
-      {activePost && (
-        <CommentsSheet
-          ref={commentsSheetRef}
-          postId={activePost.id}
-          initialCommentCount={activePost.commentCount}
-          onCommentCountChange={handleCommentCountChange}
-          onSheetChange={handleCommentsSheetChange}
-          selectedList={selectedList}
-          onOpenListPicker={handleOpenCommentListPicker}
-          onRemoveList={handleRemoveCommentList}
+        ) : (
+          <PostCard
+            post={item}
+            onLike={handleLikePost}
+            onSave={handleSavePost}
+            onDelete={handlePostDelete}
+            onOpenComments={handleOpenComments}
+          />
+        )
+      }
+      keyExtractor={(item) => item.id}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          tintColor={colors.hex.purple600}
         />
-      )}
-    </>
+      }
+      onEndReached={handleLoadMore}
+      onEndReachedThreshold={0.5}
+      ListFooterComponent={renderFooter}
+      contentContainerClassName="pb-20"
+    />
   );
 }

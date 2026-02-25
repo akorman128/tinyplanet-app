@@ -29,6 +29,10 @@ export default function ProtectedLayout() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
+        name="comments"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
         name="search"
         options={{
           title: "Search",

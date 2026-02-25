@@ -196,19 +196,30 @@ export const useLists = () => {
   const createList = async (
     input: CreateListInput
   ): Promise<CreateListOutput> => {
-    const { title, category, location, note, places: inputPlaces } = input;
+    const {
+      title,
+      category,
+      location,
+      note,
+      places: inputPlaces,
+      freeform_text,
+    } = input;
 
     let resolvedPlaces: ResolvePlacesOutput["resolved_places"] = [];
 
-    // Step 1: Resolve places via Edge Function (only if places provided)
-    if (inputPlaces && inputPlaces.length > 0) {
+    // Step 1: Resolve places via Edge Function
+    if (freeform_text || (inputPlaces && inputPlaces.length > 0)) {
       const { data: resolveData, error: resolveError } =
         await supabase.functions.invoke("resolve-list-places", {
           body: {
             location_name: location.name,
             latitude: location.latitude,
             longitude: location.longitude,
-            places: inputPlaces,
+            title,
+            category,
+            ...(freeform_text
+              ? { freeform_text }
+              : { places: inputPlaces }),
           },
         });
 
@@ -385,6 +396,31 @@ export const useLists = () => {
     }
   };
 
+  const subscribeToListCreation = useCallback(
+    (onListCreated: () => void) => {
+      const channel = supabase
+        .channel("my-lists")
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "lists",
+            filter: `user_id=eq.${profile.id}`,
+          },
+          () => {
+            onListCreated();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    },
+    [supabase, profile.id]
+  );
+
   return {
     isLoaded,
     // Queries
@@ -392,6 +428,8 @@ export const useLists = () => {
     getLists,
     getViewableLists,
     getListLocations,
+    // Subscriptions
+    subscribeToListCreation,
     // Mutations
     createList,
     updateList,

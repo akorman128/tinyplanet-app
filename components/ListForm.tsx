@@ -91,19 +91,12 @@ export function ListForm({
       return;
     }
 
-    // Parse places (one per line) - now optional
-    const placesList = data.places
-      ? data.places
-          .split("\n")
-          .map((line) => line.trim())
-          .filter((line) => line.length > 0)
-      : [];
-
     await onSubmit({
       title: data.title.trim(),
       category: data.category,
       location: data.location,
-      places: placesList,
+      places: [],
+      freeform_text: data.places?.trim() || undefined,
       note: data.note?.trim() || undefined,
     });
   };
@@ -184,7 +177,7 @@ export function ListForm({
 
         {/* Places Input */}
         <View>
-          <Label className="mb-2">Places (one per line)</Label>
+          <Label className="mb-2">Places</Label>
           <Controller
             control={control}
             name="places"
@@ -193,7 +186,7 @@ export function ListForm({
                 value={value || ""}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                placeholder="Blue Bottle Coffee&#10;Stumptown Coffee Roasters&#10;Devoción"
+                placeholder="Paste your travel notes, itinerary, or list of places..."
                 multiline
                 numberOfLines={6}
                 textAlignVertical="top"

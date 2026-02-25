@@ -64,7 +64,7 @@ export default function MapTab() {
                 onPress={() => router.push("/search")}
               >
                 <Icons.search size={16} color={colors.hex.gray300} />
-                <Body className="ml-2 text-gray-400">Search by name...</Body>
+                <Body className="ml-2 text-gray-400">Search friends...</Body>
               </Pressable>
 
               {/* Stats Toggle */}
@@ -118,7 +118,16 @@ export default function MapTab() {
 
           {/* Gradient fade + floating filter badges */}
           <View pointerEvents="box-none">
-            <Svg style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }} pointerEvents="none">
+            <Svg
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+              }}
+              pointerEvents="none"
+            >
               <Defs>
                 <LinearGradient id="headerFade" x1="0" y1="0" x2="0" y2="1">
                   <Stop offset="0" stopColor="#000" />

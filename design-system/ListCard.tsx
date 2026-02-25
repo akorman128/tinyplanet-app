@@ -25,10 +25,12 @@ export function ListCard({ list, onPress, fullWidth }: ListCardProps) {
   const ambiguousCount = list.places.filter((p) => p.status === "ambiguous").length;
   const totalCount = list.places.length;
 
+  const Wrapper = onPress ? Pressable : View;
+
   return (
-    <Pressable
+    <Wrapper
       className="bg-white rounded-xl overflow-hidden border border-gray-200"
-      onPress={onPress}
+      {...(onPress ? { onPress } : {})}
       style={fullWidth ? undefined : { width: 280 }}
     >
       {/* Mini Map */}
@@ -65,6 +67,6 @@ export function ListCard({ list, onPress, fullWidth }: ListCardProps) {
           )}
         </View>
       </View>
-    </Pressable>
+    </Wrapper>
   );
 }

@@ -86,6 +86,7 @@ export interface CreateListInput {
     longitude: number;
   };
   places: string[];
+  freeform_text?: string;
   note?: string;
 }
 
@@ -157,6 +158,7 @@ export interface GetListOutput {
 export interface ResolvePlacesInput {
   location_name: string;
   places: string[];
+  freeform_text?: string;
 }
 
 export interface ResolvePlacesOutput {

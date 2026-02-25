@@ -1,7 +1,7 @@
 import React from "react";
 import { Pressable, View, ViewStyle } from "react-native";
 import { useRouter } from "expo-router";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Animated, {
   SharedValue,
   useSharedValue,
@@ -91,14 +91,28 @@ function MenuItem({
 
 export default function SearchScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
   const progress = useSharedValue(0);
+  const isFocusedRef = React.useRef(false);
 
   useFocusEffect(
     React.useCallback(() => {
+      isFocusedRef.current = true;
       progress.value = 0;
       progress.value = withTiming(1, { duration: ANIMATION_DURATION });
+      return () => {
+        isFocusedRef.current = false;
+      };
     }, [progress])
   );
+
+  React.useEffect(() => {
+    return (navigation as any).addListener('tabPress', () => {
+      if (isFocusedRef.current) {
+        setTimeout(() => router.back(), 0);
+      }
+    });
+  }, [navigation, router]);
 
   const dismiss = () => {
     router.back();

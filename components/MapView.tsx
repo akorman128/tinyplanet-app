@@ -10,6 +10,7 @@ import Mapbox, {
 } from "@rnmapbox/maps";
 import { MapMarker } from "./MapMarker";
 import { HometownMarker } from "./HometownMarker";
+import { ListMarker } from "./ListMarker";
 import { colors, Text } from "@/design-system";
 import { useRouter } from "expo-router";
 import { useMapStore } from "@/stores/mapStore";
@@ -18,7 +19,6 @@ import {
   buildConnectionLines,
   connectionLinesToGeoJSON,
   travelPlansToGeoJSON,
-  listsToGeoJSON,
 } from "@/utils/mapUtils";
 import type { MapFilter } from "@/stores/mapStore";
 
@@ -61,11 +61,6 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
     return travelPlansToGeoJSON(travelPlanLocations);
   }, [travelPlanLocations]);
 
-  const listLocationsGeoJSON = useMemo(() => {
-    if (!listLocations || listLocations.length === 0) return null;
-    return listsToGeoJSON(listLocations);
-  }, [listLocations]);
-
   // Event handlers
   const handleLayout = useCallback((event: LayoutChangeEvent) => {
     const { width, height } = event.nativeEvent.layout;
@@ -89,12 +84,8 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
   );
 
   const handleListMarkerPress = useCallback(
-    (event: any) => {
-      const { features } = event;
-      if (features && features.length > 0) {
-        const listId = features[0].properties.id;
-        router.push({ pathname: "/list/[listId]", params: { listId } });
-      }
+    (listId: string) => {
+      router.push({ pathname: "/list/[listId]", params: { listId } });
     },
     [router]
   );
@@ -299,49 +290,24 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
                 id={feature.properties.id}
                 coordinate={feature.geometry.coordinates}
                 name={feature.properties.name}
+                avatarUrl={feature.properties.avatar_url}
                 hometownName={feature.properties.hometown_name}
                 onPress={handleFriendMarkerPress}
               />
             ))}
 
           {/* === Lists filter === */}
-          {mapFilter === "lists" && listLocationsGeoJSON && (
-            <ShapeSource
-              id="list-locations"
-              shape={listLocationsGeoJSON}
-              onPress={handleListMarkerPress}
-            >
-              <CircleLayer
-                id="list-marker-circles"
-                style={{
-                  circleRadius: 10,
-                  circleColor: colors.hex.purple600,
-                  circleOpacity: 0.85,
-                  circleStrokeWidth: 2,
-                  circleStrokeColor: colors.hex.white,
-                }}
+          {mapFilter === "lists" &&
+            listLocations &&
+            listLocations.map((list) => (
+              <ListMarker
+                key={`list-${list.id}`}
+                id={list.id}
+                coordinate={[list.location.longitude, list.location.latitude]}
+                title={list.title}
+                onPress={handleListMarkerPress}
               />
-              <SymbolLayer
-                id="list-marker-labels"
-                style={{
-                  textField: ["get", "label"],
-                  textSize: 12,
-                  textColor: colors.hex.white,
-                  textHaloColor: colors.hex.purple900,
-                  textHaloWidth: 8,
-                  textHaloBlur: 0,
-                  textOffset: [0, 1.5],
-                  textAnchor: "top",
-                  textFont: [
-                    "Roboto Medium",
-                    "Noto Sans Regular",
-                    "Arial Unicode MS Regular",
-                  ],
-                  textAllowOverlap: true,
-                }}
-              />
-            </ShapeSource>
-          )}
+            ))}
         </Mapbox.MapView>
       )}
     </View>

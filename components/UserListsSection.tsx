@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { View, FlatList, RefreshControl, Pressable, ScrollView } from "react-native";
 import { useRouter, Link } from "expo-router";
 import { useLists } from "@/hooks/useLists";
@@ -27,7 +27,7 @@ interface UserListsSectionProps {
 
 export function UserListsSection({ userId }: UserListsSectionProps) {
   const router = useRouter();
-  const { getLists } = useLists();
+  const { getLists, subscribeToListCreation } = useLists();
   const currentUserProfile = useRequireProfile();
   const isOwnProfile = userId === currentUserProfile.id;
 
@@ -117,6 +117,17 @@ export function UserListsSection({ userId }: UserListsSectionProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
+  // Ref to hold the latest fetchLists so the subscription callback stays current
+  // without causing the Supabase channel to be torn down on every offset/loading change
+  const fetchListsRef = useRef(fetchLists);
+  fetchListsRef.current = fetchLists;
+
+  // Subscribe to realtime list creation events so new lists appear automatically
+  useEffect(() => {
+    if (!isOwnProfile) return;
+    return subscribeToListCreation(() => fetchListsRef.current(true));
+  }, [isOwnProfile, subscribeToListCreation]);
+
   const handleRefresh = () => fetchLists(true);
 
   const handleLoadMore = () => {
@@ -141,7 +152,7 @@ export function UserListsSection({ userId }: UserListsSectionProps) {
     if (lists.length === 0) return null;
 
     return (
-      <View className="px-6 pb-4 gap-3">
+      <View className="pb-4 gap-3">
         {/* Category Filter */}
         <Select
           label="Category"
@@ -198,53 +209,53 @@ export function UserListsSection({ userId }: UserListsSectionProps) {
   }
 
   return (
-    <View className="flex-1">
-      {isOwnProfile && (
-        <View className="px-6 pt-4 pb-2">
-          <Pressable
-            onPress={handleCreateList}
-            className="bg-purple-600 px-4 py-3 rounded-lg items-center"
-          >
-            <Text className="text-white font-semibold">Create List</Text>
-          </Pressable>
-        </View>
-      )}
-
-      {renderFilterBar()}
-
-      {filteredLists.length === 0 ? (
-        <EmptyState message="No lists match your filters." />
-      ) : (
-        <FlatList
-          data={filteredLists}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{
-            paddingHorizontal: 24,
-            paddingBottom: 24,
-            gap: 16,
-          }}
-          renderItem={({ item }) => (
-            <Link href={`/list/${item.id}`} asChild>
-              <Pressable>
-                <Link.AppleZoom>
-                  <View collapsable={false}>
-                    <ListCard list={item} fullWidth />
-                  </View>
-                </Link.AppleZoom>
+    <FlatList
+      className="flex-1"
+      data={filteredLists}
+      keyExtractor={(item) => item.id}
+      contentContainerStyle={{
+        paddingHorizontal: 24,
+        paddingBottom: 24,
+        gap: 16,
+      }}
+      ListHeaderComponent={
+        <>
+          {isOwnProfile && (
+            <View className="pt-4 pb-2">
+              <Pressable
+                onPress={handleCreateList}
+                className="bg-purple-600 px-4 py-3 rounded-lg items-center"
+              >
+                <Text className="text-white font-semibold">Create List</Text>
               </Pressable>
-            </Link>
+            </View>
           )}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-              tintColor={colors.hex.purple600}
-            />
-          }
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.5}
-        />
+          {renderFilterBar()}
+        </>
+      }
+      ListEmptyComponent={
+        <EmptyState message="No lists match your filters." />
+      }
+      renderItem={({ item }) => (
+        <Link href={`/list/${item.id}`} asChild>
+          <Pressable>
+            <Link.AppleZoom>
+              <View collapsable={false}>
+                <ListCard list={item} fullWidth />
+              </View>
+            </Link.AppleZoom>
+          </Pressable>
+        </Link>
       )}
-    </View>
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          tintColor={colors.hex.purple600}
+        />
+      }
+      onEndReached={handleLoadMore}
+      onEndReachedThreshold={0.5}
+    />
   );
 }

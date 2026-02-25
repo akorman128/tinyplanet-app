@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, Alert } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -12,8 +12,8 @@ export default function CreateListScreen() {
   const router = useRouter();
   const { createList } = useLists();
   const { fromShare } = useLocalSearchParams<{ fromShare?: string }>();
-  const [isLoading, setIsLoading] = useState(false);
   const [initialPlaces, setInitialPlaces] = useState("");
+  const submittingRef = useRef(false);
 
   // Load shared note if coming from share extension
   useEffect(() => {
@@ -32,24 +32,20 @@ export default function CreateListScreen() {
   };
 
   const handleSubmit = async (data: CreateListInput) => {
-    try {
-      setIsLoading(true);
-      await createList(data);
-      Alert.alert("Success", "List created successfully", [
-        {
-          text: "OK",
-          onPress: () => router.back(),
-        },
-      ]);
-    } catch (error) {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+
+    // Navigate immediately — realtime subscription on user-lists will refresh when the DB insert lands
+    router.replace("/user-lists");
+
+    // Fire-and-forget: create the list in the background
+    createList(data).catch((error) => {
       console.error("Failed to create list:", error);
       Alert.alert(
         "Error",
         error instanceof Error ? error.message : "Failed to create list"
       );
-    } finally {
-      setIsLoading(false);
-    }
+    });
   };
 
   const handleCancel = () => {
@@ -63,7 +59,6 @@ export default function CreateListScreen() {
         <ListForm
           onSubmit={handleSubmit}
           onCancel={handleCancel}
-          isLoading={isLoading}
           initialPlaces={initialPlaces}
         />
       </View>
