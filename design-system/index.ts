@@ -63,3 +63,7 @@ export { ActiveTravelPlanBanner } from "./ActiveTravelPlanBanner";
 export type { ActiveTravelPlanBannerProps } from "./ActiveTravelPlanBanner";
 export { ScreenHeader } from "./ScreenHeader";
 export type { ScreenHeaderProps } from "./ScreenHeader";
+export { AnimatedEmojiBorder } from "./AnimatedEmojiBorder";
+export type { AnimatedEmojiBorderProps } from "./AnimatedEmojiBorder";
+export { ScreenshotWarningModal } from "./ScreenshotWarningModal";
+export type { ScreenshotWarningModalProps } from "./ScreenshotWarningModal";

@@ -37,6 +37,7 @@ export default {
         "READ_CONTACTS",
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
+        "READ_MEDIA_IMAGES",
       ],
     },
     plugins: [

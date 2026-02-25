@@ -13,7 +13,8 @@ import { LocationPermissionProvider } from "../providers/LocationPermissionProvi
 import { LocationPermissionScreen } from "@/components/LocationPermissionScreen";
 import { initializeMapbox } from "@/utils/mapboxConfig";
 import { Button } from "@/design-system/Button";
-import { SectionTitle, Body } from "@/design-system";
+import { SectionTitle, Body, ScreenshotWarningModal } from "@/design-system";
+import { useScreenshotDetection } from "@/hooks/useScreenshotDetection";
 import "../global.css";
 
 // Initialize Mapbox once at app startup
@@ -37,6 +38,7 @@ export default function RootLayout() {
 }
 
 function RootNavigator() {
+  const { warningVisible, dismissWarning } = useScreenshotDetection();
   const { isLoaded, session, signOut } = useSupabase();
   const { permissionRequired, clearPermissionRequirement } = useLocationStore();
   const { getProfile } = useProfile();
@@ -175,21 +177,27 @@ function RootNavigator() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        gestureEnabled: false,
-        animation: "none",
-        animationDuration: 0,
-      }}
-    >
-      <Stack.Protected guard={!!session && !!profileState}>
-        <Stack.Screen name="(protected)" options={{ headerShown: false }} />
-      </Stack.Protected>
+    <>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          gestureEnabled: false,
+          animation: "none",
+          animationDuration: 0,
+        }}
+      >
+        <Stack.Protected guard={!!session && !!profileState}>
+          <Stack.Screen name="(protected)" options={{ headerShown: false }} />
+        </Stack.Protected>
 
-      <Stack.Protected guard={!session}>
-        <Stack.Screen name="(public)" options={{ headerShown: false }} />
-      </Stack.Protected>
-    </Stack>
+        <Stack.Protected guard={!session}>
+          <Stack.Screen name="(public)" options={{ headerShown: false }} />
+        </Stack.Protected>
+      </Stack>
+      <ScreenshotWarningModal
+        visible={warningVisible}
+        onDismiss={dismissWarning}
+      />
+    </>
   );
 }

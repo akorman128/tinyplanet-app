@@ -9,6 +9,7 @@ import {
   colors,
   MenuRow,
   ActiveTravelPlanBanner,
+  AnimatedEmojiBorder,
 } from "@/design-system";
 import { useProfileScreen } from "@/hooks/useProfileScreen";
 import { ProfileHeader } from "@/components/ProfileHeader";
@@ -90,6 +91,7 @@ export default function ProfileScreen() {
         </Stack.Toolbar>
       )}
       <Link.AppleZoomTarget />
+      {/* <AnimatedEmojiBorder> */}
       <View className="flex-1 bg-white">
         <ScrollView
           className="flex-1"
@@ -109,7 +111,10 @@ export default function ProfileScreen() {
               })
             }
             onMutualsPress={() =>
-              router.push({ pathname: "/mutuals", params: { userId: userId! } })
+              router.push({
+                pathname: "/mutuals",
+                params: { userId: userId! },
+              })
             }
             onMessagePress={() => router.push(`/chat/${userId}`)}
             onError={setError}
@@ -176,6 +181,7 @@ export default function ProfileScreen() {
           />
         </ScrollView>
       </View>
+      {/* </AnimatedEmojiBorder> */}
     </>
   );
 }
