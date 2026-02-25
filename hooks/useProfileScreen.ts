@@ -13,9 +13,7 @@ export function useProfileScreen(userId?: string) {
   const { getTopVibes, isLoaded: vibeIsLoaded } = useVibe();
   const { getActiveTravelPlan } = useTravelPlan();
 
-  const [otherUserProfile, setOtherUserProfile] = useState<Profile | null>(
-    null
-  );
+  const [fetchedProfile, setFetchedProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [humanReadableLocation, setHumanReadableLocation] = useState<
@@ -31,32 +29,33 @@ export function useProfileScreen(userId?: string) {
 
   const isViewingOwnProfile = !userId;
   const displayProfile = useMemo(
-    () => (isViewingOwnProfile ? profile : otherUserProfile),
-    [isViewingOwnProfile, profile, otherUserProfile]
+    () => fetchedProfile ?? (isViewingOwnProfile ? profile : null),
+    [fetchedProfile, isViewingOwnProfile, profile]
   );
   const mutualCount =
     (!isViewingOwnProfile && displayProfile?.mutual_friend_count) || 0;
 
-  // Fetch other user's profile if userId is provided
-  const fetchOtherUserProfile = useCallback(async () => {
-    if (!userId) return;
+  // Fetch profile via RPC (own or other user)
+  const fetchProfile = useCallback(async () => {
+    const targetId = userId || profile?.id;
+    if (!targetId) return;
 
     setLoading(true);
     setError(null);
     try {
-      const result = await getProfile({ userId });
-      setOtherUserProfile(result);
+      const result = await getProfile({ userId: targetId });
+      setFetchedProfile(result);
     } catch {
       setError("Failed to load profile");
     } finally {
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]);
+  }, [userId, profile?.id]);
 
   useEffect(() => {
-    fetchOtherUserProfile();
-  }, [fetchOtherUserProfile]);
+    fetchProfile();
+  }, [fetchProfile]);
 
   // Fetch secondary data in parallel when displayProfile is available
   useEffect(() => {

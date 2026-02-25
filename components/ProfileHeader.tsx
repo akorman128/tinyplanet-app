@@ -3,6 +3,7 @@ import { View, Pressable } from "react-native";
 import {
   Avatar,
   Badge,
+  Caption,
   Heading,
   SocialMediaLinks,
   VibeDisplay,
@@ -50,6 +51,12 @@ export function ProfileHeader({
           {profile.full_name}
         </Heading>
       </View>
+
+      {profile.invited_by_name && (
+        <Caption className="text-center mb-1">
+          🪩 Invited by {profile.invited_by_name}
+        </Caption>
+      )}
 
       <VibeDisplay
         topVibes={topVibes}

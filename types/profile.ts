@@ -14,6 +14,7 @@ export interface Profile {
   birthday: string;
   phone_number: string;
   invited_by?: string;
+  invited_by_name?: string;
   onboarding_invites_sent?: boolean;
   created_at: string;
   latitude?: number;
