@@ -8,7 +8,11 @@
     "start:nocash": "npx expo start --clear --reset-cache",
     "android": "npx expo run:android",
     "ios": "npx expo run:ios",
-    "lint": "npx expo lint . --fix"
+    "lint": "npx expo lint . --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:rpc": "vitest run __tests__/rpc/",
+    "test:hooks": "vitest run __tests__/hooks/"
   },
   "dependencies": {
     "@gorhom/bottom-sheet": "^5.2.6",
@@ -19,6 +23,7 @@
     "@supabase/supabase-js": "^2.55.0",
     "@tanstack/react-query": "^5.90.21",
     "expo": "^55.0.0-preview.12",
+    "expo-blur": "~55.0.9",
     "expo-clipboard": "~55.0.7",
     "expo-constants": "~55.0.6",
     "expo-contacts": "~55.0.7",
@@ -47,11 +52,13 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@testing-library/react": "^16.3.2",
     "@types/react": "~19.2.10",
     "@types/react-native": "^0.73.0",
     "babel-plugin-module-resolver": "^5.0.2",
     "babel-preset-expo": "~55.0.5",
     "baseline-browser-mapping": "^2.9.11",
+    "dotenv": "^17.3.1",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~55.0.0",
     "eslint-config-prettier": "^10.1.8",
@@ -59,11 +66,13 @@
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.5.4",
+    "jsdom": "^29.0.0",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.5.14",
     "supabase": "^2.58.5",
     "tailwindcss": "^4.1.18",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "vitest": "^4.1.0"
   },
   "private": true,
   "overrides": {

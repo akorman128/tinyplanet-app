@@ -45,3 +45,6 @@ android/
 
 #supabase
 supabase/
+
+# test env
+.env.test
