@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Pressable, Alert } from "react-native";
 import { Text } from "./Text";
 import { useRouter, Link } from "expo-router";
@@ -6,11 +6,11 @@ import { Avatar } from "./Avatar";
 import { Icons } from "./Icons";
 import { colors } from "./colors";
 import { PostWithAuthor } from "@/types/post";
-import { useLikes } from "@/hooks/useLikes";
-import { useSavedPosts } from "@/hooks/useSavedPosts";
-import { usePosts } from "@/hooks/usePosts";
+import { useLikePost, useUnlikePost } from "@/hooks/useLikes";
+import { useSavePost, useUnsavePost } from "@/hooks/useSavedPosts";
+import { useDeletePost } from "@/hooks/usePosts";
 import { useSupabase } from "@/hooks/useSupabase";
-import { formatTimeAgo } from "@/utils";
+import { formatTimeAgo, hapticLight } from "@/utils";
 
 interface TravelPlanCardProps {
   post: PostWithAuthor;
@@ -33,16 +33,18 @@ export function TravelPlanCard({
 }: TravelPlanCardProps) {
   const router = useRouter();
   const { session } = useSupabase();
-  const { likePost, unlikePost } = useLikes();
-  const { savePost, unsavePost } = useSavedPosts();
-  const { deletePost } = usePosts();
-  const [isLiking, setIsLiking] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const likePost = useLikePost();
+  const unlikePost = useUnlikePost();
+  const savePost = useSavePost();
+  const unsavePost = useUnsavePost();
+  const deletePostMutation = useDeletePost();
+  const isLiking = likePost.isPending || unlikePost.isPending;
+  const isSaving = savePost.isPending || unsavePost.isPending;
 
   const handleLikeToggle = async () => {
     if (isLiking) return;
+    hapticLight();
 
-    setIsLiking(true);
     const wasLiked = post.liked_by_user;
 
     // Optimistic update
@@ -53,9 +55,9 @@ export function TravelPlanCard({
 
     try {
       if (wasLiked) {
-        await unlikePost(post.id);
+        await unlikePost.mutateAsync(post.id);
       } else {
-        await likePost(post.id);
+        await likePost.mutateAsync(post.id);
       }
     } catch (err) {
       console.error("Error toggling like:", err);
@@ -64,15 +66,13 @@ export function TravelPlanCard({
         liked_by_user: wasLiked,
         like_count: post.like_count,
       });
-    } finally {
-      setIsLiking(false);
     }
   };
 
   const handleSaveToggle = async () => {
     if (isSaving) return;
+    hapticLight();
 
-    setIsSaving(true);
     const wasSaved = post.saved_by_user;
 
     // Optimistic update
@@ -82,9 +82,9 @@ export function TravelPlanCard({
 
     try {
       if (wasSaved) {
-        await unsavePost(post.id);
+        await unsavePost.mutateAsync(post.id);
       } else {
-        await savePost(post.id);
+        await savePost.mutateAsync(post.id);
       }
     } catch (err) {
       console.error("Error toggling save:", err);
@@ -92,8 +92,6 @@ export function TravelPlanCard({
       onSave(post.id, {
         saved_by_user: wasSaved,
       });
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -135,7 +133,7 @@ export function TravelPlanCard({
                 style: "destructive",
                 onPress: async () => {
                   try {
-                    await deletePost(post.id);
+                    await deletePostMutation.mutateAsync(post.id);
                     onDelete(post.id);
                   } catch (err) {
                     console.error("Error deleting travel plan:", err);

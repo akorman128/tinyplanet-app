@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState } from "react";
 import {
   View,
   FlatList,
@@ -7,10 +7,9 @@ import {
   Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { useContacts } from "@/hooks/useContacts";
+import { useGetContacts, useDeleteContact } from "@/hooks/useContacts";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
 import { ContactCard } from "@/design-system/ContactCard";
-import { Contact } from "@/types/contact";
 import { colors, EmptyState, LoadingState, ErrorState } from "@/design-system";
 
 interface ContactsSectionProps {
@@ -19,44 +18,21 @@ interface ContactsSectionProps {
 
 export function ContactsSection({ userId }: ContactsSectionProps) {
   const router = useRouter();
-  const { getContacts, deleteContact } = useContacts();
+  const { data: contactsData, isPending: loading, error: queryError, refetch } = useGetContacts(userId);
+  const deleteContact = useDeleteContact();
   const currentUserProfile = useRequireProfile();
   const isOwnProfile = userId === currentUserProfile.id;
 
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [loading, setLoading] = useState(true);
+  const contacts = contactsData?.data ?? [];
+  const error = queryError?.message ?? null;
+
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const fetchContacts = useCallback(
-    async (isRefresh = false) => {
-      if (isRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-      setError(null);
-
-      try {
-        const { data } = await getContacts(userId);
-        setContacts(data);
-      } catch (err) {
-        console.error("Error fetching contacts:", err);
-        setError("Failed to load contacts");
-      } finally {
-        setLoading(false);
-        setRefreshing(false);
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [userId]
-  );
-
-  useEffect(() => {
-    fetchContacts();
-  }, [fetchContacts]);
-
-  const handleRefresh = () => fetchContacts(true);
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
 
   const handleDeleteContact = (contactId: string, contactName: string) => {
     Alert.alert(
@@ -69,8 +45,7 @@ export function ContactsSection({ userId }: ContactsSectionProps) {
           style: "destructive",
           onPress: async () => {
             try {
-              await deleteContact(contactId);
-              setContacts((prev) => prev.filter((c) => c.id !== contactId));
+              await deleteContact.mutateAsync(contactId);
             } catch (err) {
               Alert.alert("Error", "Failed to delete contact");
             }

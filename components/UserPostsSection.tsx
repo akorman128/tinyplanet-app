@@ -1,19 +1,18 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { View, FlatList, RefreshControl } from "react-native";
+import React, { useState, useCallback } from "react";
+import { View, FlatList, RefreshControl, ActivityIndicator } from "react-native";
+import { useQueryClient } from "@tanstack/react-query";
 import { PostCard } from "@/design-system/PostCard";
 import { TravelPlanCard } from "@/design-system/TravelPlanCard";
-import { useFeed } from "@/hooks/useFeed";
-import { useSavedPosts } from "@/hooks/useSavedPosts";
+import { useGetUserPosts } from "@/hooks/useFeed";
+import { useGetSavedPosts } from "@/hooks/useSavedPosts";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
 import { PostWithAuthor } from "@/types/post";
 import { colors, TabBar, SectionTitle, Caption, Text } from "@/design-system";
+import { queryKeys } from "@/lib/queryKeys";
 
-// Helper function to detect travel plan posts
 const isTravelPlanPost = (post: PostWithAuthor): boolean => {
   return post.text.startsWith("🚀 Traveling to");
 };
-
-const POSTS_PER_PAGE = 10;
 
 type PostFilter = "posts" | "saved";
 
@@ -32,141 +31,136 @@ export function UserPostsSection({
   scrollEnabled = true,
   nestedScrollEnabled = false,
 }: UserPostsSectionProps) {
-  const { getUserPosts } = useFeed();
-  const { getSavedPosts } = useSavedPosts();
+  const queryClient = useQueryClient();
   const currentUserProfile = useRequireProfile();
   const isOwnProfile = userId === currentUserProfile.id;
-
   const [activeFilter, setActiveFilter] = useState<PostFilter>(initialFilter);
-  const [posts, setPosts] = useState<PostWithAuthor[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
 
-  // Fetch posts for current filter
-  const fetchPosts = useCallback(
-    async (isRefresh = false) => {
-      if (!isRefresh && loading) return; // Prevent concurrent fetches
+  const userPostsQuery = useGetUserPosts(userId);
+  const savedPostsQuery = useGetSavedPosts();
 
-      if (isRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-      setError(null);
-
-      try {
-        let data: PostWithAuthor[];
-        const currentOffset = isRefresh ? 0 : offset;
-
-        if (activeFilter === "posts") {
-          const result = await getUserPosts(userId, {
-            limit: POSTS_PER_PAGE,
-            offset: currentOffset,
-          });
-          data = result.data;
-        } else {
-          const result = await getSavedPosts({
-            limit: POSTS_PER_PAGE,
-            offset: currentOffset,
-          });
-          data = result.data;
-        }
-
-        setPosts((prev) => (isRefresh ? data : [...prev, ...data]));
-        setOffset(isRefresh ? data.length : currentOffset + data.length);
-        setHasMore(data.length === POSTS_PER_PAGE);
-      } catch (err) {
-        console.error(`Error fetching ${activeFilter}:`, err);
-        setError(`Failed to load ${activeFilter}`);
-      } finally {
-        setLoading(false);
-        setRefreshing(false);
-      }
-    },
-    [activeFilter, userId, offset, loading, getUserPosts, getSavedPosts]
-  );
-
-  // Fetch on mount and when filter changes
-  useEffect(() => {
-    setPosts([]);
-    setOffset(0);
-    setHasMore(true);
-    setLoading(true);
-    fetchPosts(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeFilter, userId]);
+  const isPostsTab = activeFilter === "posts";
+  const activeQuery = isPostsTab ? userPostsQuery : savedPostsQuery;
+  const posts = activeQuery.data?.pages.flat() ?? [];
+  const loading = activeQuery.isPending;
+  const refreshing = activeQuery.isRefetching && !activeQuery.isFetchingNextPage;
+  const error = activeQuery.error?.message ?? null;
 
   const handleFilterChange = (newFilter: string) => {
     setActiveFilter(newFilter as PostFilter);
   };
 
-  const handleRefresh = () => {
-    fetchPosts(true);
+  const handleRefresh = async () => {
+    await activeQuery.refetch();
   };
 
   const handleLoadMore = () => {
-    if (!loading && hasMore) {
-      fetchPosts();
+    if (activeQuery.hasNextPage) {
+      activeQuery.fetchNextPage();
     }
   };
 
-  const handleLike = (postId: string, updates: Partial<PostWithAuthor>) => {
-    setPosts((prev) =>
-      prev.map((p) => (p.id === postId ? { ...p, ...updates } : p))
-    );
-  };
+  const handleLike = useCallback((postId: string, updates: Partial<PostWithAuthor>) => {
+    const key = isPostsTab ? queryKeys.posts.userPosts(userId) : queryKeys.posts.saved();
+    queryClient.setQueryData(key, (oldData: any) => {
+      if (!oldData?.pages) return oldData;
+      return {
+        ...oldData,
+        pages: oldData.pages.map((page: PostWithAuthor[]) =>
+          page.map((p) => (p.id === postId ? { ...p, ...updates } : p))
+        ),
+      };
+    });
+  }, [isPostsTab, userId, queryClient]);
 
-  const handleSave = (postId: string, updates: Partial<PostWithAuthor>) => {
-    // If unsaved in "Saved" filter, remove from list
-    if (activeFilter === "saved" && updates.saved_by_user === false) {
-      setPosts((prev) => prev.filter((p) => p.id !== postId));
+  const handleSave = useCallback((postId: string, updates: Partial<PostWithAuthor>) => {
+    const key = isPostsTab ? queryKeys.posts.userPosts(userId) : queryKeys.posts.saved();
+    if (!isPostsTab && updates.saved_by_user === false) {
+      // If unsaved in "Saved" filter, remove from list
+      queryClient.setQueryData(key, (oldData: any) => {
+        if (!oldData?.pages) return oldData;
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: PostWithAuthor[]) =>
+            page.filter((p) => p.id !== postId)
+          ),
+        };
+      });
     } else {
-      setPosts((prev) =>
-        prev.map((p) => (p.id === postId ? { ...p, ...updates } : p))
-      );
+      queryClient.setQueryData(key, (oldData: any) => {
+        if (!oldData?.pages) return oldData;
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: PostWithAuthor[]) =>
+            page.map((p) => (p.id === postId ? { ...p, ...updates } : p))
+          ),
+        };
+      });
     }
-  };
+  }, [isPostsTab, userId, queryClient]);
 
-  const handleDelete = (postId: string) => {
-    setPosts((prev) => prev.filter((p) => p.id !== postId));
-  };
+  const handleDelete = useCallback((postId: string) => {
+    const key = isPostsTab ? queryKeys.posts.userPosts(userId) : queryKeys.posts.saved();
+    queryClient.setQueryData(key, (oldData: any) => {
+      if (!oldData?.pages) return oldData;
+      return {
+        ...oldData,
+        pages: oldData.pages.map((page: PostWithAuthor[]) =>
+          page.filter((p) => p.id !== postId)
+        ),
+      };
+    });
+  }, [isPostsTab, userId, queryClient]);
 
   const handleOpenCommentsInternal = (postId: string, commentCount: number) => {
-    if (onOpenComments) {
-      onOpenComments(postId, commentCount);
-    } else {
-      console.log("Open comments for post:", postId);
-    }
+    onOpenComments?.(postId, commentCount);
   };
 
-  if (loading && !refreshing) {
+  if (loading) {
     return (
-      <View className="flex-1 items-center justify-center p-6">
-        <Text className="text-gray-500">
-          Loading {activeFilter === "posts" ? "posts" : "saved posts"}...
-        </Text>
+      <View className="flex-1">
+        {isOwnProfile && (
+          <TabBar
+            tabs={[
+              { id: "posts", label: "Posts" },
+              { id: "saved", label: "Saved" },
+            ]}
+            activeTab={activeFilter}
+            onTabChange={handleFilterChange}
+          />
+        )}
+        <View className="flex-1 items-center justify-center p-6">
+          <Text className="text-gray-500">
+            Loading {isPostsTab ? "posts" : "saved posts"}...
+          </Text>
+        </View>
       </View>
     );
   }
 
   if (error && posts.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center p-6">
-        <Text className="text-red-500">{error}</Text>
+      <View className="flex-1">
+        {isOwnProfile && (
+          <TabBar
+            tabs={[
+              { id: "posts", label: "Posts" },
+              { id: "saved", label: "Saved" },
+            ]}
+            activeTab={activeFilter}
+            onTabChange={handleFilterChange}
+          />
+        )}
+        <View className="flex-1 items-center justify-center p-6">
+          <Text className="text-red-500">{error}</Text>
+        </View>
       </View>
     );
   }
 
-  const emptyStateMessage =
-    activeFilter === "posts"
-      ? { title: "No posts yet", subtitle: "Posts will appear here" }
-      : {
-          title: "No saved posts",
-          subtitle: "Posts you save will appear here",
-        };
+  const emptyStateMessage = isPostsTab
+    ? { title: "No posts yet", subtitle: "Posts will appear here" }
+    : { title: "No saved posts", subtitle: "Posts you save will appear here" };
 
   if (posts.length === 0) {
     return (
@@ -182,12 +176,8 @@ export function UserPostsSection({
           />
         )}
         <View className="flex-1 items-center justify-center p-6">
-          <SectionTitle className="mb-2">
-            {emptyStateMessage.title}
-          </SectionTitle>
-          <Caption className="text-center">
-            {emptyStateMessage.subtitle}
-          </Caption>
+          <SectionTitle className="mb-2">{emptyStateMessage.title}</SectionTitle>
+          <Caption className="text-center">{emptyStateMessage.subtitle}</Caption>
         </View>
       </View>
     );
@@ -236,6 +226,13 @@ export function UserPostsSection({
         }
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
+        ListFooterComponent={() =>
+          activeQuery.isFetchingNextPage ? (
+            <View className="py-4">
+              <ActivityIndicator size="small" color={colors.hex.purple600} />
+            </View>
+          ) : null
+        }
         scrollEnabled={scrollEnabled}
         nestedScrollEnabled={nestedScrollEnabled}
       />

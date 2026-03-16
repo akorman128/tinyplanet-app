@@ -1,14 +1,14 @@
-import { useSignIn } from "@/hooks/useSignIn";
+import { useSignInWithPhoneNumber } from "@/hooks/useSignIn";
 import { PhoneInputScreen } from "@/components/PhoneInputScreen";
 
 export default function SignInPage() {
-  const { signInWithPhoneNumber, isLoaded } = useSignIn();
+  const signInWithPhoneNumber = useSignInWithPhoneNumber();
 
   return (
     <PhoneInputScreen
-      isLoaded={isLoaded}
+      isLoaded={true}
       onSubmitPhone={async (phone) => {
-        await signInWithPhoneNumber({ phone });
+        await signInWithPhoneNumber.mutateAsync({ phone });
       }}
       heading="Welcome back"
       buttonText="Continue"

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { View, Pressable, FlatList, Platform } from "react-native";
 import { useRouter, Stack } from "expo-router";
-import { useLists } from "@/hooks/useLists";
+import { useGetViewableLists } from "@/hooks/useLists";
 import { useListSelectionStore } from "@/stores/listSelectionStore";
 import { ViewableList } from "@/types/list";
 import {
@@ -14,26 +14,9 @@ import {
 
 export default function SelectListScreen() {
   const router = useRouter();
-  const { getViewableLists } = useLists();
+  const { data: viewableResult, isLoading: loading } = useGetViewableLists();
+  const lists = viewableResult?.data ?? [];
   const { selectedList, setSelectedList } = useListSelectionStore();
-  const [lists, setLists] = useState<ViewableList[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadLists();
-  }, []);
-
-  const loadLists = async () => {
-    try {
-      setLoading(true);
-      const { data } = await getViewableLists();
-      setLists(data);
-    } catch (err) {
-      console.error("Error loading lists:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSelect = (list: ViewableList) => {
     setSelectedList({

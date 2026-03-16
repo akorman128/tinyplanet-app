@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   FlatList,
@@ -9,70 +9,39 @@ import {
 import { useRouter } from "expo-router";
 import { colors, Input, Body } from "@/design-system";
 import { UserSearchListItem } from "@/components/UserSearchList";
-import { useFriends } from "@/hooks/useFriends";
-import { Friend } from "@/types/friendship";
+import { useSearchFriends, useSendFriendRequest } from "@/hooks/useFriends";
 
 export default function SearchScreen() {
   const router = useRouter();
-  const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Friend[]>([]);
-  const [searchLoading, setSearchLoading] = useState(false);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
 
-  const { searchFriends, sendFriendRequest } = useFriends();
+  const { data: searchData, isPending: searchLoading, refetch } = useSearchFriends(debouncedQuery);
+  const searchResults = searchData?.data ?? [];
 
-  const handleSearch = useCallback(async () => {
-    if (!searchQuery.trim()) {
-      setSearchResults([]);
-      return;
-    }
-
-    try {
-      setSearchLoading(true);
-      const { data } = await searchFriends({ query: searchQuery });
-      setSearchResults(data);
-    } catch (error) {
-      console.error("Error searching users:", error);
-      Alert.alert("Error", "Failed to search users");
-    } finally {
-      setSearchLoading(false);
-    }
-  }, [searchQuery, searchFriends]);
+  const sendFriendRequest = useSendFriendRequest();
 
   // Debounced search (500ms)
-  useEffect(() => {
+  React.useEffect(() => {
     const timer = setTimeout(() => {
-      if (searchQuery.trim()) {
-        handleSearch();
-      } else {
-        setSearchResults([]);
-      }
+      setDebouncedQuery(searchQuery.trim());
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [searchQuery, handleSearch]);
+  }, [searchQuery]);
 
   const handleAddFriend = useCallback(
     async (userId: string) => {
       try {
-        await sendFriendRequest({ targetUserId: userId });
+        await sendFriendRequest.mutateAsync({ targetUserId: userId });
         Alert.alert("Success", "Friend request sent!");
-        handleSearch();
       } catch (error) {
         console.error("Error sending friend request:", error);
         Alert.alert("Error", "Failed to send friend request");
       }
     },
-    [sendFriendRequest, handleSearch]
+    [sendFriendRequest]
   );
-
-  const handleRefresh = useCallback(async () => {
-    setRefreshing(true);
-    if (searchQuery.trim()) {
-      await handleSearch();
-    }
-    setRefreshing(false);
-  }, [searchQuery, handleSearch]);
 
   const handleUserPress = useCallback(
     (userId: string) => {
@@ -96,7 +65,7 @@ export default function SearchScreen() {
         />
       </View>
 
-      {searchLoading ? (
+      {searchLoading && debouncedQuery ? (
         <View className="flex-1 justify-center items-center px-6">
           <ActivityIndicator size="large" color={colors.hex.purple600} />
         </View>
@@ -122,7 +91,7 @@ export default function SearchScreen() {
           )}
           contentContainerClassName="pb-6"
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+            <RefreshControl refreshing={false} onRefresh={() => refetch()} />
           }
         />
       )}

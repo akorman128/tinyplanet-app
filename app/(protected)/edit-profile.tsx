@@ -22,7 +22,7 @@ import {
 } from "@/design-system";
 import { LocationSearchInput, LocationSearchValue } from "@/components/LocationSearchInput";
 import { useProfileStore } from "@/stores/profileStore";
-import { useProfile } from "@/hooks/useProfile";
+import { useUpdateProfile } from "@/hooks/useProfile";
 import { parsePostGISPoint } from "@/utils/postgis";
 
 // Zod schema for profile edit validation
@@ -58,9 +58,8 @@ type Tab = "account" | "socials";
 export default function EditProfileScreen() {
   const router = useRouter();
   const { profileState } = useProfileStore();
-  const { updateProfile } = useProfile();
+  const updateProfile = useUpdateProfile();
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("account");
 
   const {
@@ -96,10 +95,9 @@ export default function EditProfileScreen() {
   });
 
   const onSubmit = async (data: EditProfileForm) => {
-    setIsSubmitting(true);
     try {
       const hometown = data.hometown!; // refine guarantees non-null
-      await updateProfile({
+      await updateProfile.mutateAsync({
         updateData: {
           full_name: data.fullName.trim(),
           birthday: data.birthday.toISOString(),
@@ -127,8 +125,6 @@ export default function EditProfileScreen() {
         "Error",
         error instanceof Error ? error.message : "Failed to update profile"
       );
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -404,7 +400,7 @@ export default function EditProfileScreen() {
               <Button
                 variant="primary"
                 onPress={handleSubmit(onSubmit)}
-                disabled={!isValid || isSubmitting}
+                disabled={!isValid || updateProfile.isPending}
               >
                 Save
               </Button>

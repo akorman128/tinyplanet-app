@@ -1,62 +1,72 @@
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { useSupabase } from "./useSupabase";
 import { useRequireProfile } from "./useRequireProfile";
+import { queryKeys } from "@/lib/queryKeys";
 import { PostWithAuthor } from "@/types/post";
 
-export const useSavedPosts = () => {
-  const { isLoaded, supabase } = useSupabase();
+const PAGE_SIZE = 10;
+
+export interface GetSavedPostsOutput {
+  data: PostWithAuthor[];
+}
+
+export const useSavePost = () => {
+  const { supabase } = useSupabase();
+  const profile = useRequireProfile();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (postId: string) => {
+      const { error } = await supabase.from("saved_posts").insert({
+        user_id: profile.id,
+        post_id: postId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
+    },
+  });
+};
+
+export const useUnsavePost = () => {
+  const { supabase } = useSupabase();
+  const profile = useRequireProfile();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (postId: string) => {
+      const { error } = await supabase
+        .from("saved_posts")
+        .delete()
+        .eq("user_id", profile.id)
+        .eq("post_id", postId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
+    },
+  });
+};
+
+export const useGetSavedPosts = () => {
+  const { supabase } = useSupabase();
   const profile = useRequireProfile();
 
-  // ––– QUERIES –––
-
-  interface GetSavedPostsOutput {
-    data: PostWithAuthor[];
-  }
-
-  const getSavedPosts = async (options: {
-    limit: number;
-    offset: number;
-  }): Promise<GetSavedPostsOutput> => {
-    const { limit, offset } = options;
-
-    const { data: posts, error: postsError } = await supabase.rpc(
-      "get_saved_posts",
-      {
+  return useInfiniteQuery({
+    queryKey: queryKeys.posts.saved(),
+    queryFn: async ({ pageParam = 0 }) => {
+      const { data: posts, error } = await supabase.rpc("get_saved_posts", {
         user_id_param: profile.id,
-        limit_param: limit,
-        offset_param: offset,
-      }
-    );
-
-    if (postsError) throw postsError;
-
-    return { data: (posts as PostWithAuthor[]) || [] };
-  };
-
-  // ––– MUTATIONS –––
-
-  const savePost = async (postId: string): Promise<void> => {
-    const { error } = await supabase.from("saved_posts").insert({
-      user_id: profile.id,
-      post_id: postId,
-    });
-
-    if (error) throw error;
-  };
-
-  const unsavePost = async (postId: string): Promise<void> => {
-    const { error } = await supabase
-      .from("saved_posts")
-      .delete()
-      .eq("user_id", profile.id)
-      .eq("post_id", postId);
-
-    if (error) throw error;
-  };
-
-  return {
-    isLoaded,
-    getSavedPosts,
-    savePost,
-    unsavePost,
-  };
+        limit_param: PAGE_SIZE,
+        offset_param: pageParam,
+      });
+      if (error) throw error;
+      return (posts as PostWithAuthor[]) || [];
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length < PAGE_SIZE ? undefined : allPages.flat().length,
+  });
 };

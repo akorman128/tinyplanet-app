@@ -2,7 +2,13 @@ import React, { useState, useEffect } from "react";
 import { ActionSheetIOS, Platform, Alert, Pressable } from "react-native";
 import { Badge, Button } from "@/design-system";
 import { FriendshipDisplayStatus } from "@/types/friendship";
-import { useFriends } from "@/hooks/useFriends";
+import {
+  useGetFriendshipStatus,
+  useSendFriendRequest,
+  useAcceptFriendRequest,
+  useDeclineFriendRequest,
+  useUnfriend,
+} from "@/hooks/useFriends";
 
 type FriendStatusSectionProps = {
   userId: string;
@@ -47,46 +53,27 @@ export function FriendStatusSection({
   onStatusChange,
   onError,
 }: FriendStatusSectionProps) {
-  const {
-    getFriendshipStatus,
-    sendFriendRequest,
-    acceptFriendRequest,
-    declineFriendRequest,
-    unfriend,
-  } = useFriends();
+  const { data: statusData, isPending } = useGetFriendshipStatus(userId);
+  const status = statusData?.status ?? null;
 
-  const [status, setStatus] = useState<FriendshipDisplayStatus | "loading">(
-    "loading"
-  );
+  const sendFriendRequest = useSendFriendRequest();
+  const acceptFriendRequest = useAcceptFriendRequest();
+  const declineFriendRequest = useDeclineFriendRequest();
+  const unfriend = useUnfriend();
+
   const [actionLoading, setActionLoading] = useState(false);
 
-  // Fetch initial friendship status
+  // Notify parent when status changes
   useEffect(() => {
-    const fetchStatus = async () => {
-      setStatus("loading");
-      try {
-        const statusResult = await getFriendshipStatus(userId);
-        setStatus(statusResult.status);
-        onStatusChange?.(statusResult.status);
-      } catch (err) {
-        setStatus(FriendshipDisplayStatus.NOT_FRIENDS);
-        onStatusChange?.(FriendshipDisplayStatus.NOT_FRIENDS);
-      }
-    };
-
-    fetchStatus();
-  }, [userId, getFriendshipStatus, onStatusChange]);
-
-  const updateStatus = (newStatus: FriendshipDisplayStatus) => {
-    setStatus(newStatus);
-    onStatusChange?.(newStatus);
-  };
+    if (status) {
+      onStatusChange?.(status);
+    }
+  }, [status]);
 
   const handleAddFriend = async () => {
     setActionLoading(true);
     try {
-      await sendFriendRequest({ targetUserId: userId });
-      updateStatus(FriendshipDisplayStatus.PENDING_SENT);
+      await sendFriendRequest.mutateAsync({ targetUserId: userId });
     } catch (err) {
       onError?.("Failed to send friend request");
     } finally {
@@ -97,8 +84,7 @@ export function FriendStatusSection({
   const handleUnfriend = async () => {
     setActionLoading(true);
     try {
-      await unfriend({ targetUserId: userId });
-      updateStatus(FriendshipDisplayStatus.NOT_FRIENDS);
+      await unfriend.mutateAsync({ targetUserId: userId });
     } catch (err) {
       onError?.("Failed to unfriend");
     } finally {
@@ -109,8 +95,7 @@ export function FriendStatusSection({
   const handleAcceptRequest = async () => {
     setActionLoading(true);
     try {
-      await acceptFriendRequest({ fromUserId: userId });
-      updateStatus(FriendshipDisplayStatus.FRIENDS);
+      await acceptFriendRequest.mutateAsync({ fromUserId: userId });
     } catch (err) {
       onError?.("Failed to accept friend request");
     } finally {
@@ -121,8 +106,7 @@ export function FriendStatusSection({
   const handleDeclineRequest = async () => {
     setActionLoading(true);
     try {
-      await declineFriendRequest({ targetUserId: userId });
-      updateStatus(FriendshipDisplayStatus.NOT_FRIENDS);
+      await declineFriendRequest.mutateAsync({ targetUserId: userId });
     } catch (err) {
       onError?.("Failed to decline friend request");
     } finally {
@@ -133,8 +117,7 @@ export function FriendStatusSection({
   const handleCancelRequest = async () => {
     setActionLoading(true);
     try {
-      await declineFriendRequest({ targetUserId: userId });
-      updateStatus(FriendshipDisplayStatus.NOT_FRIENDS);
+      await declineFriendRequest.mutateAsync({ targetUserId: userId });
     } catch (err) {
       onError?.("Failed to cancel friend request");
     } finally {
@@ -142,7 +125,7 @@ export function FriendStatusSection({
     }
   };
 
-  if (status === "loading") {
+  if (isPending || !status) {
     return null;
   }
 

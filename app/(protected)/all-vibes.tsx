@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   FlatList,
@@ -20,7 +20,7 @@ import {
   SectionTitle,
   Text,
 } from "@/design-system";
-import { useVibe } from "@/hooks/useVibe";
+import { useGetVibesWithSenderInfo, useCreateVibe, useHasGivenVibe } from "@/hooks/useVibe";
 import { VibeWithSender } from "@/types/vibe";
 import { formatTimeAgo } from "@/utils";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
@@ -28,52 +28,17 @@ import { extractEmojis } from "@/utils/emojiValidation";
 
 export default function AllVibesScreen() {
   const { userId } = useLocalSearchParams<{ userId: string }>();
-  const { getVibesWithSenderInfo, createVibe, hasGivenVibe, isLoaded } =
-    useVibe();
-  const [vibes, setVibes] = useState<VibeWithSender[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: vibesData, isLoading: loading, error: vibesError } = useGetVibesWithSenderInfo(userId);
+  const createVibe = useCreateVibe();
+  const { data: hasUserGivenVibe = false } = useHasGivenVibe(userId);
   const [showModal, setShowModal] = useState(false);
-  const [hasUserGivenVibe, setHasUserGivenVibe] = useState(false);
   const [emojiInput, setEmojiInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const profile = useRequireProfile();
 
-  useEffect(() => {
-    const loadVibes = async () => {
-      if (!userId || !isLoaded) return;
-
-      try {
-        setLoading(true);
-        const result = await getVibesWithSenderInfo(userId);
-        setVibes(result.data as VibeWithSender[]);
-      } catch (err) {
-        console.error("Error loading vibes:", err);
-        setError("Failed to load vibes");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadVibes();
-  }, [userId, getVibesWithSenderInfo, isLoaded]);
-
-  // Check if current user has given a vibe to this recipient
-  useEffect(() => {
-    const checkUserVibe = async () => {
-      if (!userId || !isLoaded) return;
-
-      try {
-        const hasGiven = await hasGivenVibe(userId);
-        setHasUserGivenVibe(hasGiven);
-      } catch (error) {
-        console.error("Error checking user vibe:", error);
-      }
-    };
-
-    checkUserVibe();
-  }, [userId, hasGivenVibe, isLoaded]);
+  const vibes = vibesData?.data ?? [];
+  const error = vibesError ? "Failed to load vibes" : null;
 
   const handleSubmitVibe = async () => {
     if (!userId) return;
@@ -88,18 +53,13 @@ export default function AllVibesScreen() {
 
     setIsSubmitting(true);
     try {
-      await createVibe({
+      await createVibe.mutateAsync({
         receiverId: userId,
         emojis: emojis,
       });
 
       setShowModal(false);
       setEmojiInput("");
-      setHasUserGivenVibe(true);
-
-      // Reload vibes list
-      const result = await getVibesWithSenderInfo(userId);
-      setVibes(result.data as VibeWithSender[]);
     } catch (error) {
       console.error("Error creating vibe:", error);
       Alert.alert("Error", "Failed to send vibe. Please try again.");

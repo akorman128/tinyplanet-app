@@ -1,23 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { View, ScrollView, Alert } from "react-native";
+import { ScrollView, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, OptionSelector, Icons, ScreenHeader } from "@/design-system";
 import { PostForm, postSchema, PostFormData } from "@/components/PostForm";
-import { usePosts } from "@/hooks/usePosts";
+import { useCreatePost } from "@/hooks/usePosts";
 import { PostVisibility } from "@/types/post";
 import { useListSelectionStore } from "@/stores/listSelectionStore";
 
 export default function CreatePostScreen() {
   const router = useRouter();
-  const { createPost } = usePosts();
+  const createPost = useCreatePost();
   const { selectedList, clear: clearListSelection } = useListSelectionStore();
 
   const [visibility, setVisibility] = useState<PostVisibility>("public");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const form = useForm<PostFormData>({
     resolver: zodResolver(postSchema),
     defaultValues: { text: "" },
@@ -30,9 +28,8 @@ export default function CreatePostScreen() {
   }, [clearListSelection]);
 
   const onSubmit = async (data: PostFormData) => {
-    setIsSubmitting(true);
     try {
-      await createPost({
+      await createPost.mutateAsync({
         text: data.text,
         visibility,
         list_id: selectedList?.id || null,
@@ -41,8 +38,6 @@ export default function CreatePostScreen() {
     } catch (err) {
       console.error("Error creating post:", err);
       Alert.alert("Error", "Failed to create post. Please try again.");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -81,9 +76,9 @@ export default function CreatePostScreen() {
         <Button
           variant="primary"
           onPress={form.handleSubmit(onSubmit)}
-          disabled={isSubmitting || !!form.formState.errors.text}
+          disabled={createPost.isPending || !!form.formState.errors.text}
         >
-          {isSubmitting ? "Posting..." : "Post"}
+          {createPost.isPending ? "Posting..." : "Post"}
         </Button>
       </ScrollView>
     </SafeAreaView>

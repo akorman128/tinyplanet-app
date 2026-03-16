@@ -3,6 +3,7 @@ import { Text } from "./Text";
 import { JSX } from "react";
 import { IconProps } from "./Icons";
 import { Badge } from "./Badge";
+import { hapticSelection } from "@/utils";
 
 export interface ButtonGroupOption {
   label?: string;
@@ -41,7 +42,10 @@ export function ButtonGroup({
         return (
           <TouchableOpacity
             key={index}
-            onPress={option.onPress}
+            onPress={() => {
+              hapticSelection();
+              option.onPress();
+            }}
             className={`relative flex-1 py-4 px-6 ${
               isActive ? "bg-purple-600" : "bg-transparent"
             } active:bg-gray-800 ${!isLast ? "border-r border-gray-600" : ""}`}

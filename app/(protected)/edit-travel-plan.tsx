@@ -15,21 +15,17 @@ import {
   travelPlanSchema,
   TravelPlanFormData,
 } from "@/components/TravelPlanForm";
-import { useTravelPlan } from "@/hooks/useTravelPlan";
-import { useSupabase } from "@/hooks/useSupabase";
+import { useUpdateTravelPlan, useGetTravelPlanByPostId } from "@/hooks/useTravelPlan";
 import { PostVisibility } from "@/types/post";
 
 export default function EditTravelPlanScreen() {
   const router = useRouter();
   const { postId } = useLocalSearchParams<{ postId: string }>();
-  const { updateTravelPlan } = useTravelPlan();
-  const { supabase } = useSupabase();
-  const [travelPlanId, setTravelPlanId] = useState<string | null>(null);
+  const updateTravelPlan = useUpdateTravelPlan();
+  const { data: travelPlan, isPending: loading, error: queryError } = useGetTravelPlanByPostId(postId);
+  const travelPlanId = travelPlan?.id ?? null;
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [visibility, setVisibility] = useState<PostVisibility>("friends");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<TravelPlanFormData>({
     resolver: zodResolver(travelPlanSchema),
@@ -41,72 +37,27 @@ export default function EditTravelPlanScreen() {
     mode: "all",
   });
 
-  // Fetch travel plan on mount using post ID
+  // Pre-fill form when travel plan data loads
   useEffect(() => {
-    const fetchTravelPlan = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+    if (!travelPlan) return;
 
-        if (!postId) {
-          setError("No post ID provided");
-          setLoading(false);
-          return;
-        }
+    // Validate coordinates
+    if (!travelPlan.longitude || !travelPlan.latitude) return;
 
-        // Fetch travel plan by post ID using RPC function
-        const { data, error: fetchError } = await supabase.rpc(
-          "get_travel_plan_by_post_id",
-          { p_post_id: postId }
-        );
+    form.reset({
+      destination: {
+        name: travelPlan.destination_name,
+        latitude: travelPlan.latitude,
+        longitude: travelPlan.longitude,
+      },
+      startDate: new Date(travelPlan.start_date),
+      durationDays: travelPlan.duration_days,
+      text: "", // Leave empty - user can add new text if desired
+    });
 
-        if (fetchError) throw fetchError;
-
-        if (!data || data.length === 0) {
-          setError("Travel plan not found");
-          setLoading(false);
-          return;
-        }
-
-        const travelPlan = data[0];
-
-        // Store the travel plan ID for the update call
-        setTravelPlanId(travelPlan.id);
-
-        // Validate coordinates
-        if (!travelPlan.longitude || !travelPlan.latitude) {
-          setError("Invalid destination coordinates");
-          setLoading(false);
-          return;
-        }
-
-        // Pre-fill form with actual travel plan data
-        form.reset({
-          destination: {
-            name: travelPlan.destination_name,
-            latitude: travelPlan.latitude,
-            longitude: travelPlan.longitude,
-          },
-          startDate: new Date(travelPlan.start_date),
-          durationDays: travelPlan.duration_days,
-          text: "", // Leave empty - user can add new text if desired
-        });
-
-        // Trigger validation after reset to properly update form state
-        form.trigger();
-
-        // Set default visibility (travel plans are typically friends-only)
-        setVisibility("friends");
-      } catch (err) {
-        console.error("Error fetching travel plan:", err);
-        setError("Failed to load travel plan");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTravelPlan();
-  }, [supabase, postId, form]);
+    form.trigger();
+    setVisibility("friends");
+  }, [travelPlan]);
 
   const onSubmit = async (data: TravelPlanFormData) => {
     if (!travelPlanId) {
@@ -114,9 +65,8 @@ export default function EditTravelPlanScreen() {
       return;
     }
 
-    setIsSubmitting(true);
     try {
-      await updateTravelPlan({
+      await updateTravelPlan.mutateAsync({
         travel_plan_id: travelPlanId,
         destination: {
           name: data.destination!.name,
@@ -134,8 +84,6 @@ export default function EditTravelPlanScreen() {
     } catch (err) {
       console.error("Error updating travel plan:", err);
       Alert.alert("Error", "Failed to update travel plan. Please try again.");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -159,12 +107,12 @@ export default function EditTravelPlanScreen() {
     );
   }
 
-  if (error) {
+  if (queryError) {
     return (
       <>
         <Stack.Screen options={{ title: "Edit Travel Plan" }} />
         <View className="flex-1 bg-white">
-          <ErrorState message={error} />
+          <ErrorState message={queryError.message ?? "Failed to load travel plan"} />
         </View>
       </>
     );
@@ -198,9 +146,9 @@ export default function EditTravelPlanScreen() {
           <Button
             variant="primary"
             onPress={form.handleSubmit(onSubmit)}
-            disabled={isSubmitting || !form.formState.isValid}
+            disabled={updateTravelPlan.isPending || !form.formState.isValid}
           >
-            {isSubmitting ? "Saving..." : "Save"}
+            {updateTravelPlan.isPending ? "Saving..." : "Save"}
           </Button>
         </ScrollView>
       </View>

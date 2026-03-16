@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Input, Button, Icons, colors } from "@/design-system";
 import { useContactPicker } from "@/hooks/useContactPicker";
-import { useContacts } from "@/hooks/useContacts";
+import { useCreateContact } from "@/hooks/useContacts";
 import {
   LocationSearchInput,
   LocationSearchValue,
@@ -33,7 +33,7 @@ type AddContactForm = z.infer<typeof addContactSchema>;
 export default function AddContactScreen() {
   const router = useRouter();
   const { pickFullContact } = useContactPicker();
-  const { createContact } = useContacts();
+  const createContact = useCreateContact();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contactLocation, setContactLocation] =
     useState<LocationSearchValue | null>(null);
@@ -69,7 +69,7 @@ export default function AddContactScreen() {
   const onSubmit = async (data: AddContactForm) => {
     setIsSubmitting(true);
     try {
-      await createContact({
+      await createContact.mutateAsync({
         name: data.name,
         phone: data.phone || undefined,
         email: data.email || undefined,

@@ -5,6 +5,7 @@ import { Avatar } from "./Avatar";
 import { Badge } from "./Badge";
 import { Button } from "./Button";
 import { PendingRequest } from "@/types/friendship";
+import { hapticSuccess, hapticWarning } from "@/utils";
 
 type FriendRequestItemProps = {
   request: PendingRequest;
@@ -39,13 +40,19 @@ export function FriendRequestItem({
           <>
             <Button
               variant="primary"
-              onPress={() => onAccept?.(request.id)}
+              onPress={() => {
+                hapticSuccess();
+                onAccept?.(request.id);
+              }}
             >
               Accept
             </Button>
             <Button
               variant="secondary"
-              onPress={() => onDecline?.(request.id)}
+              onPress={() => {
+                hapticWarning();
+                onDecline?.(request.id);
+              }}
             >
               Decline
             </Button>

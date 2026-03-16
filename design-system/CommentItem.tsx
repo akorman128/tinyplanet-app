@@ -6,7 +6,7 @@ import { Icons } from "./Icons";
 import { colors } from "./colors";
 import { ListChip } from "./ListChip";
 import { CommentWithAuthor } from "@/types/comment";
-import { formatTimeAgo } from "@/utils";
+import { formatTimeAgo, hapticLight } from "@/utils";
 
 interface CommentItemProps {
   comment: CommentWithAuthor;
@@ -25,6 +25,7 @@ export function CommentItem({
 
   const handleLikeToggle = async () => {
     if (isLiking) return;
+    hapticLight();
 
     setIsLiking(true);
     try {

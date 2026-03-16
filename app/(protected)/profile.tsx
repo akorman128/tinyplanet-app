@@ -63,6 +63,7 @@ export default function ProfileScreen() {
         options={{
           title: "",
           headerShadowVisible: false,
+          headerTransparent: true,
           headerRight:
             Platform.OS === "android" && isViewingOwnProfile
               ? () => (
@@ -170,7 +171,6 @@ export default function ProfileScreen() {
           </View>
 
           <ProfileInfoCard
-            birthday={displayProfile.birthday}
             hometown={displayProfile.hometown}
             hasLocation={
               displayProfile.latitude !== undefined &&

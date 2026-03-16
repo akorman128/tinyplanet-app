@@ -1,5 +1,8 @@
+import { useMutation, useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query";
+
 import { useSupabase } from "./useSupabase";
 import { useRequireProfile } from "./useRequireProfile";
+import { queryKeys } from "@/lib/queryKeys";
 import {
   Contact,
   CreateContactInput,
@@ -7,143 +10,139 @@ import {
   GetContactsOutput,
 } from "@/types/contact";
 
-export const useContacts = () => {
-  const { isLoaded, supabase } = useSupabase();
+// --- Mutation hooks ---
+
+export const useCreateContact = () => {
+  const { supabase } = useSupabase();
   const profile = useRequireProfile();
+  const queryClient = useQueryClient();
 
-  // ––– QUERIES –––
+  return useMutation({
+    mutationFn: async (input: CreateContactInput): Promise<Contact> => {
+      const { data, error } = await supabase
+        .from("contacts")
+        .insert({
+          user_id: profile.id,
+          name: input.name,
+          phone: input.phone || null,
+          email: input.email || null,
+          company: input.company || null,
+          note: input.note || null,
+          location: input.location
+            ? `POINT(${input.location.longitude} ${input.location.latitude})`
+            : null,
+          location_name: input.location?.name || null,
+        })
+        .select()
+        .single();
 
-  /**
-   * Get contacts for a specific user (self or friend)
-   */
-  const getContacts = async (
-    userId?: string
-  ): Promise<GetContactsOutput> => {
-    const targetUserId = userId ?? profile.id;
+      if (error) throw new Error(`Failed to create contact: ${error.message}`);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
+    },
+  });
+};
 
-    const { data, error } = await supabase.rpc("get_contacts_ordered", {
-      p_user_id: targetUserId,
-    });
+export const useUpdateContact = () => {
+  const { supabase } = useSupabase();
+  const profile = useRequireProfile();
+  const queryClient = useQueryClient();
 
-    if (error) {
-      throw new Error(`Failed to fetch contacts: ${error.message}`);
-    }
+  return useMutation({
+    mutationFn: async (input: UpdateContactInput): Promise<Contact> => {
+      const { contact_id, ...updates } = input;
 
-    return {
-      data: (data as Contact[]) || [],
-      total: data?.length || 0,
-    };
-  };
+      const updateData: Record<string, string | null> = {};
+      if (updates.name !== undefined) updateData.name = updates.name;
+      if (updates.phone !== undefined) updateData.phone = updates.phone || null;
+      if (updates.email !== undefined) updateData.email = updates.email || null;
+      if (updates.company !== undefined)
+        updateData.company = updates.company || null;
+      if (updates.note !== undefined) updateData.note = updates.note || null;
+      if (updates.location !== undefined) {
+        updateData.location = `POINT(${updates.location.longitude} ${updates.location.latitude})`;
+        updateData.location_name = updates.location.name;
+      }
 
-  /**
-   * Get a single contact by ID
-   */
-  const getContact = async (
-    contactId: string
-  ): Promise<Contact | null> => {
-    const { data, error } = await supabase
-      .from("contacts")
-      .select("*")
-      .eq("id", contactId)
-      .maybeSingle();
+      const { data, error } = await supabase
+        .from("contacts")
+        .update(updateData)
+        .eq("id", contact_id)
+        .eq("user_id", profile.id)
+        .select()
+        .single();
 
-    if (error) {
-      throw new Error(`Failed to fetch contact: ${error.message}`);
-    }
+      if (error) throw new Error(`Failed to update contact: ${error.message}`);
+      return data;
+    },
+    onSuccess: (_data, input) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.contacts.detail(input.contact_id),
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
+    },
+  });
+};
 
-    return data;
-  };
+export const useDeleteContact = () => {
+  const { supabase } = useSupabase();
+  const profile = useRequireProfile();
+  const queryClient = useQueryClient();
 
-  // ––– MUTATIONS –––
+  return useMutation({
+    mutationFn: async (contactId: string) => {
+      const { error } = await supabase
+        .from("contacts")
+        .delete()
+        .eq("id", contactId)
+        .eq("user_id", profile.id);
 
-  /**
-   * Create a new contact
-   */
-  const createContact = async (
-    input: CreateContactInput
-  ): Promise<Contact> => {
-    const { data, error } = await supabase
-      .from("contacts")
-      .insert({
-        user_id: profile.id,
-        name: input.name,
-        phone: input.phone || null,
-        email: input.email || null,
-        company: input.company || null,
-        note: input.note || null,
-        location: input.location
-          ? `POINT(${input.location.longitude} ${input.location.latitude})`
-          : null,
-        location_name: input.location?.name || null,
-      })
-      .select()
-      .single();
+      if (error) throw new Error(`Failed to delete contact: ${error.message}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
+    },
+  });
+};
 
-    if (error) {
-      throw new Error(`Failed to create contact: ${error.message}`);
-    }
+// --- Query hooks ---
 
-    return data;
-  };
+export const useGetContacts = (userId?: string): UseQueryResult<GetContactsOutput> => {
+  const { supabase } = useSupabase();
+  const profile = useRequireProfile();
+  const targetUserId = userId ?? profile.id;
 
-  /**
-   * Update an existing contact
-   */
-  const updateContact = async (
-    input: UpdateContactInput
-  ): Promise<Contact> => {
-    const { contact_id, ...updates } = input;
+  return useQuery({
+    queryKey: queryKeys.contacts.list(targetUserId),
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_contacts_ordered", {
+        p_user_id: targetUserId,
+      });
+      if (error) throw new Error(`Failed to fetch contacts: ${error.message}`);
+      return {
+        data: (data as Contact[]) || [],
+        total: data?.length || 0,
+      };
+    },
+  });
+};
 
-    const updateData: Record<string, string | null> = {};
-    if (updates.name !== undefined) updateData.name = updates.name;
-    if (updates.phone !== undefined) updateData.phone = updates.phone || null;
-    if (updates.email !== undefined) updateData.email = updates.email || null;
-    if (updates.company !== undefined)
-      updateData.company = updates.company || null;
-    if (updates.note !== undefined) updateData.note = updates.note || null;
-    if (updates.location !== undefined) {
-      updateData.location = `POINT(${updates.location.longitude} ${updates.location.latitude})`;
-      updateData.location_name = updates.location.name;
-    }
+export const useGetContact = (contactId?: string): UseQueryResult<Contact | null> => {
+  const { supabase } = useSupabase();
 
-    const { data, error } = await supabase
-      .from("contacts")
-      .update(updateData)
-      .eq("id", contact_id)
-      .eq("user_id", profile.id)
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(`Failed to update contact: ${error.message}`);
-    }
-
-    return data;
-  };
-
-  /**
-   * Delete a contact
-   */
-  const deleteContact = async (contactId: string): Promise<void> => {
-    const { error } = await supabase
-      .from("contacts")
-      .delete()
-      .eq("id", contactId)
-      .eq("user_id", profile.id);
-
-    if (error) {
-      throw new Error(`Failed to delete contact: ${error.message}`);
-    }
-  };
-
-  return {
-    isLoaded,
-    // Queries
-    getContacts,
-    getContact,
-    // Mutations
-    createContact,
-    updateContact,
-    deleteContact,
-  };
+  return useQuery({
+    queryKey: queryKeys.contacts.detail(contactId!),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("contacts")
+        .select("*")
+        .eq("id", contactId!)
+        .maybeSingle();
+      if (error) throw new Error(`Failed to fetch contact: ${error.message}`);
+      return data;
+    },
+    enabled: !!contactId,
+  });
 };

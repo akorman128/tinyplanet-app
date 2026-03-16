@@ -1,10 +1,10 @@
-import React, { forwardRef, useState, useEffect, useCallback } from "react";
+import React, { forwardRef, useState, useCallback } from "react";
 import { View, Pressable } from "react-native";
 import BottomSheet, {
   BottomSheetView,
   BottomSheetFlatList,
 } from "@gorhom/bottom-sheet";
-import { useLists } from "@/hooks/useLists";
+import { useGetViewableLists } from "@/hooks/useLists";
 import { ViewableList } from "@/types/list";
 import {
   LoadingState,
@@ -25,28 +25,9 @@ interface ListPickerSheetProps {
 
 export const ListPickerSheet = forwardRef<BottomSheet, ListPickerSheetProps>(
   ({ onSelect, selectedListId, onSheetChange }, ref) => {
-    const { getViewableLists } = useLists();
-    const [lists, setLists] = useState<ViewableList[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { data: viewableResult, isLoading: loading } = useGetViewableLists();
+    const lists = viewableResult?.data ?? [];
     const [sheetIndex, setSheetIndex] = useState(-1);
-
-    useEffect(() => {
-      if (sheetIndex >= 0) {
-        loadLists();
-      }
-    }, [sheetIndex]);
-
-    const loadLists = async () => {
-      try {
-        setLoading(true);
-        const { data } = await getViewableLists();
-        setLists(data);
-      } catch (err) {
-        console.error("Error loading lists:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
 
     const handleSelect = (list: ViewableList) => {
       onSelect(list);

@@ -3,6 +3,7 @@ import { Text } from "./Text";
 import { JSX } from "react";
 import { IconProps } from "./Icons";
 import { colors } from "./colors";
+import { hapticSelection } from "@/utils";
 
 export interface OptionSelectorOption<T extends string> {
   value: T;
@@ -44,7 +45,10 @@ export function OptionSelector<T extends string>({
                   ? "border-purple-600 bg-purple-50"
                   : "border-gray-300 bg-white"
               }`}
-              onPress={() => onChange(option.value)}
+              onPress={() => {
+                hapticSelection();
+                onChange(option.value);
+              }}
             >
               {Icon && (
                 <Icon

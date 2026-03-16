@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { View, TouchableOpacity, Pressable, Switch } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
 import { useRouter } from "expo-router";
 import Svg, { Defs, LinearGradient, Stop, Rect } from "react-native-svg";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -8,8 +9,7 @@ import { MapView } from "@/components/MapView";
 import { Avatar, Body, Caption, Icons, colors } from "@/design-system";
 import { useProfileStore } from "@/stores/profileStore";
 import { useMapStore } from "@/stores/mapStore";
-import { useFriends } from "@/hooks/useFriends";
-import type { PlatformStatistics } from "@/types/friendship";
+import { useGetPlatformStatistics } from "@/hooks/useFriends";
 
 export default function MapTab() {
   const router = useRouter();
@@ -21,15 +21,9 @@ export default function MapTab() {
     mapFilter,
     setMapFilter,
   } = useMapStore();
-  const { getPlatformStatistics } = useFriends();
-  const [statistics, setStatistics] = useState<PlatformStatistics | null>(null);
-  const [showStats, setShowStats] = useState(false);
-
-  useEffect(() => {
-    getPlatformStatistics().then((result) => {
-      setStatistics(result.data);
-    });
-  }, [getPlatformStatistics]);
+  const { data: statsData } = useGetPlatformStatistics();
+  const statistics = statsData?.data ?? null;
+  const [showStats, setShowStats] = React.useState(false);
 
   return (
     <GestureHandlerRootView className="flex-1">
@@ -37,8 +31,9 @@ export default function MapTab() {
         <MapView mapFilter={mapFilter} />
 
         {/* Top Overlay: Black header with gradient fade */}
-        <View
+        <Animated.View
           className="absolute top-0 left-0 right-0 z-10"
+          entering={FadeIn.duration(500).delay(200)}
           pointerEvents="box-none"
         >
           <View
@@ -164,7 +159,7 @@ export default function MapTab() {
               ))}
             </View>
           </View>
-        </View>
+        </Animated.View>
       </View>
     </GestureHandlerRootView>
   );

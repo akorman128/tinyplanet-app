@@ -1,131 +1,103 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import {
-  FlatList,
-  RefreshControl,
-  View,
-  ActivityIndicator,
-} from "react-native";
+import React, { useCallback } from "react";
+import { FlatList, RefreshControl, View, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "expo-router";
-import { useFeed } from "@/hooks/useFeed";
+import { useQueryClient } from "@tanstack/react-query";
+import { useGetFeed } from "@/hooks/useFeed";
 import { PostCard } from "../design-system/PostCard";
 import { TravelPlanCard } from "../design-system/TravelPlanCard";
 import { EmptyState, LoadingState, ErrorState, colors } from "@/design-system";
 import { PostWithAuthor } from "@/types/post";
 import { useCommentCountStore } from "@/stores/commentCountStore";
+import { queryKeys } from "@/lib/queryKeys";
 
 const isTravelPlanPost = (post: PostWithAuthor): boolean => {
   return post.text.startsWith("🚀 Traveling to");
 };
 
-const PAGE_SIZE = 10;
-
 export function FeedView() {
   const router = useRouter();
-  const { getFeed } = useFeed();
-  const [posts, setPosts] = useState<PostWithAuthor[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(true);
-  const [offset, setOffset] = useState(0);
+  const queryClient = useQueryClient();
+  const {
+    data,
+    isPending,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+    isRefetching,
+  } = useGetFeed();
 
-  const getFeedRef = useRef(getFeed);
-  useEffect(() => {
-    getFeedRef.current = getFeed;
-  }, [getFeed]);
-
-  const hasLoadedRef = useRef(false);
-  const isLoadingRef = useRef(false);
-
+  const posts = data?.pages.flat() ?? [];
   const consume = useCommentCountStore((s) => s.consume);
 
   // Sync comment counts when returning from comments screen
   useFocusEffect(
     useCallback(() => {
-      setPosts((prev) =>
-        prev.map((post) => {
-          const newCount = consume(post.id);
-          if (newCount !== undefined) {
-            return { ...post, comment_count: newCount };
-          }
-          return post;
-        })
-      );
-    }, [consume])
+      // Update cached posts with fresh comment counts
+      queryClient.setQueryData(queryKeys.posts.feed(), (oldData: any) => {
+        if (!oldData?.pages) return oldData;
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: PostWithAuthor[]) =>
+            page.map((post) => {
+              const newCount = consume(post.id);
+              if (newCount !== undefined) {
+                return { ...post, comment_count: newCount };
+              }
+              return post;
+            })
+          ),
+        };
+      });
+    }, [consume, queryClient])
   );
-
-  const loadFeed = useCallback(async () => {
-    if (isLoadingRef.current) {
-      return;
-    }
-
-    isLoadingRef.current = true;
-    hasLoadedRef.current = true;
-
-    try {
-      setError(null);
-      const result = await getFeedRef.current({ limit: PAGE_SIZE, offset: 0 });
-      setPosts(result.data);
-      setOffset(PAGE_SIZE);
-      setHasMore(result.data.length === PAGE_SIZE);
-    } catch (err) {
-      console.error("Error loading feed:", err);
-      setError("Failed to load feed");
-    } finally {
-      setLoading(false);
-      isLoadingRef.current = false;
-    }
-  }, []);
-
-  useEffect(() => {
-    loadFeed();
-  }, [loadFeed]);
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await loadFeed();
-    setRefreshing(false);
-  };
-
-  const handleLoadMore = useCallback(async () => {
-    if (loadingMore || !hasMore || refreshing) return;
-
-    setLoadingMore(true);
-    try {
-      const result = await getFeedRef.current({ limit: PAGE_SIZE, offset });
-      setPosts((prev) => [...prev, ...result.data]);
-      setOffset((prev) => prev + PAGE_SIZE);
-      setHasMore(result.data.length === PAGE_SIZE);
-    } catch (err) {
-      console.error("Error loading more posts:", err);
-    } finally {
-      setLoadingMore(false);
-    }
-  }, [offset, loadingMore, hasMore, refreshing]);
 
   const handleLikePost = useCallback(
     (postId: string, updates: Partial<PostWithAuthor>) => {
-      setPosts((prev) =>
-        prev.map((p) => (p.id === postId ? { ...p, ...updates } : p))
-      );
+      queryClient.setQueryData(queryKeys.posts.feed(), (oldData: any) => {
+        if (!oldData?.pages) return oldData;
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: PostWithAuthor[]) =>
+            page.map((p) => (p.id === postId ? { ...p, ...updates } : p))
+          ),
+        };
+      });
     },
-    []
+    [queryClient]
   );
 
   const handleSavePost = useCallback(
     (postId: string, updates: Partial<PostWithAuthor>) => {
-      setPosts((prev) =>
-        prev.map((p) => (p.id === postId ? { ...p, ...updates } : p))
-      );
+      queryClient.setQueryData(queryKeys.posts.feed(), (oldData: any) => {
+        if (!oldData?.pages) return oldData;
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: PostWithAuthor[]) =>
+            page.map((p) => (p.id === postId ? { ...p, ...updates } : p))
+          ),
+        };
+      });
     },
-    []
+    [queryClient]
   );
 
-  const handlePostDelete = useCallback((postId: string) => {
-    setPosts((prev) => prev.filter((p) => p.id !== postId));
-  }, []);
+  const handlePostDelete = useCallback(
+    (postId: string) => {
+      queryClient.setQueryData(queryKeys.posts.feed(), (oldData: any) => {
+        if (!oldData?.pages) return oldData;
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: PostWithAuthor[]) =>
+            page.filter((p) => p.id !== postId)
+          ),
+        };
+      });
+    },
+    [queryClient]
+  );
 
   const handleOpenComments = useCallback(
     (postId: string, commentCount: number) => {
@@ -137,20 +109,24 @@ export function FeedView() {
     [router]
   );
 
-  if (loading && !refreshing) {
+  const handleRefresh = async () => {
+    await refetch();
+  };
+
+  if (isPending) {
     return <LoadingState />;
   }
 
-  if (error && !refreshing) {
-    return <ErrorState message={error} />;
+  if (error) {
+    return <ErrorState message={error.message} />;
   }
 
-  if (posts.length === 0 && !loading) {
+  if (posts.length === 0) {
     return <EmptyState message="Your tiny planet is empty." />;
   }
 
   const renderFooter = () => {
-    if (!loadingMore) return null;
+    if (!isFetchingNextPage) return null;
     return (
       <View className="py-4">
         <ActivityIndicator size="small" color={colors.hex.purple600} />
@@ -183,12 +159,14 @@ export function FeedView() {
       keyExtractor={(item) => item.id}
       refreshControl={
         <RefreshControl
-          refreshing={refreshing}
+          refreshing={isRefetching && !isFetchingNextPage}
           onRefresh={handleRefresh}
           tintColor={colors.hex.purple600}
         />
       }
-      onEndReached={handleLoadMore}
+      onEndReached={() => {
+        if (hasNextPage) fetchNextPage();
+      }}
       onEndReachedThreshold={0.5}
       ListFooterComponent={renderFooter}
       contentContainerClassName="pb-20"

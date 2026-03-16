@@ -1,14 +1,14 @@
-import { useSignUp } from "@/hooks/useSignUp";
+import { useSignUpWithPhoneNumber } from "@/hooks/useSignUp";
 import { PhoneInputScreen } from "@/components/PhoneInputScreen";
 
 export default function Page() {
-  const { signUpWithPhoneNumber, isLoaded } = useSignUp();
+  const signUpWithPhoneNumber = useSignUpWithPhoneNumber();
 
   return (
     <PhoneInputScreen
-      isLoaded={isLoaded}
+      isLoaded={true}
       onSubmitPhone={async (phone) => {
-        await signUpWithPhoneNumber({ phone });
+        await signUpWithPhoneNumber.mutateAsync({ phone });
       }}
       heading="Create your account"
       subheading="Enter your phone number to get started"

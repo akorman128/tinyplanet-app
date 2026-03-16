@@ -1,3 +1,6 @@
+import { useMutation, useQuery, UseQueryResult, useQueryClient } from "@tanstack/react-query";
+import { SupabaseClient } from "@supabase/supabase-js";
+
 import {
   Vibe,
   GetVibesDto,
@@ -7,229 +10,222 @@ import {
 } from "../types/vibe";
 import { useSupabase } from "./useSupabase";
 import { useRequireProfile } from "./useRequireProfile";
+import { queryKeys } from "@/lib/queryKeys";
 
-export const useVibe = () => {
-  const { isLoaded, supabase } = useSupabase();
+// --- Types ---
+
+interface CreateVibeDto {
+  receiverId?: string | null;
+  emojis: string[];
+  inviteCodeId?: string;
+}
+
+interface CreateVibeOutputDto {
+  data: Vibe;
+}
+
+interface DeleteVibeDto {
+  receiverId: string;
+  giverId: string;
+}
+
+interface UpdateVibeDto {
+  vibeId: string;
+  receiverId?: string;
+  emojis?: string[];
+  inviteCodeId?: string;
+}
+
+export interface GetTopVibesDto {
+  userId: string;
+  limit?: number;
+}
+
+export interface TopVibeItem {
+  emoji: string;
+  count: number;
+}
+
+export interface GetTopVibesOutputDto {
+  data: TopVibeItem[];
+  totalCount: number;
+}
+
+// --- Mutation hooks ---
+
+export const useCreateVibe = () => {
+  const { supabase } = useSupabase();
   const profile = useRequireProfile();
+  const queryClient = useQueryClient();
 
-  // ––– QUERIES –––
+  return useMutation({
+    mutationFn: async (input: CreateVibeDto): Promise<CreateVibeOutputDto> => {
+      const { receiverId, emojis, inviteCodeId } = input;
 
-  const getVibes = async (
-    input: GetVibesDto = {}
-  ): Promise<GetVibesOutputDto> => {
-    if (!isLoaded) {
-      throw new Error("Supabase not initialized");
-    }
+      const vibeData: {
+        giver_id: string;
+        receiver_id?: string;
+        emojis: string[];
+        invite_code_id?: string;
+      } = {
+        giver_id: profile.id,
+        receiver_id: receiverId ?? undefined,
+        emojis,
+      };
 
-    const { recipientId, giverId, inviteCodeId } = input;
+      if (inviteCodeId) {
+        vibeData.invite_code_id = inviteCodeId;
+      }
 
-    let query = supabase.from("vibes").select("*");
+      const { data, error } = await supabase
+        .from("vibes")
+        .insert(vibeData)
+        .select()
+        .single();
 
-    // Apply optional filters
-    if (recipientId) {
-      query = query.eq("receiver_id", recipientId);
-    }
-    if (giverId) {
-      query = query.eq("giver_id", giverId);
-    }
-    if (inviteCodeId) {
-      query = query.eq("invite_code_id", inviteCodeId);
-    }
+      if (error) throw error;
+      return { data };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.vibes.all });
+    },
+  });
+};
 
-    const { data, error } = await query;
+export const useDeleteVibe = () => {
+  const { supabase } = useSupabase();
+  const queryClient = useQueryClient();
 
-    if (error) throw error;
+  return useMutation({
+    mutationFn: async (input: DeleteVibeDto) => {
+      const { receiverId, giverId } = input;
+      const { error } = await supabase
+        .from("vibes")
+        .delete()
+        .eq("receiver_id", receiverId)
+        .eq("giver_id", giverId)
+        .select()
+        .single();
 
-    return { data };
-  };
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.vibes.all });
+    },
+  });
+};
 
-  const getVibesWithSenderInfo = async (
-    recipientId: string
-  ): Promise<GetVibesWithSenderOutputDto> => {
-    if (!isLoaded) {
-      throw new Error("Supabase not initialized");
-    }
+export const useUpdateVibe = () => {
+  const { supabase } = useSupabase();
+  const queryClient = useQueryClient();
 
-    const { data, error } = await supabase
-      .from("vibes")
-      .select("*, giver:profiles!giver_id(id, full_name, avatar_url)")
-      .eq("receiver_id", recipientId)
-      .order("created_at", { ascending: false });
+  return useMutation({
+    mutationFn: async (input: UpdateVibeDto) => {
+      const { vibeId, receiverId, emojis, inviteCodeId } = input;
 
-    if (error) throw error;
+      if (emojis && emojis.length !== 3) {
+        throw new Error("Vibe must have exactly 3 emojis");
+      }
 
-    return { data: data as VibeWithSender[] };
-  };
+      const updateData: {
+        receiver_id?: string;
+        emojis?: string[];
+        invite_code_id?: string;
+      } = {};
 
-  interface GetTopVibesDto {
-    userId: string;
-    limit?: number;
-  }
+      if (receiverId !== undefined) updateData.receiver_id = receiverId;
+      if (emojis !== undefined) updateData.emojis = emojis;
+      if (inviteCodeId !== undefined) updateData.invite_code_id = inviteCodeId;
 
-  interface TopVibeItem {
-    emoji: string;
-    count: number;
-  }
+      const { error } = await supabase
+        .from("vibes")
+        .update(updateData)
+        .eq("id", vibeId);
 
-  interface GetTopVibesOutputDto {
-    data: TopVibeItem[];
-    totalCount: number;
-  }
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.vibes.all });
+    },
+  });
+};
 
-  const getTopVibes = async (
-    input: GetTopVibesDto
-  ): Promise<GetTopVibesOutputDto> => {
-    if (!isLoaded) {
-      throw new Error("Supabase not initialized");
-    }
+// --- Standalone fetch for imperative consumers ---
 
-    const { userId, limit = 5 } = input;
+export async function fetchVibes(
+  supabase: SupabaseClient,
+  input: GetVibesDto = {}
+): Promise<GetVibesOutputDto> {
+  const { recipientId, giverId, inviteCodeId } = input;
+  let query = supabase.from("vibes").select("*");
+  if (recipientId) query = query.eq("receiver_id", recipientId);
+  if (giverId) query = query.eq("giver_id", giverId);
+  if (inviteCodeId) query = query.eq("invite_code_id", inviteCodeId);
+  const { data, error } = await query;
+  if (error) throw error;
+  return { data };
+}
 
-    const { data, error } = await supabase.rpc("get_top_vibes", {
-      p_user_id: userId,
-      p_limit: limit,
-    });
+// --- Query hooks ---
 
-    if (error) throw error;
+export const useGetVibes = (recipientId?: string): UseQueryResult<GetVibesOutputDto> => {
+  const { supabase } = useSupabase();
+  return useQuery({
+    queryKey: queryKeys.vibes.byRecipient(recipientId!),
+    queryFn: () => fetchVibes(supabase, { recipientId: recipientId! }),
+    enabled: !!recipientId,
+  });
+};
 
-    // Calculate total count from the returned data
-    const totalCount = data?.reduce(
-      (sum: number, item: TopVibeItem) => sum + item.count,
-      0
-    ) ?? 0;
+export const useGetVibesWithSenderInfo = (recipientId?: string): UseQueryResult<GetVibesWithSenderOutputDto> => {
+  const { supabase } = useSupabase();
+  return useQuery({
+    queryKey: queryKeys.vibes.withSenderInfo(recipientId!),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("vibes")
+        .select("*, giver:profiles!giver_id(id, full_name, avatar_url)")
+        .eq("receiver_id", recipientId!)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return { data: data as VibeWithSender[] };
+    },
+    enabled: !!recipientId,
+  });
+};
 
-    return { data: data ?? [], totalCount };
-  };
+export const useGetTopVibes = (userId?: string, limit: number = 5): UseQueryResult<GetTopVibesOutputDto> => {
+  const { supabase } = useSupabase();
+  return useQuery({
+    queryKey: queryKeys.vibes.top(userId!),
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_top_vibes", {
+        p_user_id: userId!,
+        p_limit: limit,
+      });
+      if (error) throw error;
+      const totalCount = data?.reduce((sum: number, item: TopVibeItem) => sum + item.count, 0) ?? 0;
+      return { data: data ?? [], totalCount };
+    },
+    enabled: !!userId,
+  });
+};
 
-  const hasGivenVibe = async (
-    recipientId: string,
-    giverId?: string
-  ): Promise<boolean> => {
-    if (!isLoaded) {
-      throw new Error("Supabase not initialized");
-    }
-
-    const giver = giverId ?? profile.id;
-
-    // User can't give themselves a vibe
-    if (recipientId === giver) {
-      return true;
-    }
-
-    const { data } = await getVibes({
-      recipientId,
-      giverId: giver,
-    });
-
-    return data.length > 0;
-  };
-
-  // ––– MUTATIONS –––
-
-  interface createVibeDto {
-    receiverId?: string | null;
-    emojis: string[];
-    inviteCodeId?: string;
-  }
-
-  interface createVibeOutputDto {
-    data: Vibe;
-  }
-
-  const createVibe = async (
-    input: createVibeDto
-  ): Promise<createVibeOutputDto> => {
-    const { receiverId, emojis, inviteCodeId } = input;
-
-    const vibeData: {
-      giver_id: string;
-      receiver_id?: string;
-      emojis: string[];
-      invite_code_id?: string;
-    } = {
-      giver_id: profile.id,
-      receiver_id: receiverId ?? undefined,
-      emojis,
-    };
-
-    if (inviteCodeId) {
-      vibeData.invite_code_id = inviteCodeId;
-    }
-
-    const { data, error } = await supabase
-      .from("vibes")
-      .insert(vibeData)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return { data };
-  };
-
-  interface deleteVibeDto {
-    receiverId: string;
-    giverId: string;
-  }
-
-  const deleteVibe = async (input: deleteVibeDto): Promise<void> => {
-    const { receiverId, giverId } = input;
-    const { error } = await supabase
-      .from("vibes")
-      .delete()
-      .eq("receiver_id", receiverId)
-      .eq("giver_id", giverId)
-      .select()
-      .single();
-
-    if (error) throw error;
-  };
-
-  interface updateVibeDto {
-    vibeId: string;
-    receiverId?: string;
-    emojis?: string[];
-    inviteCodeId?: string;
-  }
-
-  const updateVibe = async (input: updateVibeDto): Promise<void> => {
-    const { vibeId, receiverId, emojis, inviteCodeId } = input;
-
-    if (emojis && emojis.length !== 3) {
-      throw new Error("Vibe must have exactly 3 emojis");
-    }
-
-    const updateData: {
-      receiver_id?: string;
-      emojis?: string[];
-      invite_code_id?: string;
-    } = {};
-
-    if (receiverId !== undefined) {
-      updateData.receiver_id = receiverId;
-    }
-    if (emojis !== undefined) {
-      updateData.emojis = emojis;
-    }
-    if (inviteCodeId !== undefined) {
-      updateData.invite_code_id = inviteCodeId;
-    }
-
-    const { error } = await supabase
-      .from("vibes")
-      .update(updateData)
-      .eq("id", vibeId);
-
-    if (error) throw error;
-  };
-
-  return {
-    isLoaded,
-    getVibes,
-    getVibesWithSenderInfo,
-    getTopVibes,
-    hasGivenVibe,
-    createVibe,
-    deleteVibe,
-    updateVibe,
-  };
+export const useHasGivenVibe = (recipientId?: string): UseQueryResult<boolean> => {
+  const { supabase } = useSupabase();
+  const profile = useRequireProfile();
+  return useQuery({
+    queryKey: queryKeys.vibes.hasGiven(profile.id, recipientId!),
+    queryFn: async () => {
+      if (recipientId === profile.id) return true;
+      const { data, error } = await supabase
+        .from("vibes")
+        .select("*")
+        .eq("receiver_id", recipientId!)
+        .eq("giver_id", profile.id);
+      if (error) throw error;
+      return (data ?? []).length > 0;
+    },
+    enabled: !!recipientId,
+  });
 };

@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React from "react";
 import { View, Linking, Alert, Pressable, Platform } from "react-native";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
-import { useContacts } from "@/hooks/useContacts";
+import { useGetContact, useDeleteContact } from "@/hooks/useContacts";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
-import { Contact } from "@/types/contact";
 import {
   LoadingState,
   ErrorState,
@@ -17,35 +16,12 @@ import {
 export default function ContactDetailScreen() {
   const router = useRouter();
   const { contactId } = useLocalSearchParams<{ contactId: string }>();
-  const { getContact, deleteContact } = useContacts();
+  const { data: contact, isPending: loading, error: queryError } = useGetContact(contactId);
+  const deleteContact = useDeleteContact();
   const currentUserProfile = useRequireProfile();
 
-  const [contact, setContact] = useState<Contact | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const isOwnContact = contact?.user_id === currentUserProfile.id;
-
-  const fetchContact = useCallback(async () => {
-    if (!contactId) return;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const data = await getContact(contactId);
-      setContact(data);
-    } catch (err) {
-      console.error("Error fetching contact:", err);
-      setError("Failed to load contact");
-    } finally {
-      setLoading(false);
-    }
-  }, [contactId, getContact]);
-
-  useEffect(() => {
-    fetchContact();
-  }, [fetchContact]);
+  const error = queryError?.message ?? null;
 
   const handleCall = () => {
     if (contact?.phone) {
@@ -73,7 +49,7 @@ export default function ContactDetailScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              await deleteContact(contact.id);
+              await deleteContact.mutateAsync(contact.id);
               router.back();
             } catch (err) {
               Alert.alert("Error", "Failed to delete contact");

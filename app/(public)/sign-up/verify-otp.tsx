@@ -1,21 +1,21 @@
 import { router } from "expo-router";
-import { useSignUp } from "@/hooks/useSignUp";
+import { useVerifyOtpAndCreateProfile, useSignUpWithPhoneNumber } from "@/hooks/useSignUp";
 import { OtpVerificationScreen } from "@/components/OtpVerificationScreen";
 
 export default function Page() {
-  const { verifyOtpAndCreateProfile, signUpWithPhoneNumber, isLoaded } =
-    useSignUp();
+  const verifyOtpAndCreateProfile = useVerifyOtpAndCreateProfile();
+  const signUpWithPhoneNumber = useSignUpWithPhoneNumber();
 
   return (
     <OtpVerificationScreen
-      isLoaded={isLoaded}
+      isLoaded={true}
       onVerifyOtp={async (phone, token) => {
-        await verifyOtpAndCreateProfile({ phone, token });
+        await verifyOtpAndCreateProfile.mutateAsync({ phone, token });
         // Navigate to send invites page after successful verification
         // router.replace("/onboarding/send-invites");
       }}
       onResendCode={async (phone) => {
-        await signUpWithPhoneNumber({ phone });
+        await signUpWithPhoneNumber.mutateAsync({ phone });
       }}
     />
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   View,
   ScrollView,
@@ -6,9 +6,8 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { useLists } from "@/hooks/useLists";
+import { useGetLists } from "@/hooks/useLists";
 import { ListCard } from "@/design-system/ListCard";
-import { ListWithPlaces } from "@/types/list";
 import { colors, SectionTitle, Caption, Text } from "@/design-system";
 
 interface ListsSectionProps {
@@ -18,28 +17,9 @@ interface ListsSectionProps {
 
 export function ListsSection({ userId, isOwnProfile }: ListsSectionProps) {
   const router = useRouter();
-  const { getLists } = useLists();
-  const [lists, setLists] = useState<ListWithPlaces[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchLists();
-  }, [userId]);
-
-  const fetchLists = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const { data } = await getLists(userId);
-      setLists(data);
-    } catch (err) {
-      console.error("Failed to fetch lists:", err);
-      setError("Failed to load lists");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { data: listsResult, isLoading, error: queryError } = useGetLists(userId);
+  const lists = listsResult?.data ?? [];
+  const error = queryError ? "Failed to load lists" : null;
 
   if (isLoading) {
     return (

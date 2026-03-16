@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { View, FlatList, Alert, ActivityIndicator } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   LoadingState,
   ErrorState,
@@ -9,58 +10,55 @@ import {
   colors,
 } from "@/design-system";
 import { MessageBubble } from "@/components";
-import { useChat } from "@/hooks/useChat";
-import { useProfile } from "@/hooks/useProfile";
+import {
+  useSendMessage,
+  useUpdateMessage,
+  useDeleteMessage,
+  useGetMessages,
+  useSubscribeToMessages,
+  useSubscribeToMessageUpdates,
+  useSendTypingIndicator,
+  useSubscribeToTypingIndicators,
+} from "@/hooks/useChat";
+import { useGetProfile } from "@/hooks/useProfile";
 import { useSupabase } from "@/hooks/useSupabase";
-import { useMessageChannels } from "@/hooks/useMessageChannels";
+import { useMarkChannelAsRead } from "@/hooks/useMessageChannels";
 import { MessageWithSender } from "@/types/chat";
+import { queryKeys } from "@/lib/queryKeys";
 
-const PAGE_SIZE = 10;
+// Helper to order user IDs consistently (same as useChat)
+const orderUserIds = (userId1: string, userId2: string): [string, string] => {
+  return userId1 < userId2 ? [userId1, userId2] : [userId2, userId1];
+};
 
 export default function ChatScreen() {
   const { friendId } = useLocalSearchParams<{ friendId: string }>();
-  const { session } = useSupabase();
-  const { getProfile } = useProfile();
-  const { markChannelAsRead } = useMessageChannels();
-  const {
-    isLoaded,
-    getMessages,
-    sendMessage,
-    updateMessage,
-    deleteMessage,
-    subscribeToMessages,
-    subscribeToMessageUpdates,
-    sendTypingIndicator,
-    subscribeToTypingIndicators,
-  } = useChat();
+  const { session, isLoaded } = useSupabase();
+  const queryClient = useQueryClient();
+  const friendProfile = useGetProfile(friendId);
+  const currentUserProfile = useGetProfile(session?.user?.id);
+  const markChannelAsRead = useMarkChannelAsRead();
+  const sendMessage = useSendMessage();
+  const updateMessage = useUpdateMessage();
+  const deleteMessage = useDeleteMessage();
+  const messagesQuery = useGetMessages(friendId);
+  const subscribeToMessages = useSubscribeToMessages();
+  const subscribeToMessageUpdates = useSubscribeToMessageUpdates();
+  const sendTypingIndicator = useSendTypingIndicator();
+  const subscribeToTypingIndicators = useSubscribeToTypingIndicators();
 
-  const [messages, setMessages] = useState<MessageWithSender[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [friendName, setFriendName] = useState("");
   const [editingMessage, setEditingMessage] = useState<{
     id: string;
     text: string;
   } | null>(null);
   const [isTyping, setIsTyping] = useState(false);
-  const [currentUserProfile, setCurrentUserProfile] = useState<{
-    id: string;
-    full_name: string;
-    avatar_url: string | null;
-  } | null>(null);
-
-  // Pagination state
-  const [offset, setOffset] = useState(0);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
 
   const flatListRef = useRef<FlatList>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Helper to order user IDs consistently (same as useChat)
-  const orderUserIds = (userId1: string, userId2: string): [string, string] => {
-    return userId1 < userId2 ? [userId1, userId2] : [userId2, userId1];
-  };
+  // Derived values
+  const messages = messagesQuery.data?.pages.flat() ?? [];
+  const friendName = friendProfile.data?.full_name ?? "";
 
   // Helper to determine if timestamp should be shown
   // Note: messages array is in reverse chronological order (newest first)
@@ -83,132 +81,76 @@ export default function ChatScreen() {
     return timeDiffInMinutes >= 1;
   };
 
-  // Fetch current user profile for optimistic updates
-  useEffect(() => {
-    const fetchCurrentUserProfile = async () => {
-      if (!session?.user?.id) return;
-      try {
-        const profile = await getProfile({ userId: session.user.id });
-        setCurrentUserProfile({
-          id: profile.id,
-          full_name: profile.full_name,
-          avatar_url: profile.avatar_url,
-        });
-      } catch (err) {
-        console.error("Failed to fetch current user profile:", err);
-      }
-    };
-    fetchCurrentUserProfile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.user?.id]);
-
-  // Fetch friend profile
-  useEffect(() => {
-    const fetchFriendProfile = async () => {
-      if (!friendId) return;
-      try {
-        const profile = await getProfile({ userId: friendId });
-        setFriendName(profile.full_name);
-      } catch (err) {
-        console.error("Failed to fetch friend profile:", err);
-      }
-    };
-    fetchFriendProfile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [friendId]);
-
   // Mark channel as read when opening chat
   useEffect(() => {
     if (friendId) {
-      markChannelAsRead({ friendId }).catch((err) => {
+      markChannelAsRead.mutateAsync({ friendId }).catch((err) => {
         console.error("Error marking channel as read:", err);
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [friendId]);
 
-  // Load initial messages
-  useEffect(() => {
-    const loadMessages = async () => {
-      // Reset pagination state
-      setOffset(0);
-      setHasMore(true);
-
-      setLoading(true);
-      setError(null);
-      try {
-        const result = await getMessages({
-          friendId,
-          limit: PAGE_SIZE,
-          offset: 0,
-        });
-        setMessages(result.data);
-        setOffset(PAGE_SIZE);
-        setHasMore(result.data.length === PAGE_SIZE);
-      } catch (err) {
-        setError("Failed to load messages");
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadMessages();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [friendId, isLoaded]);
-
   // Subscribe to new messages
   useEffect(() => {
     if (!friendId || !isLoaded) return;
 
     const unsubscribe = subscribeToMessages(friendId, (newMessage) => {
-      // Fetch sender profile and append to messages
-      getProfile({ userId: newMessage.sender_id }).then((profile) => {
-        const messageWithSender: MessageWithSender = {
-          ...newMessage,
-          sender: {
-            id: profile.id,
-            full_name: profile.full_name,
-            avatar_url: profile.avatar_url,
-          },
-        };
-
-        // Only add if not already in messages (prevents duplicates from optimistic updates)
-        setMessages((prev) => {
-          const exists = prev.some((msg) => msg.id === newMessage.id);
-          if (exists) {
-            // Message already exists (from optimistic update), just return prev
-            return prev;
-          }
-          // Prepend to maintain reverse chronological order (newest first)
-          return [messageWithSender, ...prev];
-        });
-
-        // Auto-scroll to bottom (in inverted list, scrollToOffset with 0)
-        setTimeout(() => {
-          flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
-        }, 100);
-      });
+      // Prepend new message to first page of infinite query cache
+      queryClient.setQueryData(
+        queryKeys.messages.conversation(friendId),
+        (oldData: any) => {
+          if (!oldData?.pages) return oldData;
+          const firstPage = oldData.pages[0] || [];
+          // Check for duplicates (from optimistic updates)
+          if (firstPage.some((msg: any) => msg.id === newMessage.id)) return oldData;
+          // We need the sender profile for the message. Use the profiles we already have.
+          const senderProfile = newMessage.sender_id === session?.user?.id
+            ? currentUserProfile.data
+            : friendProfile.data;
+          const messageWithSender: MessageWithSender = {
+            ...newMessage,
+            sender: senderProfile ? {
+              id: senderProfile.id,
+              full_name: senderProfile.full_name,
+              avatar_url: senderProfile.avatar_url,
+            } : { id: newMessage.sender_id, full_name: "", avatar_url: null },
+          };
+          return {
+            ...oldData,
+            pages: [[messageWithSender, ...firstPage], ...oldData.pages.slice(1)],
+          };
+        }
+      );
+      setTimeout(() => {
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+      }, 100);
     });
 
     return unsubscribe;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [friendId, isLoaded]);
+  }, [friendId, isLoaded, subscribeToMessages, queryClient, session?.user?.id]);
 
   // Subscribe to message updates (edits/deletes)
   useEffect(() => {
-    const unsubscribe = subscribeToMessageUpdates(
-      friendId,
-      (updatedMessage) => {
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === updatedMessage.id ? { ...msg, ...updatedMessage } : msg
-          )
-        );
-      }
-    );
+    const unsubscribe = subscribeToMessageUpdates(friendId, (updatedMessage) => {
+      queryClient.setQueryData(
+        queryKeys.messages.conversation(friendId),
+        (oldData: any) => {
+          if (!oldData?.pages) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page: MessageWithSender[]) =>
+              page.map((msg) =>
+                msg.id === updatedMessage.id ? { ...msg, ...updatedMessage } : msg
+              )
+            ),
+          };
+        }
+      );
+    });
 
     return unsubscribe;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [friendId, isLoaded]);
+  }, [friendId, isLoaded, subscribeToMessageUpdates, queryClient]);
 
   // Subscribe to typing indicators
   useEffect(() => {
@@ -237,99 +179,85 @@ export default function ChatScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [friendId, isLoaded]);
 
-  const handleLoadMore = useCallback(async () => {
-    // Prevent multiple simultaneous loads
-    if (loadingMore || !hasMore || loading) return;
-
-    setLoadingMore(true);
-    try {
-      const result = await getMessages({
-        friendId: friendId!,
-        limit: PAGE_SIZE,
-        offset,
-      });
-
-      // Append older messages to the end of the array (array is newest-first)
-      setMessages((prev) => [...prev, ...result.data]);
-
-      // Update pagination state
-      setOffset((prev) => prev + PAGE_SIZE);
-      setHasMore(result.data.length === PAGE_SIZE);
-    } catch (err) {
-      console.error("Error loading more messages:", err);
-    } finally {
-      setLoadingMore(false);
-    }
-  }, [friendId, offset, loadingMore, hasMore, loading, getMessages]);
-
   const handleSendMessage = useCallback(
     async (text: string) => {
-      if (!friendId || !session?.user?.id || !currentUserProfile) return;
+      if (!friendId || !session?.user?.id || !currentUserProfile.data) return;
 
-      try {
-        if (editingMessage) {
-          // Update existing message
-          await updateMessage({ messageId: editingMessage.id, text });
-          setEditingMessage(null);
-        } else {
-          // Optimistic update: add message immediately to local state
-          const tempId = `temp-${Date.now()}`; // Temporary ID
-          const [user_a, user_b] = orderUserIds(session.user.id, friendId);
+      if (editingMessage) {
+        await updateMessage.mutateAsync({ messageId: editingMessage.id, text });
+        setEditingMessage(null);
+      } else {
+        const tempId = `temp-${Date.now()}`;
+        const [user_a, user_b] = orderUserIds(session.user.id, friendId);
+        const optimisticMessage: MessageWithSender = {
+          id: tempId,
+          user_id_a: user_a,
+          user_id_b: user_b,
+          sender_id: session.user.id,
+          text: text.trim(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          edited_at: null,
+          deleted_at: null,
+          sender: {
+            id: currentUserProfile.data.id,
+            full_name: currentUserProfile.data.full_name,
+            avatar_url: currentUserProfile.data.avatar_url,
+          },
+        };
 
-          const optimisticMessage: MessageWithSender = {
-            id: tempId,
-            user_id_a: user_a,
-            user_id_b: user_b,
-            sender_id: session.user.id,
-            text: text.trim(),
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            edited_at: null,
-            deleted_at: null,
-            sender: {
-              id: currentUserProfile.id,
-              full_name: currentUserProfile.full_name,
-              avatar_url: currentUserProfile.avatar_url,
-            },
-          };
+        // Optimistic: prepend to first page
+        queryClient.setQueryData(
+          queryKeys.messages.conversation(friendId),
+          (oldData: any) => {
+            if (!oldData?.pages) return { pages: [[optimisticMessage]], pageParams: [0] };
+            return {
+              ...oldData,
+              pages: [[optimisticMessage, ...oldData.pages[0]], ...oldData.pages.slice(1)],
+            };
+          }
+        );
 
-          // Add to UI immediately (prepend for reverse chronological order)
-          setMessages((prev) => [optimisticMessage, ...prev]);
+        setTimeout(() => {
+          flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+        }, 100);
 
-          // Scroll to bottom (inverted)
-          setTimeout(() => {
-            flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
-          }, 100);
-
-          // Send to database in background
-          const result = await sendMessage({ friendId, text });
-
-          // Replace temp message with real one (has real UUID from DB)
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === tempId
-                ? { ...optimisticMessage, id: result.data.id }
-                : msg
-            )
+        try {
+          const result = await sendMessage.mutateAsync({ friendId, text });
+          // Replace temp message with real one
+          queryClient.setQueryData(
+            queryKeys.messages.conversation(friendId),
+            (oldData: any) => {
+              if (!oldData?.pages) return oldData;
+              return {
+                ...oldData,
+                pages: oldData.pages.map((page: MessageWithSender[]) =>
+                  page.map((msg) =>
+                    msg.id === tempId ? { ...optimisticMessage, id: result.data.id } : msg
+                  )
+                ),
+              };
+            }
+          );
+        } catch (err) {
+          Alert.alert("Error", "Failed to send message");
+          // Remove optimistic message on error
+          queryClient.setQueryData(
+            queryKeys.messages.conversation(friendId),
+            (oldData: any) => {
+              if (!oldData?.pages) return oldData;
+              return {
+                ...oldData,
+                pages: oldData.pages.map((page: MessageWithSender[]) =>
+                  page.filter((msg) => !msg.id.startsWith("temp-"))
+                ),
+              };
+            }
           );
         }
-      } catch (err) {
-        Alert.alert("Error", "Failed to send message");
-        // Remove optimistic message on error
-        setMessages((prev) =>
-          prev.filter((msg) => !msg.id.startsWith("temp-"))
-        );
       }
     },
-    [
-      friendId,
-      session?.user?.id,
-      currentUserProfile,
-      editingMessage,
-      sendMessage,
-      updateMessage,
-      orderUserIds,
-    ]
+    [friendId, session?.user?.id, currentUserProfile.data, editingMessage, sendMessage, updateMessage, queryClient]
   );
 
   const handleTyping = useCallback(() => {
@@ -344,7 +272,7 @@ export default function ChatScreen() {
   const handleDeleteMessage = useCallback(
     async (messageId: string) => {
       try {
-        await deleteMessage({ messageId });
+        await deleteMessage.mutateAsync({ messageId });
       } catch (err) {
         Alert.alert("Error", "Failed to delete message");
       }
@@ -356,8 +284,7 @@ export default function ChatScreen() {
     setEditingMessage(null);
   }, []);
 
-  const renderFooter = () => {
-    if (!loadingMore) return null;
+  const renderLoadingMore = () => {
     return (
       <View className="py-4 items-center">
         <ActivityIndicator size="small" color={colors.hex.purple600} />
@@ -376,7 +303,7 @@ export default function ChatScreen() {
     );
   }
 
-  if (loading) {
+  if (messagesQuery.isPending) {
     return (
       <>
         <Stack.Screen options={{ title: friendName || "Chat" }} />
@@ -387,12 +314,12 @@ export default function ChatScreen() {
     );
   }
 
-  if (error) {
+  if (messagesQuery.isError) {
     return (
       <>
         <Stack.Screen options={{ title: friendName || "Chat" }} />
         <View className="flex-1 bg-white">
-          <ErrorState message={error} />
+          <ErrorState message="Failed to load messages" />
         </View>
       </>
     );
@@ -417,9 +344,11 @@ export default function ChatScreen() {
           )}
           contentContainerClassName="px-4 pt-4"
           inverted
-          onEndReached={handleLoadMore}
+          onEndReached={() => {
+            if (messagesQuery.hasNextPage) messagesQuery.fetchNextPage();
+          }}
           onEndReachedThreshold={0.5}
-          ListHeaderComponent={renderFooter}
+          ListHeaderComponent={messagesQuery.isFetchingNextPage ? renderLoadingMore() : null}
           ListFooterComponent={
             isTyping ? <TypingIndicator friendName={friendName} /> : null
           }

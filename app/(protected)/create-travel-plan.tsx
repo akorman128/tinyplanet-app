@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, ScrollView, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -17,22 +17,18 @@ import {
   travelPlanSchema,
   TravelPlanFormData,
 } from "@/components/TravelPlanForm";
-import { useTravelPlan } from "@/hooks/useTravelPlan";
+import { useCreateTravelPlan, useGetActiveTravelPlan, useCancelTravelPlan } from "@/hooks/useTravelPlan";
 import { PostVisibility } from "@/types/post";
-import { TravelPlan, CreateTravelPlanInput } from "@/types/travelPlan";
-import { Caption } from "@/design-system/Typography";
+import { CreateTravelPlanInput } from "@/types/travelPlan";
 
 export default function CreateTravelPlanScreen() {
   const router = useRouter();
-  const { createTravelPlan, getActiveTravelPlan, cancelTravelPlan } =
-    useTravelPlan();
+  const createTravelPlan = useCreateTravelPlan();
+  const { data: activeTravelPlanData, isPending: loading } = useGetActiveTravelPlan();
+  const cancelTravelPlan = useCancelTravelPlan();
+  const activeTravelPlan = activeTravelPlanData?.data ?? null;
 
   const [visibility, setVisibility] = useState<PostVisibility>("friends");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeTravelPlan, setActiveTravelPlan] = useState<TravelPlan | null>(
-    null
-  );
-  const [loading, setLoading] = useState(true);
 
   const form = useForm<TravelPlanFormData>({
     resolver: zodResolver(travelPlanSchema),
@@ -43,23 +39,6 @@ export default function CreateTravelPlanScreen() {
     },
     mode: "all",
   });
-
-  // Fetch active travel plan on mount
-  useEffect(() => {
-    const fetchActivePlan = async () => {
-      try {
-        setLoading(true);
-        const { data } = await getActiveTravelPlan();
-        setActiveTravelPlan(data);
-      } catch (error) {
-        console.error("Error fetching active travel plan:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchActivePlan();
-  }, [getActiveTravelPlan]);
 
   const handleEditActivePlan = () => {
     if (!activeTravelPlan) return;
@@ -82,7 +61,7 @@ export default function CreateTravelPlanScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              await cancelTravelPlan(activeTravelPlan.id);
+              await cancelTravelPlan.mutateAsync(activeTravelPlan.id);
               Alert.alert("Success", "Travel plan cancelled");
               router.back();
             } catch (error) {
@@ -97,7 +76,6 @@ export default function CreateTravelPlanScreen() {
   const onSubmit = async (data: TravelPlanFormData) => {
     if (!data.destination) return;
 
-    setIsSubmitting(true);
     try {
       const input: CreateTravelPlanInput = {
         destination: {
@@ -110,13 +88,11 @@ export default function CreateTravelPlanScreen() {
         post_visibility: visibility,
       };
 
-      await createTravelPlan(input);
+      await createTravelPlan.mutateAsync(input);
       router.back();
     } catch (err) {
       console.error("Error creating travel plan:", err);
       Alert.alert("Error", "Failed to create travel plan. Please try again.");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -168,9 +144,9 @@ export default function CreateTravelPlanScreen() {
                 <Button
                   variant="primary"
                   onPress={form.handleSubmit(onSubmit)}
-                  disabled={isSubmitting || !form.formState.isValid}
+                  disabled={createTravelPlan.isPending || !form.formState.isValid}
                 >
-                  {isSubmitting ? "Creating..." : "Create Plan"}
+                  {createTravelPlan.isPending ? "Creating..." : "Create Plan"}
                 </Button>
               </>
             )}

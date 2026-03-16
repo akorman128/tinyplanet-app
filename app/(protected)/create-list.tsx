@@ -4,13 +4,13 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScreenHeader } from "@/design-system";
 import { ListForm } from "@/components/ListForm";
-import { useLists } from "@/hooks/useLists";
+import { useCreateList } from "@/hooks/useLists";
 import { CreateListInput } from "@/types/list";
 import { getSharedNote, clearSharedNote } from "@/modules/SharedNoteModule";
 
 export default function CreateListScreen() {
   const router = useRouter();
-  const { createList } = useLists();
+  const createList = useCreateList();
   const { fromShare } = useLocalSearchParams<{ fromShare?: string }>();
   const [initialPlaces, setInitialPlaces] = useState("");
   const submittingRef = useRef(false);
@@ -39,7 +39,7 @@ export default function CreateListScreen() {
     router.replace("/user-lists");
 
     // Fire-and-forget: create the list in the background
-    createList(data).catch((error) => {
+    createList.mutateAsync(data).catch((error) => {
       console.error("Failed to create list:", error);
       Alert.alert(
         "Error",

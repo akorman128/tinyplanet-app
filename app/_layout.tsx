@@ -6,9 +6,10 @@ import { View, ActivityIndicator } from "react-native";
 
 import { useSupabase } from "@/hooks/useSupabase";
 import { useLocationStore } from "@/stores/locationStore";
-import { useProfile } from "@/hooks/useProfile";
+import { fetchProfile } from "@/hooks/useProfile";
 import { useProfileStore } from "@/stores/profileStore";
 import { SupabaseProvider } from "../providers/supabase-provider";
+import { QueryProvider } from "../providers/QueryProvider";
 import { LocationPermissionProvider } from "../providers/LocationPermissionProvider";
 import { LocationPermissionScreen } from "@/components/LocationPermissionScreen";
 import { initializeMapbox } from "@/utils/mapboxConfig";
@@ -30,18 +31,19 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   return (
     <SupabaseProvider>
-      <LocationPermissionProvider>
-        <RootNavigator />
-      </LocationPermissionProvider>
+      <QueryProvider>
+        <LocationPermissionProvider>
+          <RootNavigator />
+        </LocationPermissionProvider>
+      </QueryProvider>
     </SupabaseProvider>
   );
 }
 
 function RootNavigator() {
   const { warningVisible, dismissWarning } = useScreenshotDetection();
-  const { isLoaded, session, signOut } = useSupabase();
+  const { isLoaded, session, signOut, supabase } = useSupabase();
   const { permissionRequired, clearPermissionRequirement } = useLocationStore();
-  const { getProfile } = useProfile();
   const {
     profileState,
     isLoading,
@@ -73,7 +75,7 @@ function RootNavigator() {
         setLoading(true);
 
         try {
-          const freshProfile = await getProfile({ userId: session.user.id });
+          const freshProfile = await fetchProfile(supabase, session.user.id, profileState?.id ?? null);
           setProfileState(freshProfile);
           console.log("Profile location refreshed successfully");
         } catch (error) {
@@ -94,7 +96,7 @@ function RootNavigator() {
         setLoading(true);
 
         try {
-          const profile = await getProfile({ userId: session.user.id });
+          const profile = await fetchProfile(supabase, session.user.id, null);
           setProfileState(profile);
           console.log("Profile loaded successfully:", profile.id);
         } catch (error) {
@@ -116,7 +118,7 @@ function RootNavigator() {
     profileState?.latitude,
     profileState?.longitude,
     isLoading,
-    getProfile,
+    supabase,
     setProfileState,
     setLoading,
     setProfileError,

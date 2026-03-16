@@ -11,6 +11,7 @@ import Animated, {
   Extrapolation,
 } from "react-native-reanimated";
 import { Body, Subheading } from "@/design-system";
+import { hapticMedium } from "@/utils";
 
 const ANIMATION_DURATION = 250;
 const STAGGER_OFFSET = 0.15;
@@ -119,6 +120,7 @@ export default function SearchScreen() {
   };
 
   const handleItemPress = (route: string) => {
+    hapticMedium();
     router.back();
     router.push(route as any);
   };

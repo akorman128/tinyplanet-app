@@ -23,8 +23,8 @@ import {
   ScreenHeader,
 } from "@/design-system";
 import { CommentItem } from "@/design-system/CommentItem";
-import { useComments } from "@/hooks/useComments";
-import { useLikes } from "@/hooks/useLikes";
+import { useGetComments, useCreateComment } from "@/hooks/useComments";
+import { useLikeComment, useUnlikeComment } from "@/hooks/useLikes";
 import { useListSelectionStore } from "@/stores/listSelectionStore";
 import { useCommentCountStore } from "@/stores/commentCountStore";
 import { CommentWithAuthor } from "@/types/comment";
@@ -48,13 +48,14 @@ export default function CommentsScreen() {
 
   const initialCommentCount = Number(commentCountParam) || 0;
 
-  const { getComments, createComment } = useComments();
-  const { likeComment, unlikeComment } = useLikes();
+  const { data: commentsData, isPending: loading } = useGetComments(postId);
+  const createComment = useCreateComment();
+  const likeComment = useLikeComment();
+  const unlikeComment = useUnlikeComment();
   const { selectedList, clear: clearListSelection } = useListSelectionStore();
   const setCommentCount = useCommentCountStore((s) => s.set);
 
   const [comments, setComments] = useState<CommentWithAuthor[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [replyingTo, setReplyingTo] = useState<CommentWithAuthor | null>(null);
   const [currentCount, setCurrentCount] = useState(initialCommentCount);
@@ -75,23 +76,12 @@ export default function CommentsScreen() {
     return () => clearListSelection();
   }, [clearListSelection]);
 
-  // Load comments on mount
+  // Sync local comments state from query data
   useEffect(() => {
-    loadComments();
-  }, []);
-
-  const loadComments = async () => {
-    try {
-      setLoading(true);
-      const result = await getComments(postId);
-      setComments(result.data);
-    } catch (err) {
-      console.error("Error loading comments:", err);
-      Alert.alert("Error", "Failed to load comments");
-    } finally {
-      setLoading(false);
+    if (commentsData?.data) {
+      setComments(commentsData.data);
     }
-  };
+  }, [commentsData]);
 
   const onSubmit = async (data: CommentForm) => {
     setIsSubmitting(true);
@@ -134,7 +124,7 @@ export default function CommentsScreen() {
     }
 
     try {
-      await createComment({
+      await createComment.mutateAsync({
         post_id: postId,
         parent_comment_id: replyingTo?.id || null,
         body: data.body,
@@ -204,9 +194,9 @@ export default function CommentsScreen() {
 
       try {
         if (currentState) {
-          await unlikeComment(commentId);
+          await unlikeComment.mutateAsync(commentId);
         } else {
-          await likeComment(commentId);
+          await likeComment.mutateAsync(commentId);
         }
       } catch (err) {
         setComments((prev) => updateCommentLike(prev));

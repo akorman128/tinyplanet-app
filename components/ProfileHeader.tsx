@@ -10,6 +10,7 @@ import {
 } from "@/design-system";
 import { FriendStatusSection } from "@/components/FriendStatusSection";
 import { Profile } from "@/types/profile";
+import { getAgeFromBirthday } from "@/utils/formatBirthday";
 
 interface ProfileHeaderProps {
   profile: Profile;
@@ -36,6 +37,7 @@ export function ProfileHeader({
   onMessagePress,
   onError,
 }: ProfileHeaderProps) {
+  const age = getAgeFromBirthday(profile.birthday);
   return (
     <>
       <View className="mb-4">
@@ -51,12 +53,20 @@ export function ProfileHeader({
           {profile.full_name}
         </Heading>
       </View>
+      <View className="flex-row items-center justify-center mb-4">
+        {profile.birthday && age !== null && (
+          <Caption className="text-center">
+            🎉 {age}
+            {profile.invited_by_name ? " • " : ""}
+          </Caption>
+        )}
 
-      {profile.invited_by_name && (
-        <Caption className="text-center mb-1">
-          🪩 Invited by {profile.invited_by_name}
-        </Caption>
-      )}
+        {profile.invited_by_name && (
+          <Caption className="text-center">
+            🪩 Invited by {profile.invited_by_name}
+          </Caption>
+        )}
+      </View>
 
       <VibeDisplay
         topVibes={topVibes}

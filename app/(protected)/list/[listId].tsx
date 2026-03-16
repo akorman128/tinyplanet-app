@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useMemo } from "react";
 import {
   View,
   ScrollView,
@@ -12,14 +12,13 @@ import {
   useRouter,
   Stack,
   useLocalSearchParams,
-  useFocusEffect,
   Link,
 } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Mapbox from "@rnmapbox/maps";
-import { useLists } from "@/hooks/useLists";
+import { useGetList, useDeleteList, useRemovePlace } from "@/hooks/useLists";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
-import { ListWithPlaces, ListPlace, ListCategory } from "@/types/list";
+import { ListPlace, ListCategory } from "@/types/list";
 import { filterValidPlaces } from "@/utils/mapUtils";
 import { ListMiniMap } from "@/components/ListMiniMap";
 import {
@@ -49,42 +48,17 @@ export default function ListDetailScreen() {
   const router = useRouter();
   const { listId } = useLocalSearchParams<{ listId: string }>();
   const profile = useRequireProfile();
-  const { getList, deleteList, removePlace } = useLists();
+  const { data: listResult, isLoading, error: queryError } = useGetList(listId);
+  const deleteList = useDeleteList();
+  const removePlace = useRemovePlace();
 
-  const [list, setList] = useState<ListWithPlaces | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const list = listResult?.data ?? null;
+  const error = queryError ? "Failed to load list" : !isLoading && !list ? "List not found" : null;
 
   const isOwnList = useMemo(
     () => list?.user_id === profile.id,
     [list, profile.id]
   );
-
-  useFocusEffect(
-    useCallback(() => {
-      fetchList();
-    }, [listId])
-  );
-
-  const fetchList = async () => {
-    if (!listId) return;
-
-    try {
-      setIsLoading(true);
-      setError(null);
-      const { data } = await getList(listId);
-      if (!data) {
-        setError("List not found");
-      } else {
-        setList(data);
-      }
-    } catch (err) {
-      console.error("Failed to fetch list:", err);
-      setError("Failed to load list");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleDelete = () => {
     Alert.alert(
@@ -97,7 +71,7 @@ export default function ListDetailScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              await deleteList(listId);
+              await deleteList.mutateAsync(listId);
               Alert.alert("Success", "List deleted successfully", [
                 { text: "OK", onPress: () => router.back() },
               ]);
@@ -118,8 +92,7 @@ export default function ListDetailScreen() {
         style: "destructive",
         onPress: async () => {
           try {
-            await removePlace(placeId);
-            fetchList();
+            await removePlace.mutateAsync(placeId);
           } catch (err) {
             Alert.alert("Error", "Failed to remove place");
           }

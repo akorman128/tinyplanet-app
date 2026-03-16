@@ -1,59 +1,43 @@
-import { useCallback } from "react";
+import { useMutation, useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query";
+import { SupabaseClient } from "@supabase/supabase-js";
+
 import { Profile } from "@/types/profile";
 import { useProfileStore } from "@/stores/profileStore";
 import { useSupabase } from "./useSupabase";
+import { queryKeys } from "@/lib/queryKeys";
 
-export const useProfile = () => {
-  const { isLoaded, supabase } = useSupabase();
-  const { profileState, setProfileState } = useProfileStore();
+// --- Types ---
 
-  // ––– QUERIES –––
+interface CreateProfileDto {
+  id: string;
+  phone_number: string;
+  full_name: string;
+  hometown: string;
+  birthday: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+  };
+  hometown_location?: {
+    latitude: number;
+    longitude: number;
+  };
+  invited_by?: string;
+}
 
-  interface GetProfileDto {
-    userId: string;
-  }
+interface UpdateProfileDto {
+  updateData: Partial<Profile>;
+}
 
-  const getProfile = useCallback(
-    async (input: GetProfileDto): Promise<Profile> => {
-      const { userId } = input;
+// --- Mutation hooks ---
 
-      const { data, error } = await supabase.rpc("get_profile", {
-        p_user_id: userId,
-        p_current_user_id: profileState?.id || null,
-      });
+export const useCreateProfile = () => {
+  const { supabase } = useSupabase();
+  const { setProfileState } = useProfileStore();
+  const queryClient = useQueryClient();
 
-      if (error) throw error;
-
-      if (!data || data.length === 0) {
-        throw new Error(`Profile not found for user ${userId}`);
-      }
-
-      return data[0];
-    },
-    [supabase, profileState?.id]
-  );
-
-  // ––– MUTATIONS –––
-
-  interface CreateProfileDto {
-    id: string;
-    phone_number: string;
-    full_name: string;
-    hometown: string;
-    birthday: string;
-    location?: {
-      latitude: number;
-      longitude: number;
-    };
-    hometown_location?: {
-      latitude: number;
-      longitude: number;
-    };
-    invited_by?: string;
-  }
-
-  const createProfile = useCallback(
-    async (input: CreateProfileDto): Promise<Profile> => {
+  return useMutation({
+    mutationFn: async (input: CreateProfileDto): Promise<Profile> => {
       const {
         id,
         phone_number,
@@ -87,70 +71,93 @@ export const useProfile = () => {
         .single();
 
       if (error) throw error;
-
-      setProfileState(data);
-
       return data;
     },
-    [supabase, setProfileState]
-  );
+    onSuccess: (data) => {
+      setProfileState(data);
+      queryClient.invalidateQueries({ queryKey: queryKeys.profile.all });
+    },
+  });
+};
 
-  interface UpdateProfileDto {
-    updateData: Partial<Profile>;
-  }
+export const useUpdateProfile = () => {
+  const { supabase } = useSupabase();
+  const { profileState, setProfileState } = useProfileStore();
+  const queryClient = useQueryClient();
 
-  const updateProfile = useCallback(
-    async (input: UpdateProfileDto): Promise<Profile> => {
-      const { updateData } = input;
-
+  return useMutation({
+    mutationFn: async (input: UpdateProfileDto): Promise<Profile> => {
       if (!profileState) {
         throw new Error("Profile not loaded. Cannot update profile.");
       }
 
-      const previousState = profileState;
-
-      const optimisticProfile = {
-        ...profileState,
-        ...updateData,
+      const updatePayload = {
+        ...input.updateData,
         updated_at: new Date().toISOString(),
       };
 
+      const { data, error } = await supabase
+        .from("profiles")
+        .update(updatePayload)
+        .eq("id", profileState.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onMutate: async (input) => {
+      if (!profileState) return { previousState: null };
+
+      const previousState = profileState;
+      const optimisticProfile = {
+        ...profileState,
+        ...input.updateData,
+        updated_at: new Date().toISOString(),
+      };
       setProfileState(optimisticProfile);
 
-      try {
-        const updatePayload = {
-          ...updateData,
-          updated_at: new Date().toISOString(),
-        };
-
-        const { data, error } = await supabase
-          .from("profiles")
-          .update(updatePayload)
-          .eq("id", profileState.id)
-          .select()
-          .single();
-
-        if (error) {
-          setProfileState(previousState);
-          throw error;
-        }
-
-        setProfileState(data);
-
-        return data;
-      } catch (error) {
-        setProfileState(previousState);
-        throw error;
+      return { previousState };
+    },
+    onError: (_error, _input, context) => {
+      if (context?.previousState) {
+        setProfileState(context.previousState);
       }
     },
-    [supabase, profileState, setProfileState]
-  );
+    onSuccess: (data) => {
+      setProfileState(data);
+      queryClient.invalidateQueries({ queryKey: queryKeys.profile.all });
+    },
+  });
+};
 
-  return {
-    isLoaded,
-    profileState,
-    getProfile,
-    createProfile,
-    updateProfile,
-  };
+// --- Query functions ---
+
+export async function fetchProfile(
+  supabase: SupabaseClient,
+  userId: string,
+  currentUserId: string | null
+): Promise<Profile> {
+  const { data, error } = await supabase.rpc("get_profile", {
+    p_user_id: userId,
+    p_current_user_id: currentUserId,
+  });
+  if (error) throw error;
+  if (!data || data.length === 0) {
+    throw new Error(`Profile not found for user ${userId}`);
+  }
+  return data[0];
+}
+
+// --- Query hooks ---
+
+export const useGetProfile = (userId?: string): UseQueryResult<Profile> => {
+  const { supabase } = useSupabase();
+  const { profileState } = useProfileStore();
+
+  return useQuery({
+    queryKey: queryKeys.profile.detail(userId!),
+    queryFn: () => fetchProfile(supabase, userId!, profileState?.id ?? null),
+    enabled: !!userId,
+  });
 };

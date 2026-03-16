@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { View, FlatList, RefreshControl, Pressable, ScrollView } from "react-native";
 import { useRouter, Link } from "expo-router";
-import { useLists } from "@/hooks/useLists";
+import { useQueryClient } from "@tanstack/react-query";
+import { useGetLists, useSubscribeToListCreation } from "@/hooks/useLists";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
 import { ListCard } from "@/design-system/ListCard";
-import { ListWithPlaces, ListCategory } from "@/types/list";
+import { ListCategory } from "@/types/list";
+import { queryKeys } from "@/lib/queryKeys";
 import { colors, EmptyState, LoadingState, ErrorState, Select, SelectOption, Text } from "@/design-system";
-
-const LISTS_PER_PAGE = 10;
 
 type CategoryFilter = ListCategory | "all";
 
@@ -27,16 +27,14 @@ interface UserListsSectionProps {
 
 export function UserListsSection({ userId }: UserListsSectionProps) {
   const router = useRouter();
-  const { getLists, subscribeToListCreation } = useLists();
+  const queryClient = useQueryClient();
+  const { data: listsResult, isLoading: loading, error: queryError, isRefetching } = useGetLists(userId);
+  const subscribeToListCreation = useSubscribeToListCreation();
   const currentUserProfile = useRequireProfile();
   const isOwnProfile = userId === currentUserProfile.id;
 
-  const [lists, setLists] = useState<ListWithPlaces[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
+  const lists = listsResult?.data ?? [];
+  const error = queryError ? "Failed to load lists" : null;
 
   // Filter state
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>("all");
@@ -75,76 +73,25 @@ export function UserListsSection({ userId }: UserListsSectionProps) {
     return options;
   }, [uniqueLocations]);
 
-  const fetchLists = useCallback(
-    async (isRefresh = false) => {
-      if (!isRefresh && loading) return;
-
-      if (isRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-      setError(null);
-
-      try {
-        const currentOffset = isRefresh ? 0 : offset;
-        const { data, total } = await getLists(userId, {
-          limit: LISTS_PER_PAGE,
-          offset: currentOffset,
-        });
-
-        setLists((prev) => (isRefresh ? data : [...prev, ...data]));
-        setOffset(isRefresh ? data.length : currentOffset + data.length);
-        setHasMore(data.length === LISTS_PER_PAGE);
-      } catch (err) {
-        console.error("Error fetching lists:", err);
-        setError("Failed to load lists");
-      } finally {
-        setLoading(false);
-        setRefreshing(false);
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [userId, offset, loading]
-  );
-
-  useEffect(() => {
-    setLists([]);
-    setOffset(0);
-    setHasMore(true);
-    setLoading(true);
-    fetchLists(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]);
-
-  // Ref to hold the latest fetchLists so the subscription callback stays current
-  // without causing the Supabase channel to be torn down on every offset/loading change
-  const fetchListsRef = useRef(fetchLists);
-  fetchListsRef.current = fetchLists;
-
   // Subscribe to realtime list creation events so new lists appear automatically
   useEffect(() => {
     if (!isOwnProfile) return;
-    return subscribeToListCreation(() => fetchListsRef.current(true));
+    return subscribeToListCreation(() => {});
   }, [isOwnProfile, subscribeToListCreation]);
 
-  const handleRefresh = () => fetchLists(true);
-
-  const handleLoadMore = () => {
-    if (!loading && hasMore) {
-      fetchLists();
-    }
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.lists.byUser(userId) });
   };
 
   const handleCreateList = () => {
     router.push("/create-list");
   };
 
-  if (loading && lists.length === 0) {
+  if (loading) {
     return <LoadingState />;
   }
 
-  if (error && lists.length === 0) {
+  if (error) {
     return <ErrorState message={error} />;
   }
 
@@ -181,7 +128,7 @@ export function UserListsSection({ userId }: UserListsSectionProps) {
         contentContainerStyle={{ flexGrow: 1 }}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
+            refreshing={isRefetching}
             onRefresh={handleRefresh}
             tintColor={colors.hex.purple600}
           />
@@ -249,13 +196,11 @@ export function UserListsSection({ userId }: UserListsSectionProps) {
       )}
       refreshControl={
         <RefreshControl
-          refreshing={refreshing}
+          refreshing={isRefetching}
           onRefresh={handleRefresh}
           tintColor={colors.hex.purple600}
         />
       }
-      onEndReached={handleLoadMore}
-      onEndReachedThreshold={0.5}
     />
   );
 }

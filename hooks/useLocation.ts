@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import * as Location from "expo-location";
 import { useSupabase } from "./useSupabase";
-import { useProfile } from "./useProfile";
+import { fetchProfile } from "./useProfile";
 import { useProfileStore } from "@/stores/profileStore";
 import { useLocationStore, LocationCoordinates } from "@/stores/locationStore";
 import { Profile } from "@/types/profile";
@@ -51,7 +51,6 @@ export interface UseLocationReturn {
  */
 export const useLocation = (): UseLocationReturn => {
   const { supabase } = useSupabase();
-  const { getProfile } = useProfile();
   const { profileState, setProfileState } = useProfileStore();
 
   // Use selective subscriptions to prevent unnecessary re-renders
@@ -276,9 +275,11 @@ export const useLocation = (): UseLocationReturn => {
 
         // Fetch enriched profile with computed fields (lat/lon, friend_count, etc.)
         if (data) {
-          const enrichedProfile = await getProfile({
-            userId: currentProfile.id,
-          });
+          const enrichedProfile = await fetchProfile(
+            supabase,
+            currentProfile.id,
+            currentProfile.id
+          );
           setProfileState(enrichedProfile);
         }
 
@@ -291,7 +292,6 @@ export const useLocation = (): UseLocationReturn => {
       profileState,
       supabase,
       setProfileState,
-      getProfile,
       getCurrentLocation,
       lastDatabaseUpdate,
       markDatabaseUpdate,

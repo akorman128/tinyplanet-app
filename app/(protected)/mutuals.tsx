@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   View,
   ActivityIndicator,
@@ -7,40 +7,13 @@ import {
 } from "react-native";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { colors, Avatar, Body, Caption, Text } from "@/design-system";
-import { useFriends } from "@/hooks/useFriends";
+import { useGetMutualsBetweenUsers } from "@/hooks/useFriends";
 import { Friend } from "@/types/friendship";
 
 export default function MutualsScreen() {
   const router = useRouter();
   const { userId } = useLocalSearchParams<{ userId: string }>();
-  const { getMutualsBetweenUsers } = useFriends();
-  const [mutuals, setMutuals] = useState<Friend[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchMutuals = async () => {
-      if (!userId) {
-        setError("No user specified");
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-      try {
-        const mutualFriends = await getMutualsBetweenUsers(userId);
-        setMutuals(mutualFriends);
-      } catch (err) {
-        console.error("Error fetching mutuals:", err);
-        setError("Failed to load mutual friends");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMutuals();
-  }, [userId]);
+  const { data: mutuals = [], isPending: loading } = useGetMutualsBetweenUsers(userId);
 
   const handleUserPress = (friendId: string) => {
     router.push({ pathname: "/profile", params: { userId: friendId } });

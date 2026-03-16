@@ -9,8 +9,8 @@ import {
   colors,
   Text,
 } from "@/design-system";
-import { useLists } from "@/hooks/useLists";
-import { ListWithPlaces, ListCategory } from "@/types/list";
+import { useGetList, useUpdateList } from "@/hooks/useLists";
+import { ListCategory } from "@/types/list";
 
 const CATEGORY_OPTIONS: SelectOption<ListCategory>[] = [
   { value: "nightlife", label: "Nightlife" },
@@ -24,55 +24,31 @@ const CATEGORY_OPTIONS: SelectOption<ListCategory>[] = [
 export default function EditListScreen() {
   const router = useRouter();
   const { listId } = useLocalSearchParams<{ listId: string }>();
-  const { getList, updateList } = useLists();
+  const { data: listResult, isLoading: loading, error: queryError } = useGetList(listId);
+  const updateList = useUpdateList();
 
-  const [list, setList] = useState<ListWithPlaces | null>(null);
+  const list = listResult?.data ?? null;
+  const error = queryError ? "Failed to load list" : !loading && !list ? "List not found" : null;
+
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<ListCategory>("eat_drink");
   const [note, setNote] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const fetchList = async () => {
-      if (!listId) {
-        setError("Missing list ID");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError(null);
-        const { data } = await getList(listId);
-
-        if (!data) {
-          setError("List not found");
-          return;
-        }
-
-        setList(data);
-        setTitle(data.title);
-        setCategory(data.category);
-        setNote(data.note || "");
-      } catch (err) {
-        console.error("Error fetching list:", err);
-        setError("Failed to load list");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchList();
-  }, [listId, getList]);
+    if (list) {
+      setTitle(list.title);
+      setCategory(list.category);
+      setNote(list.note || "");
+    }
+  }, [list]);
 
   const handleSave = async () => {
     if (!list || !title.trim()) return;
 
     setIsSubmitting(true);
     try {
-      await updateList({
+      await updateList.mutateAsync({
         list_id: list.id,
         title: title.trim(),
         category,

@@ -1,57 +1,87 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import { useSupabase } from "./useSupabase";
 import { useRequireProfile } from "./useRequireProfile";
+import { queryKeys } from "@/lib/queryKeys";
 
-export const useLikes = () => {
-  const { isLoaded, supabase } = useSupabase();
+export const useLikePost = () => {
+  const { supabase } = useSupabase();
   const profile = useRequireProfile();
+  const queryClient = useQueryClient();
 
-  // ––– QUERIES –––
+  return useMutation({
+    mutationFn: async (postId: string) => {
+      const { error } = await supabase.from("likes").insert({
+        user_id: profile.id,
+        post_id: postId,
+        comment_id: null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: (_data, postId) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.posts.detail(postId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
+    },
+  });
+};
 
-  const likePost = async (postId: string): Promise<void> => {
-    const { error } = await supabase.from("likes").insert({
-      user_id: profile.id,
-      post_id: postId,
-      comment_id: null,
-    });
+export const useUnlikePost = () => {
+  const { supabase } = useSupabase();
+  const profile = useRequireProfile();
+  const queryClient = useQueryClient();
 
-    if (error) throw error;
-  };
+  return useMutation({
+    mutationFn: async (postId: string) => {
+      const { error } = await supabase
+        .from("likes")
+        .delete()
+        .eq("user_id", profile.id)
+        .eq("post_id", postId);
+      if (error) throw error;
+    },
+    onSuccess: (_data, postId) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.posts.detail(postId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
+    },
+  });
+};
 
-  const unlikePost = async (postId: string): Promise<void> => {
-    const { error } = await supabase
-      .from("likes")
-      .delete()
-      .eq("user_id", profile.id)
-      .eq("post_id", postId);
+export const useLikeComment = () => {
+  const { supabase } = useSupabase();
+  const profile = useRequireProfile();
+  const queryClient = useQueryClient();
 
-    if (error) throw error;
-  };
+  return useMutation({
+    mutationFn: async (commentId: string) => {
+      const { error } = await supabase.from("likes").insert({
+        user_id: profile.id,
+        post_id: null,
+        comment_id: commentId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.comments.all });
+    },
+  });
+};
 
-  const likeComment = async (commentId: string): Promise<void> => {
-    const { error } = await supabase.from("likes").insert({
-      user_id: profile.id,
-      post_id: null,
-      comment_id: commentId,
-    });
+export const useUnlikeComment = () => {
+  const { supabase } = useSupabase();
+  const profile = useRequireProfile();
+  const queryClient = useQueryClient();
 
-    if (error) throw error;
-  };
-
-  const unlikeComment = async (commentId: string): Promise<void> => {
-    const { error } = await supabase
-      .from("likes")
-      .delete()
-      .eq("user_id", profile.id)
-      .eq("comment_id", commentId);
-
-    if (error) throw error;
-  };
-
-  return {
-    isLoaded,
-    likePost,
-    unlikePost,
-    likeComment,
-    unlikeComment,
-  };
+  return useMutation({
+    mutationFn: async (commentId: string) => {
+      const { error } = await supabase
+        .from("likes")
+        .delete()
+        .eq("user_id", profile.id)
+        .eq("comment_id", commentId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.comments.all });
+    },
+  });
 };

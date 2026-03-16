@@ -2,6 +2,7 @@ import React from "react";
 import { View, TouchableOpacity } from "react-native";
 import { Text } from "./Text";
 import { colors } from "@/design-system/colors";
+import { hapticSelection } from "@/utils";
 
 export type Tab = {
   id: string;
@@ -26,7 +27,10 @@ export function TabBar({ tabs, activeTab, onTabChange, className = "" }: TabBarP
             className={`flex-1 py-4 items-center justify-center border-b-2 ${
               isActive ? "border-purple-600" : "border-transparent"
             }`}
-            onPress={() => onTabChange(tab.id)}
+            onPress={() => {
+              hapticSelection();
+              onTabChange(tab.id);
+            }}
             activeOpacity={0.7}
           >
             <Text

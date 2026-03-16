@@ -6,10 +6,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import { Button, Heading, Subheading } from "@/design-system";
-import { useVibe } from "@/hooks/useVibe";
-import { useInviteCodes } from "@/hooks/useInviteCodes";
+import { useCreateVibe } from "@/hooks/useVibe";
+import { useCreateInviteCode, useSendInviteCode } from "@/hooks/useInviteCodes";
 import { useContactPicker } from "@/hooks/useContactPicker";
-import { useProfile } from "@/hooks/useProfile";
+import { useUpdateProfile } from "@/hooks/useProfile";
+import { useProfileStore } from "@/stores/profileStore";
 import { useSignupStore } from "@/stores/signupStore";
 import { isValidVibe, extractEmojis } from "@/utils/emojiValidation";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -31,9 +32,11 @@ type VibeForm = z.infer<typeof vibeSchema>;
 
 export default function SendInvitesPage() {
   const { signupData } = useSignupStore();
-  const { profileState, updateProfile } = useProfile();
-  const { createVibe } = useVibe();
-  const { createInviteCode, sendInviteCode } = useInviteCodes();
+  const { profileState } = useProfileStore();
+  const updateProfile = useUpdateProfile();
+  const createVibe = useCreateVibe();
+  const createInviteCode = useCreateInviteCode();
+  const sendInviteCode = useSendInviteCode();
   const { pickContact: pickContactFromDevice } = useContactPicker();
 
   const [isSending, setIsSending] = useState(false);
@@ -87,17 +90,17 @@ export default function SendInvitesPage() {
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 30);
 
-        const { data: inviteCodeData, code } = await createInviteCode({
+        const { data: inviteCodeData, code } = await createInviteCode.mutateAsync({
           expires_at: expiresAt,
         });
 
-        await createVibe({
+        await createVibe.mutateAsync({
           receiverId: null,
           emojis: emojiArray,
           inviteCodeId: inviteCodeData.id,
         });
 
-        await sendInviteCode({
+        await sendInviteCode.mutateAsync({
           phone_number: phoneNumber,
           invite_code: code,
           inviter_name: signupData.fullName,
@@ -108,7 +111,7 @@ export default function SendInvitesPage() {
 
       // Mark onboarding_invites_sent as true in profile
       if (profileState) {
-        await updateProfile({
+        await updateProfile.mutateAsync({
           updateData: { onboarding_invites_sent: true },
         });
       }

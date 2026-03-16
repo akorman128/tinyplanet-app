@@ -12,18 +12,16 @@ import {
   colors,
 } from "@/design-system";
 import { PostForm, postSchema, PostFormData } from "@/components/PostForm";
-import { usePosts } from "@/hooks/usePosts";
+import { useGetPost, useUpdatePost } from "@/hooks/usePosts";
 import { PostVisibility } from "@/types/post";
 
 export default function EditPostScreen() {
   const router = useRouter();
   const { postId } = useLocalSearchParams<{ postId: string }>();
-  const { getPost, updatePost } = usePosts();
+  const { data: postData, isPending: loading, error: queryError } = useGetPost(postId);
+  const updatePost = useUpdatePost();
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [visibility, setVisibility] = useState<PostVisibility>("public");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<PostFormData>({
     resolver: zodResolver(postSchema),
@@ -31,51 +29,30 @@ export default function EditPostScreen() {
     mode: "onChange",
   });
 
-  // Fetch post data on mount
+  // Pre-fill form when post data loads
   useEffect(() => {
-    const fetchPost = async () => {
-      if (!postId) {
-        setError("No post ID provided");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError(null);
-        const { data: post } = await getPost(postId);
-
-        // Pre-fill form with post data
-        form.reset({ text: post.text });
-        setVisibility(post.visibility);
-      } catch (err) {
-        console.error("Error fetching post:", err);
-        setError("Failed to load post");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPost();
-  }, [postId, getPost]);
+    if (postData?.data) {
+      form.reset({ text: postData.data.text });
+      setVisibility(postData.data.visibility);
+    }
+  }, [postData]);
 
   const onSubmit = async (data: PostFormData) => {
     if (!postId) return;
 
-    setIsSubmitting(true);
     try {
-      await updatePost(postId, {
-        text: data.text,
-        visibility,
+      await updatePost.mutateAsync({
+        postId,
+        input: {
+          text: data.text,
+          visibility,
+        },
       });
 
-      // Navigate back after successful update
       router.back();
     } catch (err) {
       console.error("Error updating post:", err);
       Alert.alert("Error", "Failed to update post. Please try again.");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -99,12 +76,12 @@ export default function EditPostScreen() {
     );
   }
 
-  if (error) {
+  if (queryError) {
     return (
       <>
         <Stack.Screen options={{ title: "Edit Post" }} />
         <View className="flex-1 bg-white">
-          <ErrorState message={error} />
+          <ErrorState message={queryError.message} />
         </View>
       </>
     );
@@ -131,9 +108,9 @@ export default function EditPostScreen() {
           <Button
             variant="primary"
             onPress={form.handleSubmit(onSubmit)}
-            disabled={isSubmitting || !!form.formState.errors.text}
+            disabled={updatePost.isPending || !!form.formState.errors.text}
           >
-            {isSubmitting ? "Saving..." : "Save"}
+            {updatePost.isPending ? "Saving..." : "Save"}
           </Button>
         </ScrollView>
       </View>

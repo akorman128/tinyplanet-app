@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   FlatList,
@@ -20,11 +20,10 @@ import {
 } from "@/design-system";
 import { FriendRequestItem } from "@/design-system/FriendRequestItem";
 import { VibePhoneForm } from "@/components/VibePhoneForm";
-import { useFriends } from "@/hooks/useFriends";
-import { useVibe } from "@/hooks/useVibe";
-import { useInviteCodes } from "@/hooks/useInviteCodes";
+import { useGetPendingRequests, useAcceptFriendRequest, useDeclineFriendRequest } from "@/hooks/useFriends";
+import { useCreateVibe } from "@/hooks/useVibe";
+import { useCreateInviteCode, useSendInviteCode, useGetInviteCountThisMonth } from "@/hooks/useInviteCodes";
 import { useProfileStore } from "@/stores/profileStore";
-import { PendingRequest } from "@/types/friendship";
 import { useContactPicker } from "@/hooks/useContactPicker";
 import { isValidVibe, extractEmojis } from "@/utils/emojiValidation";
 import { formatPhoneNumber } from "@/utils";
@@ -49,13 +48,6 @@ const vibeFormSchema = z.object({
 export default function FriendsScreen() {
   const { profileState } = useProfileStore();
   const [activeTab, setActiveTab] = useState<TabId>("requests");
-  const [refreshing, setRefreshing] = useState(false);
-
-  // Requests tab state
-  const [incomingRequests, setIncomingRequests] = useState<PendingRequest[]>(
-    []
-  );
-  const [requestsLoading, setRequestsLoading] = useState(false);
 
   // Send Vibe forms
   const form1 = useForm({
@@ -74,74 +66,44 @@ export default function FriendsScreen() {
   const [isSending, setIsSending] = useState(false);
 
   // Invite limit tracking (3 per month)
-  const [invitesUsedThisMonth, setInvitesUsedThisMonth] = useState(0);
   const MONTHLY_INVITE_LIMIT = 3;
+  const { data: invitesUsedThisMonth = 0 } = useGetInviteCountThisMonth();
   const invitesRemaining = MONTHLY_INVITE_LIMIT - invitesUsedThisMonth;
 
   const allFormsValid = form1.formState.isValid && form2.formState.isValid;
 
-  const {
-    getPendingRequests,
-    acceptFriendRequest,
-    declineFriendRequest,
-  } = useFriends();
-  const { createVibe } = useVibe();
-  const { createInviteCode, sendInviteCode, getInviteCountThisMonth } =
-    useInviteCodes();
+  const { data: pendingData, isLoading: requestsLoading, refetch: refetchPending } = useGetPendingRequests();
+  const incomingRequests = pendingData?.incoming ?? [];
+  const acceptFriendRequest = useAcceptFriendRequest();
+  const declineFriendRequest = useDeclineFriendRequest();
+  const createVibe = useCreateVibe();
+  const createInviteCode = useCreateInviteCode();
+  const sendInviteCode = useSendInviteCode();
   const { pickContact: pickContactFromDevice } = useContactPicker();
-
-  const loadPendingRequests = useCallback(async () => {
-    try {
-      setRequestsLoading(true);
-      const { incoming } = await getPendingRequests();
-      setIncomingRequests(incoming);
-    } catch (error) {
-      console.error("Error loading pending requests:", error);
-      Alert.alert("Error", "Failed to load friend requests");
-    } finally {
-      setRequestsLoading(false);
-    }
-  }, [getPendingRequests]);
-
-  const loadInviteCount = useCallback(async () => {
-    try {
-      const count = await getInviteCountThisMonth();
-      setInvitesUsedThisMonth(count);
-    } catch (error) {
-      console.error("Error loading invite count:", error);
-    }
-  }, [getInviteCountThisMonth]);
-
-  useEffect(() => {
-    loadPendingRequests();
-    loadInviteCount();
-  }, []);
 
   const handleAcceptRequest = useCallback(
     async (userId: string) => {
       try {
-        await acceptFriendRequest({ fromUserId: userId });
+        await acceptFriendRequest.mutateAsync({ fromUserId: userId });
         Alert.alert("Success", "Friend request accepted!");
-        loadPendingRequests();
       } catch (error) {
         console.error("Error accepting friend request:", error);
         Alert.alert("Error", "Failed to accept friend request");
       }
     },
-    [acceptFriendRequest, loadPendingRequests]
+    [acceptFriendRequest]
   );
 
   const handleDeclineRequest = useCallback(
     async (userId: string) => {
       try {
-        await declineFriendRequest({ targetUserId: userId });
-        loadPendingRequests();
+        await declineFriendRequest.mutateAsync({ targetUserId: userId });
       } catch (error) {
         console.error("Error declining friend request:", error);
         Alert.alert("Error", "Failed to decline friend request");
       }
     },
-    [declineFriendRequest, loadPendingRequests]
+    [declineFriendRequest]
   );
 
   const pickContact = async (formIndex: number) => {
@@ -176,17 +138,17 @@ export default function FriendsScreen() {
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 30);
 
-        const { data: inviteCodeData, code } = await createInviteCode({
+        const { data: inviteCodeData, code } = await createInviteCode.mutateAsync({
           expires_at: expiresAt,
         });
 
-        await createVibe({
+        await createVibe.mutateAsync({
           receiverId: null,
           emojis: emojiArray,
           inviteCodeId: inviteCodeData.id,
         });
 
-        await sendInviteCode({
+        await sendInviteCode.mutateAsync({
           phone_number: phoneNumber,
           invite_code: code,
           inviter_name: profileState?.full_name,
@@ -199,8 +161,6 @@ export default function FriendsScreen() {
 
       form1.reset();
       form2.reset();
-
-      await loadInviteCount();
     } catch (error: any) {
       console.error("Error sending invites:", error);
       Alert.alert(
@@ -213,12 +173,10 @@ export default function FriendsScreen() {
   };
 
   const handleRefresh = useCallback(async () => {
-    setRefreshing(true);
     if (activeTab === "requests") {
-      await loadPendingRequests();
+      await refetchPending();
     }
-    setRefreshing(false);
-  }, [activeTab, loadPendingRequests]);
+  }, [activeTab, refetchPending]);
 
   const renderRequestsTab = () => (
     <View className="flex-1">
@@ -248,7 +206,7 @@ export default function FriendsScreen() {
           )}
           contentContainerClassName="pb-6"
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+            <RefreshControl refreshing={requestsLoading} onRefresh={handleRefresh} />
           }
         />
       )}

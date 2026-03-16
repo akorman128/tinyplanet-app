@@ -1,5 +1,3 @@
 {
-  "enabledPlugins": {
-    "frontend-mobile-security@claude-code-workflows": true
-  }
+  "enabledPlugins": {}
 }

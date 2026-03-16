@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { View, ScrollView, Alert } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -10,7 +10,7 @@ import {
   LocationSearchInput,
   LocationSearchValue,
 } from "@/components/LocationSearchInput";
-import { useLists } from "@/hooks/useLists";
+import { useGetList, useUpdatePlace } from "@/hooks/useLists";
 import { ListPlace } from "@/types/list";
 
 export default function EditPlaceScreen() {
@@ -19,57 +19,34 @@ export default function EditPlaceScreen() {
     placeId: string;
     listId: string;
   }>();
-  const { getList, updatePlace } = useLists();
+  const { data: listResult, isLoading: loading, error: queryError } = useGetList(listId);
+  const updatePlace = useUpdatePlace();
 
-  const [place, setPlace] = useState<ListPlace | null>(null);
+  const place = useMemo(() => {
+    if (!listResult?.data || !placeId) return null;
+    return listResult.data.places.find((p) => p.id === placeId) ?? null;
+  }, [listResult, placeId]);
+
+  const error = queryError
+    ? "Failed to load place"
+    : !loading && !listResult?.data
+      ? "List not found"
+      : !loading && listResult?.data && !place
+        ? "Place not found"
+        : null;
+
   const [location, setLocation] = useState<LocationSearchValue | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const fetchPlace = async () => {
-      if (!placeId || !listId) {
-        setError("Missing place or list ID");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError(null);
-        const { data: list } = await getList(listId);
-
-        if (!list) {
-          setError("List not found");
-          return;
-        }
-
-        const foundPlace = list.places.find((p) => p.id === placeId);
-        if (!foundPlace) {
-          setError("Place not found");
-          return;
-        }
-
-        setPlace(foundPlace);
-
-        if (foundPlace.latitude && foundPlace.longitude) {
-          setLocation({
-            name: foundPlace.resolved_name,
-            latitude: foundPlace.latitude,
-            longitude: foundPlace.longitude,
-          });
-        }
-      } catch (err) {
-        console.error("Error fetching place:", err);
-        setError("Failed to load place");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPlace();
-  }, [placeId, listId, getList]);
+    if (place && place.latitude && place.longitude) {
+      setLocation({
+        name: place.resolved_name,
+        latitude: place.latitude,
+        longitude: place.longitude,
+      });
+    }
+  }, [place]);
 
   const handleLocationSelect = async (loc: LocationSearchValue | null) => {
     if (!place || !loc) {
@@ -79,7 +56,7 @@ export default function EditPlaceScreen() {
 
     setIsSubmitting(true);
     try {
-      await updatePlace({
+      await updatePlace.mutateAsync({
         place_id: place.id,
         resolved_name: loc.name,
         location: {
@@ -104,7 +81,7 @@ export default function EditPlaceScreen() {
 
     setIsSubmitting(true);
     try {
-      await updatePlace({
+      await updatePlace.mutateAsync({
         place_id: place.id,
         resolved_name: text,
         status: "unresolved",

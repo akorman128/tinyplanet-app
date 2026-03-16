@@ -4,7 +4,8 @@ import { router } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useInviteCodes } from "@/hooks/useInviteCodes";
+import { fetchInviteCodes } from "@/hooks/useInviteCodes";
+import { useSupabase } from "@/hooks/useSupabase";
 import { Button, Heading, Subheading, Input, Caption } from "@/design-system";
 import { useSignupStore } from "@/stores/signupStore";
 
@@ -17,7 +18,7 @@ type InviteCodeForm = z.infer<typeof inviteCodeSchema>;
 
 export default function InviteCodePage() {
   const { signupData, setSignupData } = useSignupStore();
-  const { getInviteCodes } = useInviteCodes();
+  const { supabase } = useSupabase();
 
   const {
     control,
@@ -35,9 +36,7 @@ export default function InviteCodePage() {
   const onSubmit = async (data: InviteCodeForm) => {
     const code = data.inviteCode.trim().toUpperCase();
 
-    const { data: inviteCodes } = await getInviteCodes({
-      filters: { code: code },
-    });
+    const { data: inviteCodes } = await fetchInviteCodes(supabase, { code: code });
 
     if (inviteCodes.length === 0) {
       setError("inviteCode", {

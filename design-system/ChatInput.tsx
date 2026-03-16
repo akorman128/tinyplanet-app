@@ -10,6 +10,7 @@ import { Text } from "./Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icons } from "./Icons";
 import { colors } from "./colors";
+import { hapticMedium } from "@/utils";
 
 interface ChatInputProps {
   onSend: (text: string) => void;
@@ -57,6 +58,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const handleSend = () => {
     const trimmedText = text.trim();
     if (!trimmedText) return;
+    hapticMedium();
 
     onSend(trimmedText);
     setText("");

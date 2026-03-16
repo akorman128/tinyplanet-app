@@ -1,14 +1,14 @@
-import { useSignIn } from "@/hooks/useSignIn";
+import { useVerifySignInOtp } from "@/hooks/useSignIn";
 import { OtpVerificationScreen } from "@/components/OtpVerificationScreen";
 
 export default function VerifyOtp() {
-  const { verifyOtp, isLoaded } = useSignIn();
+  const verifyOtp = useVerifySignInOtp();
 
   return (
     <OtpVerificationScreen
-      isLoaded={isLoaded}
+      isLoaded={true}
       onVerifyOtp={async (phone, token) => {
-        await verifyOtp({ phone, token });
+        await verifyOtp.mutateAsync({ phone, token });
       }}
     />
   );

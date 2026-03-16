@@ -1,101 +1,77 @@
+import { useMutation } from "@tanstack/react-query";
+
 import { useSupabase } from "./useSupabase";
 import { useProfileStore } from "@/stores/profileStore";
-import { useProfile } from "./useProfile";
+import { fetchProfile } from "./useProfile";
 import { useLocation } from "./useLocation";
-import { Profile } from "@/types/profile";
 
-interface signInWithPhoneNumberDto {
-  phone: string;
-}
+// --- Mutation hooks ---
 
-interface signInWithPasswordDto {
-  email: string;
-  password: string;
-}
+export const useSignInWithPhoneNumber = () => {
+  const { supabase } = useSupabase();
 
-interface verifyOtpDto {
-  phone: string;
-  token: string;
-}
+  return useMutation({
+    mutationFn: async (input: { phone: string }) => {
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: input.phone,
+        options: { shouldCreateUser: false },
+      });
+      if (error) throw error;
+    },
+  });
+};
 
-export const useSignIn = () => {
-  const { isLoaded, supabase } = useSupabase();
-  const { getProfile } = useProfile();
+export const useVerifySignInOtp = () => {
+  const { supabase } = useSupabase();
   const { updateLocationInDatabase } = useLocation();
   const { setProfileState } = useProfileStore();
 
-  const updateUserLocation = async (profile: Profile): Promise<void> => {
-    try {
-      await updateLocationInDatabase(false, profile);
-    } catch (error) {
-      console.error("Failed to update location on sign-in:", error);
-    }
-  };
+  return useMutation({
+    mutationFn: async (input: { phone: string; token: string }) => {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.verifyOtp({
+        phone: input.phone,
+        token: input.token,
+        type: "sms",
+      });
+      if (error) throw error;
+      if (!user) throw new Error("User not found");
 
-  const signInWithPhoneNumber = async (
-    input: signInWithPhoneNumberDto
-  ): Promise<void> => {
-    const { phone } = input;
+      const profile = await fetchProfile(supabase, user.id, null);
+      setProfileState(profile);
 
-    // Supabase Auth will only send OTP if user exists with shouldCreateUser: false
-    // This prevents new user creation and doesn't expose phone numbers to unauthenticated users
-    const { error } = await supabase.auth.signInWithOtp({
-      phone,
-      options: {
-        shouldCreateUser: false,
-      },
-    });
+      try {
+        await updateLocationInDatabase(false, profile);
+      } catch (error) {
+        console.error("Failed to update location on sign-in:", error);
+      }
+    },
+  });
+};
 
-    if (error) throw error;
-  };
+export const useSignInWithPassword = () => {
+  const { supabase } = useSupabase();
+  const { updateLocationInDatabase } = useLocation();
+  const { setProfileState } = useProfileStore();
 
-  const verifyOtp = async (input: verifyOtpDto): Promise<void> => {
-    const { phone, token } = input;
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.verifyOtp({
-      phone,
-      token,
-      type: "sms",
-    });
-    if (error) throw error;
+  return useMutation({
+    mutationFn: async (input: { email: string; password: string }) => {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: input.email,
+        password: input.password,
+      });
+      if (error) throw error;
 
-    if (!user) throw new Error("User not found");
+      const user = await fetchProfile(supabase, data.user.id, null);
+      setProfileState(user);
 
-    const profile = await getProfile({ userId: user.id });
-
-    setProfileState(profile);
-
-    try {
-      await updateUserLocation(profile);
-    } catch (error) {
-      console.error("Failed to update location on sign-in:", error);
-    }
-  };
-
-  const signInWithPassword = async (
-    input: signInWithPasswordDto
-  ): Promise<void> => {
-    const { email, password } = input;
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) throw error;
-
-    const user = await getProfile({ userId: data.user.id });
-
-    setProfileState(user);
-
-    // Update location after successful sign-in
-    await updateUserLocation(user);
-  };
-
-  return {
-    isLoaded,
-    signInWithPassword,
-    signInWithPhoneNumber,
-    verifyOtp,
-  };
+      try {
+        await updateLocationInDatabase(false, user);
+      } catch (error) {
+        console.error("Failed to update location on sign-in:", error);
+      }
+    },
+  });
 };

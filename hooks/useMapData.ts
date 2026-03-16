@@ -1,92 +1,51 @@
-import { useState, useEffect, useCallback } from "react";
-import { useFriends } from "./useFriends";
-import { useTravelPlan } from "./useTravelPlan";
-import { useLists } from "./useLists";
+import { useGetFriendLocations, useGetFriendHometownLocations } from "./useFriends";
+import { useGetTravelPlanLocations } from "./useTravelPlan";
+import { useGetListLocations } from "./useLists";
 import { useLocation } from "./useLocation";
-import { GeoJSONFeatureCollection } from "@/types/friendship";
-import { TravelPlanMapLocation } from "@/types/travelPlan";
-import { ListLocation } from "@/types/list";
+import { useEffect } from "react";
 
 export const useMapData = () => {
-  const { getFriendLocations, getFriendHometownLocations } = useFriends();
-  const { getTravelPlanLocations } = useTravelPlan();
-  const { getListLocations } = useLists();
+  const friendLocations = useGetFriendLocations();
+  const hometownLocations = useGetFriendHometownLocations();
+  const travelPlanLocations = useGetTravelPlanLocations();
+  const listLocations = useGetListLocations();
   const {
     location: userLocationObj,
     getCurrentLocation,
     updateLocationInDatabase,
   } = useLocation();
 
-  const [friendLocations, setFriendLocations] =
-    useState<GeoJSONFeatureCollection | null>(null);
-  const [hometownLocations, setHometownLocations] =
-    useState<GeoJSONFeatureCollection | null>(null);
-  const [travelPlanLocations, setTravelPlanLocations] = useState<
-    TravelPlanMapLocation[]
-  >([]);
-  const [listLocations, setListLocations] = useState<ListLocation[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Convert user location object to [longitude, latitude] tuple for Mapbox
+  // Convert user location to [longitude, latitude] tuple for Mapbox
   const userLocation: [number, number] | null = userLocationObj
     ? [userLocationObj.longitude, userLocationObj.latitude]
     : null;
 
-  const loadFriendLocations = useCallback(
-    async (forceRefresh: boolean = false) => {
-      try {
-        setError(null);
-
-        await getCurrentLocation(forceRefresh);
-        await updateLocationInDatabase(forceRefresh);
-
-        const [locations, hometowns, travelPlans, viewableLists] =
-          await Promise.all([
-            getFriendLocations(),
-            getFriendHometownLocations(),
-            getTravelPlanLocations(),
-            getListLocations(),
-          ]);
-
-        setFriendLocations(locations);
-        setHometownLocations(hometowns);
-        setTravelPlanLocations(travelPlans.data);
-        setListLocations(viewableLists);
-      } catch (err) {
-        console.error("Error loading friend locations:", err);
-        const errorMessage =
-          err instanceof Error ? err.message : String(err);
-        setError(errorMessage);
-      }
-    },
-    [
-      getFriendLocations,
-      getFriendHometownLocations,
-      getTravelPlanLocations,
-      getListLocations,
-      updateLocationInDatabase,
-      getCurrentLocation,
-    ]
-  );
-
-  // Initial load
+  // Initial location fetch + DB update on mount
   useEffect(() => {
-    const initialLoad = async () => {
-      setLoading(true);
-      await loadFriendLocations();
-      setLoading(false);
+    const init = async () => {
+      await getCurrentLocation(false);
+      await updateLocationInDatabase(false);
     };
-    initialLoad();
-  }, [loadFriendLocations]);
+    init();
+    // Only run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
-    friendLocations,
-    hometownLocations,
-    travelPlanLocations,
-    listLocations,
+    friendLocations: friendLocations.data ?? null,
+    hometownLocations: hometownLocations.data ?? null,
+    travelPlanLocations: travelPlanLocations.data?.data ?? [],
+    listLocations: listLocations.data ?? [],
     userLocation,
-    loading,
-    error,
+    loading:
+      friendLocations.isLoading ||
+      hometownLocations.isLoading ||
+      travelPlanLocations.isLoading ||
+      listLocations.isLoading,
+    error:
+      (friendLocations.error ||
+        hometownLocations.error ||
+        travelPlanLocations.error ||
+        listLocations.error)?.message ?? null,
   };
 };
