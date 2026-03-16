@@ -131,13 +131,13 @@ export async function createTestMessage(
 
 /** Create a vibe (emoji reaction). */
 export async function createTestVibe(
-  senderId: string,
-  recipientId: string,
+  giverId: string,
+  receiverId: string,
   emojis: string[]
 ) {
   const { error } = await adminClient.from("vibes").insert({
-    sender_id: senderId,
-    recipient_id: recipientId,
+    giver_id: giverId,
+    receiver_id: receiverId,
     emojis,
   });
   if (error) throw error;
@@ -216,7 +216,7 @@ export async function cleanupTestData(userIds: string[]) {
     await adminClient
       .from("vibes")
       .delete()
-      .or(`sender_id.eq.${userId},recipient_id.eq.${userId}`);
+      .or(`giver_id.eq.${userId},receiver_id.eq.${userId}`);
     await adminClient.from("likes").delete().eq("user_id", userId);
     await adminClient.from("comments").delete().eq("user_id", userId);
     await adminClient.from("travel_plans").delete().eq("user_id", userId);

@@ -1,6 +1,7 @@
 import { adminClient } from "../utils/supabase-test-client";
 import {
   createTestUser,
+  createTestVibe,
   cleanupTestData,
   TestUser,
 } from "../utils/seed";
@@ -16,28 +17,12 @@ describe("get_top_vibes RPC", () => {
     userC = await createTestUser({ full_name: "Vibes Giver C" });
 
     // B sends vibes to A: fire, 100, party
-    const { error: e1 } = await adminClient.from("vibes").insert({
-      giver_id: userB.id,
-      receiver_id: userA.id,
-      emojis: ["🔥", "💯", "🎉"],
-    });
-    if (e1) throw e1;
-
+    await createTestVibe(userB.id, userA.id, ["🔥", "💯", "🎉"]);
     // C sends vibes to A: fire, heart, star
-    const { error: e2 } = await adminClient.from("vibes").insert({
-      giver_id: userC.id,
-      receiver_id: userA.id,
-      emojis: ["🔥", "❤️", "🌟"],
-    });
-    if (e2) throw e2;
+    await createTestVibe(userC.id, userA.id, ["🔥", "❤️", "🌟"]);
   });
 
   afterAll(async () => {
-    // Clean up vibes manually since cleanupTestData uses sender_id/recipient_id
-    await adminClient
-      .from("vibes")
-      .delete()
-      .or(`receiver_id.eq.${userA.id}`);
     await cleanupTestData([userA.id, userB.id, userC.id]);
   });
 
