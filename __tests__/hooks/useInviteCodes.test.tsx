@@ -9,7 +9,11 @@ vi.mock("@/hooks/useSupabase", () => ({
 }));
 
 vi.mock("@/hooks/useRequireProfile", () => ({
-  useRequireProfile: () => ({ id: "user-a", full_name: "User A", avatar_url: "" }),
+  useRequireProfile: () => ({
+    id: "user-a",
+    full_name: "User A",
+    avatar_url: "",
+  }),
 }));
 
 vi.mock("@/stores/profileStore", () => ({
@@ -32,7 +36,10 @@ describe("useCreateInviteCode", () => {
 
   it("calls from('invite_codes').insert() with provided code", async () => {
     const inviteData = { id: "inv-1", code: "MYCODE" };
-    mockSupabase.configureFrom("invite_codes", { data: inviteData, error: null });
+    mockSupabase.configureFrom("invite_codes", {
+      data: inviteData,
+      error: null,
+    });
 
     const { Wrapper } = createTestWrapper(mockSupabase);
     const { result } = renderHook(() => useCreateInviteCode(), {

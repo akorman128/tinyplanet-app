@@ -185,22 +185,22 @@ export function listsToGeoJSON(lists: ListLocation[]) {
   return {
     type: "FeatureCollection" as const,
     features: lists.map((list) => ({
-        type: "Feature" as const,
-        geometry: {
-          type: "Point" as const,
-          coordinates: [
-            list.location.longitude,
-            list.location.latitude,
-          ] as [number, number],
-        },
-        properties: {
-          id: list.id,
-          title: list.title,
-          category: list.category,
-          location_name: list.location_name,
-          owner_name: list.owner_name,
-          label: list.title,
-        },
-      })),
+      type: "Feature" as const,
+      geometry: {
+        type: "Point" as const,
+        coordinates: [list.location.longitude, list.location.latitude] as [
+          number,
+          number,
+        ],
+      },
+      properties: {
+        id: list.id,
+        title: list.title,
+        category: list.category,
+        location_name: list.location_name,
+        owner_name: list.owner_name,
+        label: list.title,
+      },
+    })),
   };
 }

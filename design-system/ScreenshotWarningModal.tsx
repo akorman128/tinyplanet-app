@@ -8,8 +8,8 @@ export interface ScreenshotWarningModalProps {
   onDismiss: () => void;
 }
 
-export const ScreenshotWarningModal =
-  React.memo<ScreenshotWarningModalProps>(({ visible, onDismiss }) => {
+export const ScreenshotWarningModal = React.memo<ScreenshotWarningModalProps>(
+  ({ visible, onDismiss }) => {
     return (
       <Modal
         visible={visible}
@@ -39,6 +39,7 @@ export const ScreenshotWarningModal =
         </Pressable>
       </Modal>
     );
-  });
+  }
+);
 
 ScreenshotWarningModal.displayName = "ScreenshotWarningModal";

@@ -15,14 +15,21 @@ import {
   travelPlanSchema,
   TravelPlanFormData,
 } from "@/components/TravelPlanForm";
-import { useUpdateTravelPlan, useGetTravelPlanByPostId } from "@/hooks/useTravelPlan";
+import {
+  useUpdateTravelPlan,
+  useGetTravelPlanByPostId,
+} from "@/hooks/useTravelPlan";
 import { PostVisibility } from "@/types/post";
 
 export default function EditTravelPlanScreen() {
   const router = useRouter();
   const { postId } = useLocalSearchParams<{ postId: string }>();
   const updateTravelPlan = useUpdateTravelPlan();
-  const { data: travelPlan, isPending: loading, error: queryError } = useGetTravelPlanByPostId(postId);
+  const {
+    data: travelPlan,
+    isPending: loading,
+    error: queryError,
+  } = useGetTravelPlanByPostId(postId);
   const travelPlanId = travelPlan?.id ?? null;
 
   const [visibility, setVisibility] = useState<PostVisibility>("friends");
@@ -112,7 +119,9 @@ export default function EditTravelPlanScreen() {
       <>
         <Stack.Screen options={{ title: "Edit Travel Plan" }} />
         <View className="flex-1 bg-cream">
-          <ErrorState message={queryError.message ?? "Failed to load travel plan"} />
+          <ErrorState
+            message={queryError.message ?? "Failed to load travel plan"}
+          />
         </View>
       </>
     );
@@ -122,7 +131,6 @@ export default function EditTravelPlanScreen() {
     <>
       <Stack.Screen options={{ title: "Edit Travel Plan" }} />
       <View className="flex-1 bg-cream">
-
         <ScrollView
           className="flex-1"
           contentContainerClassName="px-6 pt-6 pb-8"

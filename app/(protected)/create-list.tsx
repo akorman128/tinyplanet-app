@@ -53,7 +53,10 @@ export default function CreateListScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#faf9f5" }} edges={["top"]}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#faf9f5" }}
+      edges={["top"]}
+    >
       <ScreenHeader title="Create List" onClose={handleCancel} />
       <View className="flex-1">
         <ListForm

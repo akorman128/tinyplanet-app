@@ -62,7 +62,9 @@ const fetchGeocodeData = async (
 
   if (!data.features || data.features.length === 0) {
     const totalDuration = Date.now() - startTime;
-    console.log(`[Geocode] Total duration: ${totalDuration}ms (no features found)`);
+    console.log(
+      `[Geocode] Total duration: ${totalDuration}ms (no features found)`
+    );
     return {
       formattedAddress: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
     };
@@ -93,7 +95,9 @@ const fetchGeocodeData = async (
       : `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
 
   const totalDuration = Date.now() - startTime;
-  console.log(`[Geocode] Total duration: ${totalDuration}ms - Result: ${formattedAddress}`);
+  console.log(
+    `[Geocode] Total duration: ${totalDuration}ms - Result: ${formattedAddress}`
+  );
 
   return {
     city,
@@ -122,7 +126,9 @@ export const reverseGeocode = async (
   const cached = geocodeCache.get(longitude, latitude);
 
   if (cached) {
-    console.log(`[Geocode] Cache HIT for (${longitude}, ${latitude}) - ${cached.isStale ? 'STALE' : 'FRESH'}`);
+    console.log(
+      `[Geocode] Cache HIT for (${longitude}, ${latitude}) - ${cached.isStale ? "STALE" : "FRESH"}`
+    );
 
     // Return cached data immediately
     const cachedResult: ReverseGeocodeResult = {
@@ -143,18 +149,24 @@ export const reverseGeocode = async (
     }
 
     const duration = Date.now() - reverseGeocodeStartTime;
-    console.log(`[Geocode] reverseGeocode completed in ${duration}ms (from cache)`);
+    console.log(
+      `[Geocode] reverseGeocode completed in ${duration}ms (from cache)`
+    );
     return cachedResult;
   }
 
-  console.log(`[Geocode] Cache MISS for (${longitude}, ${latitude}) - fetching from API`);
+  console.log(
+    `[Geocode] Cache MISS for (${longitude}, ${latitude}) - fetching from API`
+  );
 
   // Cache miss - fetch fresh data
   try {
     const result = await fetchGeocodeData(longitude, latitude);
     geocodeCache.set(longitude, latitude, result.formattedAddress);
     const duration = Date.now() - reverseGeocodeStartTime;
-    console.log(`[Geocode] reverseGeocode completed in ${duration}ms (from API)`);
+    console.log(
+      `[Geocode] reverseGeocode completed in ${duration}ms (from API)`
+    );
     return result;
   } catch (error) {
     console.error("[Geocode] Reverse geocoding error:", error);

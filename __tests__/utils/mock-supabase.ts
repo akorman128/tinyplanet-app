@@ -64,8 +64,12 @@ export function createMockSupabase() {
     chain.maybeSingle = vi.fn().mockResolvedValue(resolvedValue);
 
     // Make the chain itself thenable (for queries without .single())
-    chain.then = vi.fn((onFulfilled?: (value: MockResponse) => unknown, onRejected?: (reason: unknown) => unknown) =>
-      Promise.resolve(resolvedValue).then(onFulfilled, onRejected));
+    chain.then = vi.fn(
+      (
+        onFulfilled?: (value: MockResponse) => unknown,
+        onRejected?: (reason: unknown) => unknown
+      ) => Promise.resolve(resolvedValue).then(onFulfilled, onRejected)
+    );
     return chain;
   };
 

@@ -1,3 +1,5 @@
+import { ProfileThemeSettings } from "./theme";
+
 export interface Profile {
   id: string;
   updated_at: string;
@@ -22,4 +24,5 @@ export interface Profile {
   friend_count?: number;
   mutual_friend_count?: number;
   post_count?: number;
+  theme_settings?: ProfileThemeSettings | null;
 }

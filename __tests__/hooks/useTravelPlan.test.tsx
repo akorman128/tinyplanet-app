@@ -9,7 +9,11 @@ vi.mock("@/hooks/useSupabase", () => ({
 }));
 
 vi.mock("@/hooks/useRequireProfile", () => ({
-  useRequireProfile: () => ({ id: "user-a", full_name: "User A", avatar_url: "" }),
+  useRequireProfile: () => ({
+    id: "user-a",
+    full_name: "User A",
+    avatar_url: "",
+  }),
 }));
 
 vi.mock("@/stores/profileStore", () => ({
@@ -35,7 +39,9 @@ describe("useCreateTravelPlan", () => {
     });
 
     const { Wrapper } = createTestWrapper(mockSupabase);
-    const { result } = renderHook(() => useCreateTravelPlan(), { wrapper: Wrapper });
+    const { result } = renderHook(() => useCreateTravelPlan(), {
+      wrapper: Wrapper,
+    });
 
     await act(async () => {
       await result.current.mutateAsync({
@@ -47,21 +53,26 @@ describe("useCreateTravelPlan", () => {
       });
     });
 
-    expect(mockSupabase.rpc).toHaveBeenCalledWith("create_travel_plan_with_post", {
-      p_user_id: "user-a",
-      p_destination_location_lng: 2.35,
-      p_destination_location_lat: 48.86,
-      p_destination_name: "Paris",
-      p_start_date: startDate,
-      p_duration_days: 5,
-      p_post_visibility: "friends",
-      p_text: "Excited!",
-    });
+    expect(mockSupabase.rpc).toHaveBeenCalledWith(
+      "create_travel_plan_with_post",
+      {
+        p_user_id: "user-a",
+        p_destination_location_lng: 2.35,
+        p_destination_location_lat: 48.86,
+        p_destination_name: "Paris",
+        p_start_date: startDate,
+        p_duration_days: 5,
+        p_post_visibility: "friends",
+        p_text: "Excited!",
+      }
+    );
   });
 
   it("rejects invalid duration > 31", async () => {
     const { Wrapper } = createTestWrapper(mockSupabase);
-    const { result } = renderHook(() => useCreateTravelPlan(), { wrapper: Wrapper });
+    const { result } = renderHook(() => useCreateTravelPlan(), {
+      wrapper: Wrapper,
+    });
 
     await expect(
       act(async () => {
@@ -77,7 +88,9 @@ describe("useCreateTravelPlan", () => {
 
   it("rejects past start date", async () => {
     const { Wrapper } = createTestWrapper(mockSupabase);
-    const { result } = renderHook(() => useCreateTravelPlan(), { wrapper: Wrapper });
+    const { result } = renderHook(() => useCreateTravelPlan(), {
+      wrapper: Wrapper,
+    });
 
     await expect(
       act(async () => {
@@ -98,18 +111,26 @@ describe("useCancelTravelPlan", () => {
   });
 
   it("calls cancel RPC", async () => {
-    mockSupabase.configureRpc("cancel_travel_plan_with_post", { data: null, error: null });
+    mockSupabase.configureRpc("cancel_travel_plan_with_post", {
+      data: null,
+      error: null,
+    });
 
     const { Wrapper } = createTestWrapper(mockSupabase);
-    const { result } = renderHook(() => useCancelTravelPlan(), { wrapper: Wrapper });
+    const { result } = renderHook(() => useCancelTravelPlan(), {
+      wrapper: Wrapper,
+    });
 
     await act(async () => {
       await result.current.mutateAsync("tp1");
     });
 
-    expect(mockSupabase.rpc).toHaveBeenCalledWith("cancel_travel_plan_with_post", {
-      p_travel_plan_id: "tp1",
-    });
+    expect(mockSupabase.rpc).toHaveBeenCalledWith(
+      "cancel_travel_plan_with_post",
+      {
+        p_travel_plan_id: "tp1",
+      }
+    );
   });
 });
 
@@ -125,17 +146,24 @@ describe("useGetTravelPlanByPostId", () => {
     });
 
     const { Wrapper } = createTestWrapper(mockSupabase);
-    const { result } = renderHook(() => useGetTravelPlanByPostId("post-1"), { wrapper: Wrapper });
+    const { result } = renderHook(() => useGetTravelPlanByPostId("post-1"), {
+      wrapper: Wrapper,
+    });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockSupabase.rpc).toHaveBeenCalledWith("get_travel_plan_by_post_id", {
-      p_post_id: "post-1",
-    });
+    expect(mockSupabase.rpc).toHaveBeenCalledWith(
+      "get_travel_plan_by_post_id",
+      {
+        p_post_id: "post-1",
+      }
+    );
   });
 
   it("is disabled when postId is undefined", () => {
     const { Wrapper } = createTestWrapper(mockSupabase);
-    const { result } = renderHook(() => useGetTravelPlanByPostId(undefined), { wrapper: Wrapper });
+    const { result } = renderHook(() => useGetTravelPlanByPostId(undefined), {
+      wrapper: Wrapper,
+    });
 
     expect(result.current.fetchStatus).toBe("idle");
   });

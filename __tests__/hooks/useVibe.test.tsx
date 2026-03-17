@@ -9,7 +9,11 @@ vi.mock("@/hooks/useSupabase", () => ({
 }));
 
 vi.mock("@/hooks/useRequireProfile", () => ({
-  useRequireProfile: () => ({ id: "user-a", full_name: "User A", avatar_url: "" }),
+  useRequireProfile: () => ({
+    id: "user-a",
+    full_name: "User A",
+    avatar_url: "",
+  }),
 }));
 
 vi.mock("@/stores/profileStore", () => ({
@@ -26,7 +30,11 @@ describe("useCreateVibe", () => {
   });
 
   it("inserts a vibe with correct data", async () => {
-    const vibeData = { id: "vibe-1", giver_id: "user-a", emojis: ["😀", "🎉", "🔥"] };
+    const vibeData = {
+      id: "vibe-1",
+      giver_id: "user-a",
+      emojis: ["😀", "🎉", "🔥"],
+    };
     mockSupabase.configureFrom("vibes", { data: vibeData, error: null });
 
     const { Wrapper } = createTestWrapper(mockSupabase);
@@ -74,7 +82,9 @@ describe("useUpdateVibe (emoji validation)", () => {
     });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
-    expect(result.current.error?.message).toBe("Vibe must have exactly 3 emojis");
+    expect(result.current.error?.message).toBe(
+      "Vibe must have exactly 3 emojis"
+    );
   });
 
   it("allows update with exactly 3 emojis", async () => {

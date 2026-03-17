@@ -19,13 +19,14 @@ export default function UserContactsScreen() {
       <Stack.Screen
         options={{
           title: "Contacts",
-          headerRight: Platform.OS === "android" && isOwnProfile
-            ? () => (
-                <Pressable onPress={() => router.push("/add-contact")}>
-                  <Icons.plus size={24} color={colors.black} />
-                </Pressable>
-              )
-            : undefined,
+          headerRight:
+            Platform.OS === "android" && isOwnProfile
+              ? () => (
+                  <Pressable onPress={() => router.push("/add-contact")}>
+                    <Icons.plus size={24} color={colors.black} />
+                  </Pressable>
+                )
+              : undefined,
         }}
       />
       {Platform.OS === "ios" && isOwnProfile && (

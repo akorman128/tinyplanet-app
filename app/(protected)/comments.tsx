@@ -227,7 +227,10 @@ export default function CommentsScreen() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#faf9f5" }} edges={["top"]}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#faf9f5" }}
+      edges={["top"]}
+    >
       <ScreenHeader title="Comments" onClose={() => router.back()} />
 
       {loading ? (

@@ -1,4 +1,9 @@
-import { useMutation, useQuery, UseQueryResult, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  UseQueryResult,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 import {
@@ -168,7 +173,9 @@ export async function fetchVibes(
 
 // --- Query hooks ---
 
-export const useGetVibes = (recipientId?: string): UseQueryResult<GetVibesOutputDto> => {
+export const useGetVibes = (
+  recipientId?: string
+): UseQueryResult<GetVibesOutputDto> => {
   const { supabase } = useSupabase();
   return useQuery({
     queryKey: queryKeys.vibes.byRecipient(recipientId!),
@@ -177,7 +184,9 @@ export const useGetVibes = (recipientId?: string): UseQueryResult<GetVibesOutput
   });
 };
 
-export const useGetVibesWithSenderInfo = (recipientId?: string): UseQueryResult<GetVibesWithSenderOutputDto> => {
+export const useGetVibesWithSenderInfo = (
+  recipientId?: string
+): UseQueryResult<GetVibesWithSenderOutputDto> => {
   const { supabase } = useSupabase();
   return useQuery({
     queryKey: queryKeys.vibes.withSenderInfo(recipientId!),
@@ -194,7 +203,10 @@ export const useGetVibesWithSenderInfo = (recipientId?: string): UseQueryResult<
   });
 };
 
-export const useGetTopVibes = (userId?: string, limit: number = 5): UseQueryResult<GetTopVibesOutputDto> => {
+export const useGetTopVibes = (
+  userId?: string,
+  limit: number = 5
+): UseQueryResult<GetTopVibesOutputDto> => {
   const { supabase } = useSupabase();
   return useQuery({
     queryKey: queryKeys.vibes.top(userId!),
@@ -204,14 +216,18 @@ export const useGetTopVibes = (userId?: string, limit: number = 5): UseQueryResu
         p_limit: limit,
       });
       if (error) throw error;
-      const totalCount = data?.reduce((sum: number, item: TopVibeItem) => sum + item.count, 0) ?? 0;
+      const totalCount =
+        data?.reduce((sum: number, item: TopVibeItem) => sum + item.count, 0) ??
+        0;
       return { data: data ?? [], totalCount };
     },
     enabled: !!userId,
   });
 };
 
-export const useHasGivenVibe = (recipientId?: string): UseQueryResult<boolean> => {
+export const useHasGivenVibe = (
+  recipientId?: string
+): UseQueryResult<boolean> => {
   const { supabase } = useSupabase();
   const profile = useRequireProfile();
   return useQuery({

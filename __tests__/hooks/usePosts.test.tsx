@@ -9,7 +9,11 @@ vi.mock("@/hooks/useSupabase", () => ({
 }));
 
 vi.mock("@/hooks/useRequireProfile", () => ({
-  useRequireProfile: () => ({ id: "user-a", full_name: "User A", avatar_url: "" }),
+  useRequireProfile: () => ({
+    id: "user-a",
+    full_name: "User A",
+    avatar_url: "",
+  }),
 }));
 
 vi.mock("@/stores/profileStore", () => ({
@@ -104,7 +108,8 @@ describe("useUpdatePost", () => {
 
     const chain = mockSupabase.getLastChain("posts");
     expect(chain?.update).toHaveBeenCalled();
-    const updateArg = (chain?.update as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    const updateArg = (chain?.update as ReturnType<typeof vi.fn>).mock
+      .calls[0][0];
     expect(updateArg.text).toBe("updated");
     expect(updateArg.edited_at).toBeDefined();
     // edited_at should be a recent ISO string

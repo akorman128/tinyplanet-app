@@ -1,5 +1,10 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { useMutation, useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  UseQueryResult,
+} from "@tanstack/react-query";
 
 import { useProfileStore } from "@/stores/profileStore";
 import { useSupabase } from "./useSupabase";
@@ -69,8 +74,10 @@ export async function fetchInviteCodes(
 
   if (filters?.code) query = query.eq("code", filters.code);
   if (filters?.userId) query = query.eq("inviter_id", filters.userId);
-  if (filters?.startDate) query = query.gte("created_at", filters.startDate.toISOString());
-  if (filters?.endDate) query = query.lte("created_at", filters.endDate.toISOString());
+  if (filters?.startDate)
+    query = query.gte("created_at", filters.startDate.toISOString());
+  if (filters?.endDate)
+    query = query.lte("created_at", filters.endDate.toISOString());
 
   const { data, error } = await query;
   if (error) {
@@ -88,19 +95,27 @@ export const useCreateInviteCode = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: CreateInviteCodeDto): Promise<CreateInviteCodeOutputDto> => {
+    mutationFn: async (
+      input: CreateInviteCodeDto
+    ): Promise<CreateInviteCodeOutputDto> => {
       if (!profileState) throw new Error("Profile required");
       const { code: providedCode, expires_at } = input;
 
       if (providedCode) {
         const { data, error } = await supabase
           .from("invite_codes")
-          .insert({ code: providedCode, inviter_id: profileState.id, status: "active", expires_at })
+          .insert({
+            code: providedCode,
+            inviter_id: profileState.id,
+            status: "active",
+            expires_at,
+          })
           .select()
           .single();
 
         if (error) {
-          if (error.code === "23505") throw new Error("Code already exists, please try again");
+          if (error.code === "23505")
+            throw new Error("Code already exists, please try again");
           throw error;
         }
         return { data, code: providedCode };
@@ -111,13 +126,21 @@ export const useCreateInviteCode = () => {
         const generatedCode = generateInviteCode();
         const { data, error } = await supabase
           .from("invite_codes")
-          .insert({ code: generatedCode, inviter_id: profileState.id, status: "active", expires_at })
+          .insert({
+            code: generatedCode,
+            inviter_id: profileState.id,
+            status: "active",
+            expires_at,
+          })
           .select()
           .single();
 
         if (!error) return { data, code: generatedCode };
         if (error.code === "23505" && attempt < maxRetries - 1) continue;
-        if (error.code === "23505") throw new Error("Failed to generate unique invite code after multiple attempts");
+        if (error.code === "23505")
+          throw new Error(
+            "Failed to generate unique invite code after multiple attempts"
+          );
         throw error;
       }
       throw new Error("Failed to create invite code");
@@ -133,18 +156,31 @@ export const useSendInviteCode = () => {
   const { profileState } = useProfileStore();
 
   return useMutation({
-    mutationFn: async (input: SendInviteCodeDto): Promise<SendInviteCodeOutputDto> => {
+    mutationFn: async (
+      input: SendInviteCodeDto
+    ): Promise<SendInviteCodeOutputDto> => {
       if (!profileState) throw new Error("Profile required");
       const { phone_number, invite_code, inviter_name } = input;
 
-      const { data, error } = await supabase.functions.invoke("send-invite-sms", {
-        body: { phone_number, invite_code, inviter_name: inviter_name || profileState.full_name },
-      });
+      const { data, error } = await supabase.functions.invoke(
+        "send-invite-sms",
+        {
+          body: {
+            phone_number,
+            invite_code,
+            inviter_name: inviter_name || profileState.full_name,
+          },
+        }
+      );
 
       if (error) throw new Error(`Failed to send invite: ${error}`);
       if (!data.success) throw new Error(data.error || "Failed to send invite");
 
-      return { success: true, message: data.message || "Invite sent successfully", messageSid: data.messageSid };
+      return {
+        success: true,
+        message: data.message || "Invite sent successfully",
+        messageSid: data.messageSid,
+      };
     },
   });
 };
@@ -154,10 +190,14 @@ export const useUpdateInviteCode = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: UpdateInviteCodeDto): Promise<UpdateInviteCodeOutputDto> => {
+    mutationFn: async (
+      input: UpdateInviteCodeDto
+    ): Promise<UpdateInviteCodeOutputDto> => {
       const { inviteCodeId, status, redeemed_at } = input;
 
-      const updateData: { status: InviteCodeStatus; redeemed_at?: string } = { status };
+      const updateData: { status: InviteCodeStatus; redeemed_at?: string } = {
+        status,
+      };
       if (redeemed_at) updateData.redeemed_at = redeemed_at;
 
       const { data, error } = await supabase
@@ -178,7 +218,9 @@ export const useUpdateInviteCode = () => {
 
 // --- Query hooks ---
 
-export const useGetInviteCodes = (filters?: GetInviteCodesDto["filters"]): UseQueryResult<GetInviteCodesOutputDto> => {
+export const useGetInviteCodes = (
+  filters?: GetInviteCodesDto["filters"]
+): UseQueryResult<GetInviteCodesOutputDto> => {
   const { supabase } = useSupabase();
 
   return useQuery({
@@ -193,7 +235,14 @@ export const useGetInviteCountThisMonth = (): UseQueryResult<number> => {
 
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+  const endOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+    23,
+    59,
+    59
+  );
 
   return useQuery({
     queryKey: queryKeys.inviteCodes.monthlyCount,
@@ -216,7 +265,10 @@ export const useRedeemInviteCode = () => {
   return async (input: { code: string }): Promise<boolean> => {
     const { code } = input;
 
-    const { data } = await fetchInviteCodes(supabase, { code, status: InviteCodeStatus.ACTIVE });
+    const { data } = await fetchInviteCodes(supabase, {
+      code,
+      status: InviteCodeStatus.ACTIVE,
+    });
 
     const inviteCode = data[0];
 

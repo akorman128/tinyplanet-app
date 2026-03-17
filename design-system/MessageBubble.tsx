@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  View,
-  Pressable,
-  Alert,
-  ActionSheetIOS,
-  Platform,
-} from "react-native";
+import { View, Pressable, Alert, ActionSheetIOS, Platform } from "react-native";
 import { Text } from "./Text";
 import { MessageWithSender } from "@/types/chat";
 import { useRequireProfile } from "@/hooks/useRequireProfile";

@@ -1,5 +1,10 @@
 import React, { useState, useCallback } from "react";
-import { View, FlatList, RefreshControl, ActivityIndicator } from "react-native";
+import {
+  View,
+  FlatList,
+  RefreshControl,
+  ActivityIndicator,
+} from "react-native";
 import { useQueryClient, InfiniteData } from "@tanstack/react-query";
 import { PostCard } from "@/design-system/PostCard";
 import { TravelPlanCard } from "@/design-system/TravelPlanCard";
@@ -43,7 +48,8 @@ export function UserPostsSection({
   const activeQuery = isPostsTab ? userPostsQuery : savedPostsQuery;
   const posts = activeQuery.data?.pages.flat() ?? [];
   const loading = activeQuery.isPending;
-  const refreshing = activeQuery.isRefetching && !activeQuery.isFetchingNextPage;
+  const refreshing =
+    activeQuery.isRefetching && !activeQuery.isFetchingNextPage;
   const error = activeQuery.error?.message ?? null;
 
   const handleFilterChange = (newFilter: string) => {
@@ -60,57 +66,84 @@ export function UserPostsSection({
     }
   };
 
-  const handleLike = useCallback((postId: string, updates: Partial<PostWithAuthor>) => {
-    const key = isPostsTab ? queryKeys.posts.userPosts(userId) : queryKeys.posts.saved();
-    queryClient.setQueryData(key, (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
-      if (!oldData?.pages) return oldData;
-      return {
-        ...oldData,
-        pages: oldData.pages.map((page) =>
-          page.map((p) => (p.id === postId ? { ...p, ...updates } : p))
-        ),
-      };
-    });
-  }, [isPostsTab, userId, queryClient]);
+  const handleLike = useCallback(
+    (postId: string, updates: Partial<PostWithAuthor>) => {
+      const key = isPostsTab
+        ? queryKeys.posts.userPosts(userId)
+        : queryKeys.posts.saved();
+      queryClient.setQueryData(
+        key,
+        (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
+          if (!oldData?.pages) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) =>
+              page.map((p) => (p.id === postId ? { ...p, ...updates } : p))
+            ),
+          };
+        }
+      );
+    },
+    [isPostsTab, userId, queryClient]
+  );
 
-  const handleSave = useCallback((postId: string, updates: Partial<PostWithAuthor>) => {
-    const key = isPostsTab ? queryKeys.posts.userPosts(userId) : queryKeys.posts.saved();
-    if (!isPostsTab && updates.saved_by_user === false) {
-      // If unsaved in "Saved" filter, remove from list
-      queryClient.setQueryData(key, (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
-        if (!oldData?.pages) return oldData;
-        return {
-          ...oldData,
-          pages: oldData.pages.map((page) =>
-            page.filter((p) => p.id !== postId)
-          ),
-        };
-      });
-    } else {
-      queryClient.setQueryData(key, (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
-        if (!oldData?.pages) return oldData;
-        return {
-          ...oldData,
-          pages: oldData.pages.map((page) =>
-            page.map((p) => (p.id === postId ? { ...p, ...updates } : p))
-          ),
-        };
-      });
-    }
-  }, [isPostsTab, userId, queryClient]);
+  const handleSave = useCallback(
+    (postId: string, updates: Partial<PostWithAuthor>) => {
+      const key = isPostsTab
+        ? queryKeys.posts.userPosts(userId)
+        : queryKeys.posts.saved();
+      if (!isPostsTab && updates.saved_by_user === false) {
+        // If unsaved in "Saved" filter, remove from list
+        queryClient.setQueryData(
+          key,
+          (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
+            if (!oldData?.pages) return oldData;
+            return {
+              ...oldData,
+              pages: oldData.pages.map((page) =>
+                page.filter((p) => p.id !== postId)
+              ),
+            };
+          }
+        );
+      } else {
+        queryClient.setQueryData(
+          key,
+          (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
+            if (!oldData?.pages) return oldData;
+            return {
+              ...oldData,
+              pages: oldData.pages.map((page) =>
+                page.map((p) => (p.id === postId ? { ...p, ...updates } : p))
+              ),
+            };
+          }
+        );
+      }
+    },
+    [isPostsTab, userId, queryClient]
+  );
 
-  const handleDelete = useCallback((postId: string) => {
-    const key = isPostsTab ? queryKeys.posts.userPosts(userId) : queryKeys.posts.saved();
-    queryClient.setQueryData(key, (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
-      if (!oldData?.pages) return oldData;
-      return {
-        ...oldData,
-        pages: oldData.pages.map((page) =>
-          page.filter((p) => p.id !== postId)
-        ),
-      };
-    });
-  }, [isPostsTab, userId, queryClient]);
+  const handleDelete = useCallback(
+    (postId: string) => {
+      const key = isPostsTab
+        ? queryKeys.posts.userPosts(userId)
+        : queryKeys.posts.saved();
+      queryClient.setQueryData(
+        key,
+        (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
+          if (!oldData?.pages) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) =>
+              page.filter((p) => p.id !== postId)
+            ),
+          };
+        }
+      );
+    },
+    [isPostsTab, userId, queryClient]
+  );
 
   const handleOpenCommentsInternal = (postId: string, commentCount: number) => {
     onOpenComments?.(postId, commentCount);
@@ -176,8 +209,12 @@ export function UserPostsSection({
           />
         )}
         <View className="flex-1 items-center justify-center p-6">
-          <SectionTitle className="mb-2">{emptyStateMessage.title}</SectionTitle>
-          <Caption className="text-center">{emptyStateMessage.subtitle}</Caption>
+          <SectionTitle className="mb-2">
+            {emptyStateMessage.title}
+          </SectionTitle>
+          <Caption className="text-center">
+            {emptyStateMessage.subtitle}
+          </Caption>
         </View>
       </View>
     );

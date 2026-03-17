@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  UseQueryResult,
+} from "@tanstack/react-query";
 
 import { useSupabase } from "./useSupabase";
 import { useRequireProfile } from "./useRequireProfile";
@@ -109,7 +114,9 @@ export const useDeleteContact = () => {
 
 // --- Query hooks ---
 
-export const useGetContacts = (userId?: string): UseQueryResult<GetContactsOutput> => {
+export const useGetContacts = (
+  userId?: string
+): UseQueryResult<GetContactsOutput> => {
   const { supabase } = useSupabase();
   const profile = useRequireProfile();
   const targetUserId = userId ?? profile.id;
@@ -129,7 +136,9 @@ export const useGetContacts = (userId?: string): UseQueryResult<GetContactsOutpu
   });
 };
 
-export const useGetContact = (contactId?: string): UseQueryResult<Contact | null> => {
+export const useGetContact = (
+  contactId?: string
+): UseQueryResult<Contact | null> => {
   const { supabase } = useSupabase();
 
   return useQuery({

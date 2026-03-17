@@ -1,13 +1,27 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { View, FlatList, RefreshControl, Pressable, ScrollView } from "react-native";
-import { useRouter, Link } from "expo-router";
+import {
+  View,
+  FlatList,
+  RefreshControl,
+  Pressable,
+  ScrollView,
+} from "react-native";
+import { Link } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useGetLists, useSubscribeToListCreation } from "@/hooks/useLists";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
 import { ListCard } from "@/design-system/ListCard";
 import { ListCategory } from "@/types/list";
 import { queryKeys } from "@/lib/queryKeys";
-import { colors, EmptyState, LoadingState, ErrorState, Select, SelectOption, Text } from "@/design-system";
+import {
+  colors,
+  EmptyState,
+  LoadingState,
+  ErrorState,
+  Select,
+  SelectOption,
+  Text,
+} from "@/design-system";
 
 type CategoryFilter = ListCategory | "all";
 
@@ -26,9 +40,13 @@ interface UserListsSectionProps {
 }
 
 export function UserListsSection({ userId }: UserListsSectionProps) {
-  const router = useRouter();
   const queryClient = useQueryClient();
-  const { data: listsResult, isLoading: loading, error: queryError, isRefetching } = useGetLists(userId);
+  const {
+    data: listsResult,
+    isLoading: loading,
+    error: queryError,
+    isRefetching,
+  } = useGetLists(userId);
   const subscribeToListCreation = useSubscribeToListCreation();
   const currentUserProfile = useRequireProfile();
   const isOwnProfile = userId === currentUserProfile.id;
@@ -37,7 +55,8 @@ export function UserListsSection({ userId }: UserListsSectionProps) {
   const error = queryError ? "Failed to load lists" : null;
 
   // Filter state
-  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>("all");
+  const [selectedCategory, setSelectedCategory] =
+    useState<CategoryFilter>("all");
   const [selectedLocation, setSelectedLocation] = useState<string | "all">(
     "all"
   );
@@ -66,7 +85,9 @@ export function UserListsSection({ userId }: UserListsSectionProps) {
 
   // Build location options dynamically
   const locationOptions: SelectOption<string>[] = useMemo(() => {
-    const options: SelectOption<string>[] = [{ value: "all", label: "All Locations" }];
+    const options: SelectOption<string>[] = [
+      { value: "all", label: "All Locations" },
+    ];
     uniqueLocations.forEach((location) => {
       options.push({ value: location, label: location });
     });
@@ -81,10 +102,6 @@ export function UserListsSection({ userId }: UserListsSectionProps) {
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: queryKeys.lists.byUser(userId) });
-  };
-
-  const handleCreateList = () => {
-    router.push("/create-list");
   };
 
   if (loading) {
@@ -134,16 +151,6 @@ export function UserListsSection({ userId }: UserListsSectionProps) {
           />
         }
       >
-        {isOwnProfile && (
-          <View className="px-6 pt-4">
-            <Pressable
-              onPress={handleCreateList}
-              className="bg-purple-600 px-4 py-3 rounded-lg items-center"
-            >
-              <Text className="text-white font-semibold">Create List</Text>
-            </Pressable>
-          </View>
-        )}
         <EmptyState
           message={
             isOwnProfile
@@ -165,24 +172,8 @@ export function UserListsSection({ userId }: UserListsSectionProps) {
         paddingBottom: 24,
         gap: 16,
       }}
-      ListHeaderComponent={
-        <>
-          {isOwnProfile && (
-            <View className="pt-4 pb-2">
-              <Pressable
-                onPress={handleCreateList}
-                className="bg-purple-600 px-4 py-3 rounded-lg items-center"
-              >
-                <Text className="text-white font-semibold">Create List</Text>
-              </Pressable>
-            </View>
-          )}
-          {renderFilterBar()}
-        </>
-      }
-      ListEmptyComponent={
-        <EmptyState message="No lists match your filters." />
-      }
+      ListHeaderComponent={<>{renderFilterBar()}</>}
+      ListEmptyComponent={<EmptyState message="No lists match your filters." />}
       renderItem={({ item }) => (
         <Link href={`/list/${item.id}`} asChild>
           <Pressable>

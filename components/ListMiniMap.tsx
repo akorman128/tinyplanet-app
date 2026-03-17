@@ -37,14 +37,15 @@ export function ListMiniMap({
   const bounds = useMemo(
     () =>
       calculateMapBounds(
-        validPlaces as Array<{ latitude: number; longitude: number }>
+        validPlaces as { latitude: number; longitude: number }[]
       ),
     [validPlaces]
   );
 
   // Create GeoJSON for places
   const placesGeoJSON = useMemo(
-    () => placesToGeoJSON(validPlaces, truncateName ? { truncateName } : undefined),
+    () =>
+      placesToGeoJSON(validPlaces, truncateName ? { truncateName } : undefined),
     [validPlaces, truncateName]
   );
 
@@ -60,7 +61,10 @@ export function ListMiniMap({
   }
 
   return (
-    <View className="rounded-lg overflow-hidden" style={{ height, position: "relative" }}>
+    <View
+      className="rounded-lg overflow-hidden"
+      style={{ height, position: "relative" }}
+    >
       <Mapbox.MapView
         style={{ flex: 1 }}
         styleURL={styleURL}

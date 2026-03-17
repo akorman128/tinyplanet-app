@@ -16,7 +16,11 @@ import {
 export default function ContactDetailScreen() {
   const router = useRouter();
   const { contactId } = useLocalSearchParams<{ contactId: string }>();
-  const { data: contact, isPending: loading, error: queryError } = useGetContact(contactId);
+  const {
+    data: contact,
+    isPending: loading,
+    error: queryError,
+  } = useGetContact(contactId);
   const deleteContact = useDeleteContact();
   const currentUserProfile = useRequireProfile();
 
@@ -87,13 +91,14 @@ export default function ContactDetailScreen() {
       <Stack.Screen
         options={{
           title: "Contact",
-          headerRight: Platform.OS === "android" && isOwnContact
-            ? () => (
-                <Pressable onPress={handleDelete}>
-                  <Icons.trash size={24} color={colors.hex.error} />
-                </Pressable>
-              )
-            : undefined,
+          headerRight:
+            Platform.OS === "android" && isOwnContact
+              ? () => (
+                  <Pressable onPress={handleDelete}>
+                    <Icons.trash size={24} color={colors.hex.error} />
+                  </Pressable>
+                )
+              : undefined,
         }}
       />
       {Platform.OS === "ios" && isOwnContact && (
@@ -106,7 +111,6 @@ export default function ContactDetailScreen() {
         </Stack.Toolbar>
       )}
       <View className="flex-1 bg-cream">
-
         <View className="px-6 pt-6">
           {/* Name */}
           <Text className="text-3xl font-bold text-black mb-2">
@@ -115,7 +119,9 @@ export default function ContactDetailScreen() {
 
           {/* Company */}
           {contact.company && (
-            <Text className="text-lg text-gray-600 mb-6">{contact.company}</Text>
+            <Text className="text-lg text-gray-600 mb-6">
+              {contact.company}
+            </Text>
           )}
 
           {/* Action Buttons */}
@@ -150,10 +156,7 @@ export default function ContactDetailScreen() {
               <GlassInfoItem label="Company" value={contact.company} />
             )}
             {contact.location_name && (
-              <GlassInfoItem
-                label="Location"
-                value={contact.location_name}
-              />
+              <GlassInfoItem label="Location" value={contact.location_name} />
             )}
           </GlassInfoCard>
 

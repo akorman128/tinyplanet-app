@@ -2,7 +2,10 @@ import { Stack } from "expo-router";
 
 export default function PublicLayout() {
   return (
-    <Stack initialRouteName="welcome">
+    <Stack
+      initialRouteName="welcome"
+      screenOptions={{ headerShadowVisible: false }}
+    >
       <Stack.Screen
         name="welcome"
         options={{

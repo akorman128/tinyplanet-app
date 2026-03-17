@@ -8,12 +8,7 @@ import {
   Platform,
 } from "react-native";
 import { setStringAsync } from "expo-clipboard";
-import {
-  useRouter,
-  Stack,
-  useLocalSearchParams,
-  Link,
-} from "expo-router";
+import { useRouter, Stack, useLocalSearchParams, Link } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Mapbox from "@rnmapbox/maps";
 import { useGetList, useDeleteList, useRemovePlace } from "@/hooks/useLists";
@@ -53,7 +48,11 @@ export default function ListDetailScreen() {
   const removePlace = useRemovePlace();
 
   const list = listResult?.data ?? null;
-  const error = queryError ? "Failed to load list" : !isLoading && !list ? "List not found" : null;
+  const error = queryError
+    ? "Failed to load list"
+    : !isLoading && !list
+      ? "List not found"
+      : null;
 
   const isOwnList = useMemo(
     () => list?.user_id === profile.id,
@@ -196,26 +195,24 @@ export default function ListDetailScreen() {
       <Stack.Screen
         options={{
           title: "List",
-          headerRight: Platform.OS === "android" && isOwnList
-            ? () => (
-                <View className="flex-row items-center gap-4">
-                  <Pressable onPress={handleEdit}>
-                    <Icons.edit size={22} color={colors.black} />
-                  </Pressable>
-                  <Pressable onPress={handleDelete}>
-                    <Icons.trash size={22} color={colors.hex.error} />
-                  </Pressable>
-                </View>
-              )
-            : undefined,
+          headerRight:
+            Platform.OS === "android" && isOwnList
+              ? () => (
+                  <View className="flex-row items-center gap-4">
+                    <Pressable onPress={handleEdit}>
+                      <Icons.edit size={22} color={colors.black} />
+                    </Pressable>
+                    <Pressable onPress={handleDelete}>
+                      <Icons.trash size={22} color={colors.hex.error} />
+                    </Pressable>
+                  </View>
+                )
+              : undefined,
         }}
       />
       {Platform.OS === "ios" && isOwnList && (
         <Stack.Toolbar placement="right">
-          <Stack.Toolbar.Button
-            icon="pencil"
-            onPress={handleEdit}
-          />
+          <Stack.Toolbar.Button icon="pencil" onPress={handleEdit} />
           <Stack.Toolbar.Button
             icon="trash"
             tintColor={colors.hex.error}
@@ -226,7 +223,6 @@ export default function ListDetailScreen() {
       <Link.AppleZoomTarget />
       <GestureHandlerRootView style={{ flex: 1 }}>
         <View className="flex-1 bg-cream">
-
           {/* Map */}
           <ListMiniMap
             places={list.places}

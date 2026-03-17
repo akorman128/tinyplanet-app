@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  View,
-  ScrollView,
-  Pressable,
-  ActivityIndicator,
-} from "react-native";
+import { View, ScrollView, Pressable, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { useGetLists } from "@/hooks/useLists";
 import { ListCard } from "@/design-system/ListCard";
@@ -17,7 +12,11 @@ interface ListsSectionProps {
 
 export function ListsSection({ userId, isOwnProfile }: ListsSectionProps) {
   const router = useRouter();
-  const { data: listsResult, isLoading, error: queryError } = useGetLists(userId);
+  const {
+    data: listsResult,
+    isLoading,
+    error: queryError,
+  } = useGetLists(userId);
   const lists = listsResult?.data ?? [];
   const error = queryError ? "Failed to load lists" : null;
 

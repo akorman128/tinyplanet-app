@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  View,
-  ActivityIndicator,
-  Pressable,
-  FlatList,
-} from "react-native";
+import { View, ActivityIndicator, Pressable, FlatList } from "react-native";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { colors, Avatar, Body, Caption, Text } from "@/design-system";
 import { useGetMutualsBetweenUsers } from "@/hooks/useFriends";
@@ -13,7 +8,8 @@ import { Friend } from "@/types/friendship";
 export default function MutualsScreen() {
   const router = useRouter();
   const { userId } = useLocalSearchParams<{ userId: string }>();
-  const { data: mutuals = [], isPending: loading } = useGetMutualsBetweenUsers(userId);
+  const { data: mutuals = [], isPending: loading } =
+    useGetMutualsBetweenUsers(userId);
 
   const handleUserPress = (friendId: string) => {
     router.push({ pathname: "/profile", params: { userId: friendId } });
@@ -30,12 +26,8 @@ export default function MutualsScreen() {
         size="small"
       />
       <View className="ml-3 flex-1">
-        <Body className="font-medium">
-          {item.full_name}
-        </Body>
-        {item.hometown && (
-          <Caption className="mt-0.5">{item.hometown}</Caption>
-        )}
+        <Body className="font-medium">{item.full_name}</Body>
+        {item.hometown && <Caption className="mt-0.5">{item.hometown}</Caption>}
       </View>
     </Pressable>
   );
@@ -58,12 +50,9 @@ export default function MutualsScreen() {
     <>
       <Stack.Screen options={{ title: "Mutual Friends" }} />
       <View className="flex-1 bg-cream">
-
         {mutuals.length === 0 ? (
           <View className="flex-1 justify-center items-center px-6">
-            <Body className="text-gray-400 text-center">
-              No mutual friends
-            </Body>
+            <Body className="text-gray-400 text-center">No mutual friends</Body>
           </View>
         ) : (
           <View className="flex-1">

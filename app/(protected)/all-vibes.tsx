@@ -20,7 +20,11 @@ import {
   SectionTitle,
   Text,
 } from "@/design-system";
-import { useGetVibesWithSenderInfo, useCreateVibe, useHasGivenVibe } from "@/hooks/useVibe";
+import {
+  useGetVibesWithSenderInfo,
+  useCreateVibe,
+  useHasGivenVibe,
+} from "@/hooks/useVibe";
 import { VibeWithSender } from "@/types/vibe";
 import { formatTimeAgo } from "@/utils";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
@@ -28,7 +32,11 @@ import { extractEmojis } from "@/utils/emojiValidation";
 
 export default function AllVibesScreen() {
   const { userId } = useLocalSearchParams<{ userId: string }>();
-  const { data: vibesData, isLoading: loading, error: vibesError } = useGetVibesWithSenderInfo(userId);
+  const {
+    data: vibesData,
+    isLoading: loading,
+    error: vibesError,
+  } = useGetVibesWithSenderInfo(userId);
   const createVibe = useCreateVibe();
   const { data: hasUserGivenVibe = false } = useHasGivenVibe(userId);
   const [showModal, setShowModal] = useState(false);
@@ -101,7 +109,9 @@ export default function AllVibesScreen() {
         options={{
           title: "Vibes",
           headerRight:
-            Platform.OS === "android" && profile.id !== userId && !hasUserGivenVibe
+            Platform.OS === "android" &&
+            profile.id !== userId &&
+            !hasUserGivenVibe
               ? () => (
                   <Pressable onPress={() => setShowModal(true)}>
                     <Icons.plus size={24} color={colors.hex.purple600} />
@@ -120,7 +130,6 @@ export default function AllVibesScreen() {
         </Stack.Toolbar>
       )}
       <View className="flex-1 bg-cream">
-
         {/* Content */}
         {loading ? (
           <View className="flex-1 justify-center items-center">

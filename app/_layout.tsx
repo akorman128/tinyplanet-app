@@ -75,7 +75,11 @@ function RootNavigator() {
         setLoading(true);
 
         try {
-          const freshProfile = await fetchProfile(supabase, session.user.id, profileState?.id ?? null);
+          const freshProfile = await fetchProfile(
+            supabase,
+            session.user.id,
+            profileState?.id ?? null
+          );
           setProfileState(freshProfile);
           console.log("Profile location refreshed successfully");
         } catch (error) {
@@ -183,6 +187,7 @@ function RootNavigator() {
       <Stack
         screenOptions={{
           headerShown: false,
+          headerShadowVisible: false,
           gestureEnabled: false,
           animation: "none",
           animationDuration: 0,

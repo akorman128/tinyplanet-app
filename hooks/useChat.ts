@@ -1,5 +1,9 @@
 import { useCallback } from "react";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import { useSupabase } from "./useSupabase";
 import { useRequireProfile } from "./useRequireProfile";
@@ -40,7 +44,12 @@ export const useSendMessage = () => {
 
       const { data, error } = await supabase
         .from("messages")
-        .insert({ user_id_a: user_a, user_id_b: user_b, sender_id: profile.id, text: text.trim() })
+        .insert({
+          user_id_a: user_a,
+          user_id_b: user_b,
+          sender_id: profile.id,
+          text: text.trim(),
+        })
         .select()
         .single();
 
@@ -48,7 +57,9 @@ export const useSendMessage = () => {
       return { data };
     },
     onSuccess: (_data, input) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.messages.conversation(input.friendId) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.messages.conversation(input.friendId),
+      });
       queryClient.invalidateQueries({ queryKey: queryKeys.messages.channels });
     },
   });
@@ -60,7 +71,9 @@ export const useUpdateMessage = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: UpdateMessageInput): Promise<UpdateMessageOutput> => {
+    mutationFn: async (
+      input: UpdateMessageInput
+    ): Promise<UpdateMessageOutput> => {
       const { messageId, text } = input;
       const { data, error } = await supabase
         .from("messages")
@@ -115,7 +128,9 @@ export const useGetMessages = (friendId?: string) => {
       const [user_a, user_b] = orderUserIds(profile.id, friendId!);
       const { data, error } = await supabase
         .from("messages")
-        .select(`*, sender:profiles!messages_sender_id_fkey(id, full_name, avatar_url)`)
+        .select(
+          `*, sender:profiles!messages_sender_id_fkey(id, full_name, avatar_url)`
+        )
         .eq("user_id_a", user_a)
         .eq("user_id_b", user_b)
         .is("deleted_at", null)
@@ -146,11 +161,23 @@ export const useSubscribeToMessages = () => {
 
       const channel = supabase
         .channel(channelName)
-        .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `user_id_a=eq.${user_a},user_id_b=eq.${user_b}` },
-          (payload) => { onMessage(payload.new as Message); })
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "messages",
+            filter: `user_id_a=eq.${user_a},user_id_b=eq.${user_b}`,
+          },
+          (payload) => {
+            onMessage(payload.new as Message);
+          }
+        )
         .subscribe();
 
-      return () => { supabase.removeChannel(channel); };
+      return () => {
+        supabase.removeChannel(channel);
+      };
     },
     [isLoaded, supabase, profile.id]
   );
@@ -169,11 +196,23 @@ export const useSubscribeToMessageUpdates = () => {
 
       const channel = supabase
         .channel(channelName)
-        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "messages", filter: `user_id_a=eq.${user_a},user_id_b=eq.${user_b}` },
-          (payload) => { onUpdate(payload.new as Message); })
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "messages",
+            filter: `user_id_a=eq.${user_a},user_id_b=eq.${user_b}`,
+          },
+          (payload) => {
+            onUpdate(payload.new as Message);
+          }
+        )
         .subscribe();
 
-      return () => { supabase.removeChannel(channel); };
+      return () => {
+        supabase.removeChannel(channel);
+      };
     },
     [isLoaded, supabase, profile.id]
   );
@@ -192,7 +231,11 @@ export const useSendTypingIndicator = () => {
       const channelName = `chat:${user_a}:${user_b}_presence`;
 
       const channel = supabase.channel(channelName);
-      await channel.send({ type: "broadcast", event: "typing", payload: { userId: profile.id, isTyping: true } });
+      await channel.send({
+        type: "broadcast",
+        event: "typing",
+        payload: { userId: profile.id, isTyping: true },
+      });
     },
     [isLoaded, supabase, profile.id]
   );
@@ -203,7 +246,10 @@ export const useSubscribeToTypingIndicators = () => {
   const profile = useRequireProfile();
 
   return useCallback(
-    (friendId: string, onTyping: (event: TypingIndicatorEvent) => void): (() => void) => {
+    (
+      friendId: string,
+      onTyping: (event: TypingIndicatorEvent) => void
+    ): (() => void) => {
       if (!isLoaded) return () => {};
 
       const [user_a, user_b] = orderUserIds(profile.id, friendId);
@@ -211,10 +257,14 @@ export const useSubscribeToTypingIndicators = () => {
 
       const channel = supabase
         .channel(channelName)
-        .on("broadcast", { event: "typing" }, (payload) => { onTyping(payload.payload as TypingIndicatorEvent); })
+        .on("broadcast", { event: "typing" }, (payload) => {
+          onTyping(payload.payload as TypingIndicatorEvent);
+        })
         .subscribe();
 
-      return () => { supabase.removeChannel(channel); };
+      return () => {
+        supabase.removeChannel(channel);
+      };
     },
     [isLoaded, supabase, profile.id]
   );

@@ -117,7 +117,9 @@ describe("Lists RPCs", () => {
       });
       expect(error).toBeNull();
 
-      const emptyList = data.find((l: { id: string; [key: string]: unknown }) => l.id === listAEmpty);
+      const emptyList = data.find(
+        (l: { id: string; [key: string]: unknown }) => l.id === listAEmpty
+      );
       expect(emptyList).toBeDefined();
       expect(emptyList.places).toEqual([]);
     });
@@ -176,12 +178,16 @@ describe("Lists RPCs", () => {
       // Empty list has no location, should not appear
       expect(ids).not.toContain(listAEmpty);
 
-      const ownList = data.find((l: { id: string; [key: string]: unknown }) => l.id === listAWithPlaces);
+      const ownList = data.find(
+        (l: { id: string; [key: string]: unknown }) => l.id === listAWithPlaces
+      );
       expect(ownList.owner_name).toBe("You");
       expect(ownList.longitude).toBeCloseTo(-74.006, 2);
       expect(ownList.latitude).toBeCloseTo(40.7128, 2);
 
-      const friendList = data.find((l: { id: string; [key: string]: unknown }) => l.id === listB);
+      const friendList = data.find(
+        (l: { id: string; [key: string]: unknown }) => l.id === listB
+      );
       expect(friendList.owner_name).toBe("Lists User B");
       expect(friendList.longitude).toBeCloseTo(-118.2437, 2);
       expect(friendList.latitude).toBeCloseTo(34.0522, 2);

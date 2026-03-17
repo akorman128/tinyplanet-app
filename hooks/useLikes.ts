@@ -19,7 +19,9 @@ export const useLikePost = () => {
       if (error) throw error;
     },
     onSuccess: (_data, postId) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.posts.detail(postId) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.posts.detail(postId),
+      });
       queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
     },
   });
@@ -40,7 +42,9 @@ export const useUnlikePost = () => {
       if (error) throw error;
     },
     onSuccess: (_data, postId) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.posts.detail(postId) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.posts.detail(postId),
+      });
       queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
     },
   });

@@ -21,8 +21,12 @@ interface ListCardProps {
 }
 
 export function ListCard({ list, onPress, fullWidth }: ListCardProps) {
-  const resolvedCount = list.places.filter((p) => p.status === "resolved").length;
-  const ambiguousCount = list.places.filter((p) => p.status === "ambiguous").length;
+  const resolvedCount = list.places.filter(
+    (p) => p.status === "resolved"
+  ).length;
+  const ambiguousCount = list.places.filter(
+    (p) => p.status === "ambiguous"
+  ).length;
   const totalCount = list.places.length;
 
   const Wrapper = onPress ? Pressable : View;

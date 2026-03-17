@@ -2,6 +2,7 @@ import React from "react";
 import { View, Pressable, Linking } from "react-native";
 import { Icons } from "./Icons";
 import { colors } from "./colors";
+import { useThemeTextStyle } from "./ThemeTextContext";
 
 export interface SocialMediaLinksProps {
   website?: string | null;
@@ -25,6 +26,8 @@ export const SocialMediaLinks: React.FC<SocialMediaLinksProps> = ({
   letterboxd,
   beli,
 }) => {
+  const { backgroundColor, fontColor } = useThemeTextStyle();
+
   const openWithAppFallback = (appUrl: string, webUrl: string) => {
     Linking.canOpenURL(appUrl)
       .then((supported) => {
@@ -93,12 +96,15 @@ export const SocialMediaLinks: React.FC<SocialMediaLinksProps> = ({
   };
 
   return (
-    <View className="w-full flex-row items-center justify-around  bg-gray-50 rounded-lg p-4">
+    <View
+      className="w-full flex-row items-center justify-around rounded-lg"
+      style={{ backgroundColor: backgroundColor ?? colors.hex.cream }}
+    >
       {activePlatforms.map((platform, index) => {
         const Icon = Icons[platform.icon];
         return (
           <Pressable key={index} onPress={() => handlePress(platform)}>
-            <Icon size={32} color={colors.black} />
+            <Icon size={32} color={fontColor ?? colors.black} />
           </Pressable>
         );
       })}

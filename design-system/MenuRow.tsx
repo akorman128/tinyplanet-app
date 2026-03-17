@@ -3,6 +3,7 @@ import { View, Pressable } from "react-native";
 import { Body } from "./Typography";
 import { Icons } from "./Icons";
 import { colors } from "./colors";
+import { useThemeTextStyle } from "./ThemeTextContext";
 
 export interface MenuRowProps {
   icon: React.ReactNode;
@@ -17,6 +18,8 @@ export function MenuRow({
   onPress,
   position = "standalone",
 }: MenuRowProps) {
+  const { backgroundColor, fontColor } = useThemeTextStyle();
+
   const rounded =
     position === "first"
       ? "rounded-t-lg"
@@ -29,13 +32,19 @@ export function MenuRow({
   return (
     <Pressable
       onPress={onPress}
-      className={`w-full px-4 py-3 bg-gray-50 flex-row items-center justify-between ${rounded}`}
+      className={`w-full px-4 py-3 flex-row items-center justify-between ${rounded}`}
+      style={{ backgroundColor: backgroundColor ?? colors.hex.cream }}
     >
       <View className="flex-row items-center gap-3">
         {icon}
-        <Body className="font-semibold text-black">{label}</Body>
+        <Body
+          className="font-semibold"
+          style={{ color: fontColor ?? colors.black }}
+        >
+          {label}
+        </Body>
       </View>
-      <Icons.chevronRight size={20} color={colors.black} />
+      <Icons.chevronRight size={20} color={fontColor ?? colors.black} />
     </Pressable>
   );
 }

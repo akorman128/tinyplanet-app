@@ -7,20 +7,21 @@ import Animated, {
   withTiming,
   Easing,
 } from "react-native-reanimated";
+import { SPEED_TO_DURATION } from "@/utils/themeDefaults";
 
-const EMOJIS = ["🫦", "🕶️", "👠"];
+const DEFAULT_EMOJIS = ["🫦", "🕶️", "👠"];
 const CELL_SIZE = 20;
 const STRIP_THICKNESS = 34;
-const CYCLE_DURATION = 2500;
-/** Pixels per one full emoji cycle (4 emojis) */
-const SEQUENCE_PX = EMOJIS.length * CELL_SIZE;
+const SEQUENCE_PX = (emojis: string[]) => emojis.length * CELL_SIZE;
 
 function EmojiCells({
   count,
   horizontal,
+  emojis,
 }: {
   count: number;
   horizontal: boolean;
+  emojis: string[];
 }) {
   const cells = Array.from({ length: count }, (_, i) => (
     <Text
@@ -33,7 +34,7 @@ function EmojiCells({
         lineHeight: horizontal ? STRIP_THICKNESS : CELL_SIZE,
       }}
     >
-      {EMOJIS[i % EMOJIS.length]}
+      {emojis[i % emojis.length]}
     </Text>
   ));
   return <>{cells}</>;
@@ -44,23 +45,34 @@ function HorizontalStrip({
   scrollDirection,
   top,
   bottom,
+  emojis,
+  duration,
+  reducedMotion,
 }: {
   width: number;
   scrollDirection: "left" | "right";
   top?: number;
   bottom?: number;
+  emojis: string[];
+  duration: number;
+  reducedMotion: boolean;
 }) {
   const offset = useSharedValue(0);
-  const emojiCount = Math.ceil((width + 2 * SEQUENCE_PX) / CELL_SIZE);
+  const seqPx = SEQUENCE_PX(emojis);
+  const emojiCount = Math.ceil((width + 2 * seqPx) / CELL_SIZE);
 
   React.useEffect(() => {
-    const target = scrollDirection === "left" ? -SEQUENCE_PX : SEQUENCE_PX;
+    if (reducedMotion) {
+      offset.value = 0;
+      return;
+    }
+    const target = scrollDirection === "left" ? -seqPx : seqPx;
     offset.value = withRepeat(
-      withTiming(target, { duration: CYCLE_DURATION, easing: Easing.linear }),
+      withTiming(target, { duration, easing: Easing.linear }),
       -1,
       false
     );
-  }, [scrollDirection, offset]);
+  }, [scrollDirection, offset, seqPx, duration, reducedMotion]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: offset.value }],
@@ -80,12 +92,9 @@ function HorizontalStrip({
       pointerEvents="none"
     >
       <Animated.View
-        style={[
-          { flexDirection: "row", marginLeft: -SEQUENCE_PX },
-          animatedStyle,
-        ]}
+        style={[{ flexDirection: "row", marginLeft: -seqPx }, animatedStyle]}
       >
-        <EmojiCells count={emojiCount} horizontal />
+        <EmojiCells count={emojiCount} horizontal emojis={emojis} />
       </Animated.View>
     </View>
   );
@@ -96,23 +105,34 @@ function VerticalStrip({
   scrollDirection,
   left,
   right,
+  emojis,
+  duration,
+  reducedMotion,
 }: {
   height: number;
   scrollDirection: "up" | "down";
   left?: number;
   right?: number;
+  emojis: string[];
+  duration: number;
+  reducedMotion: boolean;
 }) {
   const offset = useSharedValue(0);
-  const emojiCount = Math.ceil((height + 2 * SEQUENCE_PX) / CELL_SIZE);
+  const seqPx = SEQUENCE_PX(emojis);
+  const emojiCount = Math.ceil((height + 2 * seqPx) / CELL_SIZE);
 
   React.useEffect(() => {
-    const target = scrollDirection === "up" ? -SEQUENCE_PX : SEQUENCE_PX;
+    if (reducedMotion) {
+      offset.value = 0;
+      return;
+    }
+    const target = scrollDirection === "up" ? -seqPx : seqPx;
     offset.value = withRepeat(
-      withTiming(target, { duration: CYCLE_DURATION, easing: Easing.linear }),
+      withTiming(target, { duration, easing: Easing.linear }),
       -1,
       false
     );
-  }, [scrollDirection, offset]);
+  }, [scrollDirection, offset, seqPx, duration, reducedMotion]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: offset.value }],
@@ -131,8 +151,8 @@ function VerticalStrip({
       }}
       pointerEvents="none"
     >
-      <Animated.View style={[{ marginTop: -SEQUENCE_PX }, animatedStyle]}>
-        <EmojiCells count={emojiCount} horizontal={false} />
+      <Animated.View style={[{ marginTop: -seqPx }, animatedStyle]}>
+        <EmojiCells count={emojiCount} horizontal={false} emojis={emojis} />
       </Animated.View>
     </View>
   );
@@ -140,17 +160,61 @@ function VerticalStrip({
 
 export interface AnimatedEmojiBorderProps {
   children: React.ReactNode;
+  emojis?: string[];
+  speed?: "slow" | "medium" | "fast";
+  direction?: "clockwise" | "counterclockwise";
+  reducedMotion?: boolean;
 }
 
-export function AnimatedEmojiBorder({ children }: AnimatedEmojiBorderProps) {
+export function AnimatedEmojiBorder({
+  children,
+  emojis = DEFAULT_EMOJIS,
+  speed = "medium",
+  direction = "clockwise",
+  reducedMotion = false,
+}: AnimatedEmojiBorderProps) {
   const { width, height } = useWindowDimensions();
+  const duration = SPEED_TO_DURATION[speed];
+
+  // Clockwise: top→right, right→down, bottom→left, left→up
+  // Counterclockwise: reverse
+  const cw = direction === "clockwise";
 
   return (
     <View style={{ flex: 1 }}>
       {children}
-      <HorizontalStrip width={width} scrollDirection="left" bottom={0} />
-      <VerticalStrip height={height} scrollDirection="up" left={0} />
-      <VerticalStrip height={height} scrollDirection="down" right={0} />
+      <HorizontalStrip
+        width={width}
+        scrollDirection={cw ? "right" : "left"}
+        top={0}
+        emojis={emojis}
+        duration={duration}
+        reducedMotion={reducedMotion}
+      />
+      <HorizontalStrip
+        width={width}
+        scrollDirection={cw ? "left" : "right"}
+        bottom={0}
+        emojis={emojis}
+        duration={duration}
+        reducedMotion={reducedMotion}
+      />
+      <VerticalStrip
+        height={height}
+        scrollDirection={cw ? "down" : "up"}
+        right={0}
+        emojis={emojis}
+        duration={duration}
+        reducedMotion={reducedMotion}
+      />
+      <VerticalStrip
+        height={height}
+        scrollDirection={cw ? "up" : "down"}
+        left={0}
+        emojis={emojis}
+        duration={duration}
+        reducedMotion={reducedMotion}
+      />
     </View>
   );
 }

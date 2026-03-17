@@ -9,6 +9,7 @@ import {
   useDeclineFriendRequest,
   useUnfriend,
 } from "@/hooks/useFriends";
+import { useGetBlockStatus } from "@/hooks/useBlock";
 
 type FriendStatusSectionProps = {
   userId: string;
@@ -54,7 +55,10 @@ export function FriendStatusSection({
   onError,
 }: FriendStatusSectionProps) {
   const { data: statusData, isPending } = useGetFriendshipStatus(userId);
-  const status = statusData?.status ?? null;
+  const { data: blockData } = useGetBlockStatus(userId);
+  const status = blockData?.isBlocked
+    ? FriendshipDisplayStatus.BLOCKED
+    : (statusData?.status ?? null);
 
   const sendFriendRequest = useSendFriendRequest();
   const acceptFriendRequest = useAcceptFriendRequest();
@@ -201,6 +205,11 @@ export function FriendStatusSection({
               ]);
             }
           },
+        };
+      case FriendshipDisplayStatus.BLOCKED:
+        return {
+          text: "Blocked",
+          onPress: () => {},
         };
     }
   };

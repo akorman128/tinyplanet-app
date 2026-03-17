@@ -12,15 +12,11 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { colors, Input, Button, Body, TabBar, Text } from "@/design-system";
 import {
-  colors,
-  Input,
-  Button,
-  Body,
-  TabBar,
-  Text,
-} from "@/design-system";
-import { LocationSearchInput, LocationSearchValue } from "@/components/LocationSearchInput";
+  LocationSearchInput,
+  LocationSearchValue,
+} from "@/components/LocationSearchInput";
 import { useProfileStore } from "@/stores/profileStore";
 import { useUpdateProfile } from "@/hooks/useProfile";
 import { parsePostGISPoint } from "@/utils/postgis";
@@ -160,7 +156,6 @@ export default function EditProfileScreen() {
     <>
       <Stack.Screen options={{ title: "Edit Profile" }} />
       <View className="flex-1 bg-cream">
-
         {/* Tabs */}
         <TabBar
           tabs={tabs}

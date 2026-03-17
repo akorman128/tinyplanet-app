@@ -43,6 +43,17 @@ export interface LocationPermissionState {
   lastDatabaseUpdate: LocationCoordinates | null;
 
   /**
+   * Radius (in miles) of random noise applied to location before DB writes.
+   * 0 = exact location, max 1 mile.
+   */
+  locationPrivacyRadiusMiles: number;
+
+  /**
+   * Set the location privacy radius (clamped 0–1 miles)
+   */
+  setLocationPrivacyRadius: (radiusMiles: number) => void;
+
+  /**
    * Update the permission status
    */
   setPermissionStatus: (status: Location.PermissionStatus) => void;
@@ -88,6 +99,11 @@ export const useLocationStore = create<LocationPermissionState>()(
       currentLocation: null,
       lastUpdated: null,
       lastDatabaseUpdate: null,
+      locationPrivacyRadiusMiles: 0.1,
+      setLocationPrivacyRadius: (radiusMiles: number) =>
+        set({
+          locationPrivacyRadiusMiles: Math.max(0, Math.min(1, radiusMiles)),
+        }),
       setPermissionStatus: (status: Location.PermissionStatus) =>
         set({ lastPermissionStatus: status }),
       markPermissionGranted: () =>

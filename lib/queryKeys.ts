@@ -54,8 +54,7 @@ export const queryKeys = {
     all: ["lists"] as const,
     detail: (listId: string) => ["lists", "detail", listId] as const,
     byUser: (userId?: string) => ["lists", "user", userId] as const,
-    viewable: (userId?: string) =>
-      ["lists", "viewable", userId] as const,
+    viewable: (userId?: string) => ["lists", "viewable", userId] as const,
     locations: ["lists", "locations"] as const,
   },
 
@@ -99,6 +98,14 @@ export const queryKeys = {
   profile: {
     all: ["profile"] as const,
     detail: (userId: string) => ["profile", "detail", userId] as const,
+  },
+
+  // Blocks
+  blocks: {
+    all: ["blocks"] as const,
+    list: ["blocks", "list"] as const,
+    status: (targetUserId: string) =>
+      ["blocks", "status", targetUserId] as const,
   },
 
   // Auth / Session

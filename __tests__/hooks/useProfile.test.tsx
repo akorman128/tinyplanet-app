@@ -3,7 +3,9 @@ import { createMockSupabase, MockSupabaseClient } from "../utils/mock-supabase";
 import { createTestWrapper } from "../utils/test-wrapper";
 
 let mockSupabase: MockSupabaseClient;
-let mockProfileState: { id: string; full_name?: string } | null = { id: "user-a" };
+let mockProfileState: { id: string; full_name?: string } | null = {
+  id: "user-a",
+};
 const mockSetProfileState = vi.fn();
 
 vi.mock("@/hooks/useSupabase", () => ({
@@ -11,7 +13,11 @@ vi.mock("@/hooks/useSupabase", () => ({
 }));
 
 vi.mock("@/hooks/useRequireProfile", () => ({
-  useRequireProfile: () => ({ id: "user-a", full_name: "User A", avatar_url: "" }),
+  useRequireProfile: () => ({
+    id: "user-a",
+    full_name: "User A",
+    avatar_url: "",
+  }),
 }));
 
 vi.mock("@/stores/profileStore", () => ({
@@ -34,7 +40,10 @@ describe("useGetProfile", () => {
 
   it("calls rpc('get_profile') with user ID", async () => {
     const profileData = [{ id: "user-b", full_name: "User B" }];
-    mockSupabase.configureRpc("get_profile", { data: profileData, error: null });
+    mockSupabase.configureRpc("get_profile", {
+      data: profileData,
+      error: null,
+    });
 
     const { Wrapper } = createTestWrapper(mockSupabase);
     const { result } = renderHook(() => useGetProfile("user-b"), {
@@ -60,7 +69,10 @@ describe("useCreateProfile", () => {
 
   it("calls from('profiles').insert() with correct data", async () => {
     const createdProfile = { id: "new-user", full_name: "New User" };
-    mockSupabase.configureFrom("profiles", { data: createdProfile, error: null });
+    mockSupabase.configureFrom("profiles", {
+      data: createdProfile,
+      error: null,
+    });
 
     const { Wrapper } = createTestWrapper(mockSupabase);
     const { result } = renderHook(() => useCreateProfile(), {
@@ -105,7 +117,10 @@ describe("useUpdateProfile", () => {
 
   it("calls from('profiles').update() with correct data", async () => {
     const updatedProfile = { id: "user-a", full_name: "Updated Name" };
-    mockSupabase.configureFrom("profiles", { data: updatedProfile, error: null });
+    mockSupabase.configureFrom("profiles", {
+      data: updatedProfile,
+      error: null,
+    });
 
     const { Wrapper } = createTestWrapper(mockSupabase);
     const { result } = renderHook(() => useUpdateProfile(), {

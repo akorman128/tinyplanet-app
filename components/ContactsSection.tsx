@@ -18,7 +18,12 @@ interface ContactsSectionProps {
 
 export function ContactsSection({ userId }: ContactsSectionProps) {
   const router = useRouter();
-  const { data: contactsData, isPending: loading, error: queryError, refetch } = useGetContacts(userId);
+  const {
+    data: contactsData,
+    isPending: loading,
+    error: queryError,
+    refetch,
+  } = useGetContacts(userId);
   const deleteContact = useDeleteContact();
   const currentUserProfile = useRequireProfile();
   const isOwnProfile = userId === currentUserProfile.id;

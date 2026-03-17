@@ -4,13 +4,7 @@ import { useRouter, Stack } from "expo-router";
 import { useGetViewableLists } from "@/hooks/useLists";
 import { useListSelectionStore } from "@/stores/listSelectionStore";
 import { ViewableList } from "@/types/list";
-import {
-  LoadingState,
-  EmptyState,
-  Icons,
-  colors,
-  Text,
-} from "@/design-system";
+import { LoadingState, EmptyState, Icons, colors, Text } from "@/design-system";
 
 export default function SelectListScreen() {
   const router = useRouter();
@@ -62,25 +56,22 @@ export default function SelectListScreen() {
       <Stack.Screen
         options={{
           title: "Select a List",
-          headerRight: Platform.OS === "android" && selectedList
-            ? () => (
-                <Pressable onPress={handleClear} className="px-2">
-                  <Text className="text-purple-600 font-medium">Clear</Text>
-                </Pressable>
-              )
-            : undefined,
+          headerRight:
+            Platform.OS === "android" && selectedList
+              ? () => (
+                  <Pressable onPress={handleClear} className="px-2">
+                    <Text className="text-purple-600 font-medium">Clear</Text>
+                  </Pressable>
+                )
+              : undefined,
         }}
       />
       {Platform.OS === "ios" && selectedList && (
         <Stack.Toolbar placement="right">
-          <Stack.Toolbar.Button
-            icon="xmark"
-            onPress={handleClear}
-          />
+          <Stack.Toolbar.Button icon="xmark" onPress={handleClear} />
         </Stack.Toolbar>
       )}
       <View className="flex-1 bg-cream">
-
         {loading ? (
           <LoadingState />
         ) : lists.length === 0 ? (

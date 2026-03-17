@@ -38,7 +38,9 @@ describe("get_top_vibes RPC", () => {
     expect(Number(data[0].count)).toBe(2);
 
     // Other emojis appear once each
-    const singleEmojis = data.filter((v: { emoji: string; count: number }) => Number(v.count) === 1);
+    const singleEmojis = data.filter(
+      (v: { emoji: string; count: number }) => Number(v.count) === 1
+    );
     expect(singleEmojis.length).toBe(4); // 💯, 🎉, ❤️, 🌟
   });
 

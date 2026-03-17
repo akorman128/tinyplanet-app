@@ -149,9 +149,10 @@ export function LocationSearchInput({
   };
 
   const handleSelectLocation = async (result: LocationResult) => {
-    const displayName = result.full_address || result.place_formatted
-      ? `${result.name}, ${result.full_address || result.place_formatted}`
-      : result.name;
+    const displayName =
+      result.full_address || result.place_formatted
+        ? `${result.name}, ${result.full_address || result.place_formatted}`
+        : result.name;
     setQuery(displayName);
     setResults([]);
 
@@ -255,9 +256,7 @@ export function LocationSearchInput({
                   <Text className="text-base text-gray-600">
                     Use "{query.trim()}" as text only
                   </Text>
-                  <Text className="text-sm text-gray-400">
-                    No map location
-                  </Text>
+                  <Text className="text-sm text-gray-400">No map location</Text>
                 </Pressable>
               )}
             </ScrollView>

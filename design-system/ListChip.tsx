@@ -22,10 +22,7 @@ export function ListChip({ list, size = "medium" }: ListChipProps) {
       <Pressable className="flex-row items-center bg-purple-50  rounded-lg px-3 py-4">
         <Link.AppleZoom>
           <View className="flex-row items-center flex-1" collapsable={false}>
-            <Icons.list
-              size={isSmall ? 14 : 16}
-              color={colors.hex.purple600}
-            />
+            <Icons.list size={isSmall ? 14 : 16} color={colors.hex.purple600} />
             <View className="flex-1 ml-2">
               <Text
                 className={`font-medium text-purple-700 ${isSmall ? "text-xs" : "text-sm"}`}

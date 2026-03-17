@@ -1,5 +1,8 @@
 import { router } from "expo-router";
-import { useVerifyOtpAndCreateProfile, useSignUpWithPhoneNumber } from "@/hooks/useSignUp";
+import {
+  useVerifyOtpAndCreateProfile,
+  useSignUpWithPhoneNumber,
+} from "@/hooks/useSignUp";
 import { OtpVerificationScreen } from "@/components/OtpVerificationScreen";
 
 export default function Page() {

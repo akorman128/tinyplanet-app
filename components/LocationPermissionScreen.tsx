@@ -92,8 +92,8 @@ export function LocationPermissionScreen({
     const message = isSystemDenied
       ? "You have denied location access in your device settings. Please open Settings to enable location permissions for Tiny Planet."
       : isSignup
-      ? "Access to your location is required to use this Tiny Planet. How tf are we supposed to find your ass?"
-      : "Location access was revoked. Please re-enable location permissions to continue using Tiny Planet.";
+        ? "Access to your location is required to use this Tiny Planet. How tf are we supposed to find your ass?"
+        : "Location access was revoked. Please re-enable location permissions to continue using Tiny Planet.";
 
     return (
       <SafeAreaView className="flex-1 bg-gradient-to-b from-blue-50 to-purple-50">

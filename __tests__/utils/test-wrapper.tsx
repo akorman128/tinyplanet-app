@@ -7,7 +7,9 @@ import type { MockSupabaseClient } from "./mock-supabase";
 // context value is never actually read — it just has to be non-null to avoid
 // the "must be used within SupabaseProvider" guard. We cast through the
 // context's expected type so TypeScript doesn't complain.
-type ContextValue = React.ComponentProps<typeof SupabaseContext.Provider>["value"];
+type ContextValue = React.ComponentProps<
+  typeof SupabaseContext.Provider
+>["value"];
 
 interface WrapperProps {
   children: React.ReactNode;
@@ -31,7 +33,9 @@ export function createTestWrapper(mockSupabase: MockSupabaseClient) {
   function Wrapper({ children }: WrapperProps) {
     return (
       <QueryClientProvider client={queryClient}>
-        <SupabaseContext.Provider value={mockSupabase as unknown as ContextValue}>
+        <SupabaseContext.Provider
+          value={mockSupabase as unknown as ContextValue}
+        >
           {children}
         </SupabaseContext.Provider>
       </QueryClientProvider>

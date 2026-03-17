@@ -16,9 +16,16 @@ type TabBarProps = {
   className?: string;
 };
 
-export function TabBar({ tabs, activeTab, onTabChange, className = "" }: TabBarProps) {
+export function TabBar({
+  tabs,
+  activeTab,
+  onTabChange,
+  className = "",
+}: TabBarProps) {
   return (
-    <View className={`flex-row bg-cream border-b border-[#f0f0f0] ${className}`}>
+    <View
+      className={`flex-row bg-cream border-b border-[#f0f0f0] ${className}`}
+    >
       {tabs.map((tab) => {
         const isActive = tab.id === activeTab;
         return (

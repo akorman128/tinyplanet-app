@@ -17,8 +17,11 @@ interface LocationPermissionProviderProps {
 export const LocationPermissionProvider = ({
   children,
 }: LocationPermissionProviderProps) => {
-  const { checkPermissionStatus, getCurrentLocation, updateLocationInDatabase } =
-    useLocation();
+  const {
+    checkPermissionStatus,
+    getCurrentLocation,
+    updateLocationInDatabase,
+  } = useLocation();
   const locationStore = useLocationStore();
 
   useEffect(() => {

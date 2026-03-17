@@ -70,4 +70,3 @@ export function OptionSelector<T extends string>({
     </View>
   );
 }
-

@@ -10,19 +10,20 @@ import { Stack } from "expo-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  colors,
-  Button,
-  Body,
-  Caption,
-  TabBar,
-  Tab,
-} from "@/design-system";
+import { colors, Button, Body, Caption, TabBar, Tab } from "@/design-system";
 import { FriendRequestItem } from "@/design-system/FriendRequestItem";
 import { VibePhoneForm } from "@/components/VibePhoneForm";
-import { useGetPendingRequests, useAcceptFriendRequest, useDeclineFriendRequest } from "@/hooks/useFriends";
+import {
+  useGetPendingRequests,
+  useAcceptFriendRequest,
+  useDeclineFriendRequest,
+} from "@/hooks/useFriends";
 import { useCreateVibe } from "@/hooks/useVibe";
-import { useCreateInviteCode, useSendInviteCode, useGetInviteCountThisMonth } from "@/hooks/useInviteCodes";
+import {
+  useCreateInviteCode,
+  useSendInviteCode,
+  useGetInviteCountThisMonth,
+} from "@/hooks/useInviteCodes";
 import { useProfileStore } from "@/stores/profileStore";
 import { useContactPicker } from "@/hooks/useContactPicker";
 import { isValidVibe, extractEmojis } from "@/utils/emojiValidation";
@@ -72,7 +73,11 @@ export default function FriendsScreen() {
 
   const allFormsValid = form1.formState.isValid && form2.formState.isValid;
 
-  const { data: pendingData, isLoading: requestsLoading, refetch: refetchPending } = useGetPendingRequests();
+  const {
+    data: pendingData,
+    isLoading: requestsLoading,
+    refetch: refetchPending,
+  } = useGetPendingRequests();
   const incomingRequests = pendingData?.incoming ?? [];
   const acceptFriendRequest = useAcceptFriendRequest();
   const declineFriendRequest = useDeclineFriendRequest();
@@ -138,9 +143,10 @@ export default function FriendsScreen() {
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 30);
 
-        const { data: inviteCodeData, code } = await createInviteCode.mutateAsync({
-          expires_at: expiresAt,
-        });
+        const { data: inviteCodeData, code } =
+          await createInviteCode.mutateAsync({
+            expires_at: expiresAt,
+          });
 
         await createVibe.mutateAsync({
           receiverId: null,
@@ -165,7 +171,9 @@ export default function FriendsScreen() {
       console.error("Error sending invites:", error);
       Alert.alert(
         "Error",
-        error instanceof Error ? error.message : "Failed to send invites. Please try again."
+        error instanceof Error
+          ? error.message
+          : "Failed to send invites. Please try again."
       );
     } finally {
       setIsSending(false);
@@ -206,7 +214,10 @@ export default function FriendsScreen() {
           )}
           contentContainerClassName="pb-6"
           refreshControl={
-            <RefreshControl refreshing={requestsLoading} onRefresh={handleRefresh} />
+            <RefreshControl
+              refreshing={requestsLoading}
+              onRefresh={handleRefresh}
+            />
           }
         />
       )}

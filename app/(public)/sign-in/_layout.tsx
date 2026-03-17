@@ -5,6 +5,7 @@ export default function SignInLayout() {
     <Stack
       screenOptions={{
         headerTransparent: true,
+        headerShadowVisible: false,
         headerLargeTitle: true,
         headerBackButtonDisplayMode: "minimal",
       }}

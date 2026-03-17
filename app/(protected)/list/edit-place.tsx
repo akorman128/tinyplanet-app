@@ -1,11 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { View, ScrollView, Alert } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import {
-  LoadingState,
-  ErrorState,
-  Text,
-} from "@/design-system";
+import { LoadingState, ErrorState, Text } from "@/design-system";
 import {
   LocationSearchInput,
   LocationSearchValue,
@@ -19,7 +15,11 @@ export default function EditPlaceScreen() {
     placeId: string;
     listId: string;
   }>();
-  const { data: listResult, isLoading: loading, error: queryError } = useGetList(listId);
+  const {
+    data: listResult,
+    isLoading: loading,
+    error: queryError,
+  } = useGetList(listId);
   const updatePlace = useUpdatePlace();
 
   const place = useMemo(() => {
@@ -123,7 +123,6 @@ export default function EditPlaceScreen() {
     <>
       <Stack.Screen options={{ title: "Edit Location" }} />
       <View className="flex-1 bg-cream">
-
         <ScrollView
           className="flex-1"
           contentContainerClassName="px-6 pt-6 pb-8"

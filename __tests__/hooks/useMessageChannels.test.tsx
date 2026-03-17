@@ -9,7 +9,11 @@ vi.mock("@/hooks/useSupabase", () => ({
 }));
 
 vi.mock("@/hooks/useRequireProfile", () => ({
-  useRequireProfile: () => ({ id: "user-a", full_name: "User A", avatar_url: "" }),
+  useRequireProfile: () => ({
+    id: "user-a",
+    full_name: "User A",
+    avatar_url: "",
+  }),
 }));
 
 vi.mock("@/stores/profileStore", () => ({
@@ -32,7 +36,9 @@ describe("useGetMessageChannels", () => {
     });
 
     const { Wrapper } = createTestWrapper(mockSupabase);
-    const { result } = renderHook(() => useGetMessageChannels(), { wrapper: Wrapper });
+    const { result } = renderHook(() => useGetMessageChannels(), {
+      wrapper: Wrapper,
+    });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(mockSupabase.rpc).toHaveBeenCalledWith("get_message_channels", {
@@ -48,10 +54,15 @@ describe("useHasUnreadMessages", () => {
   });
 
   it("calls RPC has_unread_messages", async () => {
-    mockSupabase.configureRpc("has_unread_messages", { data: true, error: null });
+    mockSupabase.configureRpc("has_unread_messages", {
+      data: true,
+      error: null,
+    });
 
     const { Wrapper } = createTestWrapper(mockSupabase);
-    const { result } = renderHook(() => useHasUnreadMessages(), { wrapper: Wrapper });
+    const { result } = renderHook(() => useHasUnreadMessages(), {
+      wrapper: Wrapper,
+    });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(mockSupabase.rpc).toHaveBeenCalledWith("has_unread_messages", {

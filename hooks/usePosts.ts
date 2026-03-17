@@ -1,4 +1,9 @@
-import { useQuery, UseQueryResult, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  UseQueryResult,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import { useSupabase } from "./useSupabase";
 import { useRequireProfile } from "./useRequireProfile";
@@ -196,7 +201,9 @@ export const useGetPost = (postId?: string): UseQueryResult<GetPostOutput> => {
             ? owner[0]?.full_name
             : owner?.full_name;
           const ownerName =
-            listData.user_id === profile.id ? "You" : ownerFullName || "Unknown";
+            listData.user_id === profile.id
+              ? "You"
+              : ownerFullName || "Unknown";
           attachedList = {
             id: listData.id,
             title: listData.title,

@@ -8,7 +8,9 @@ export const formatBirthday = (birthday: string | undefined) => {
   });
 };
 
-export const getAgeFromBirthday = (birthday: string | undefined): number | null => {
+export const getAgeFromBirthday = (
+  birthday: string | undefined
+): number | null => {
   if (!birthday) return null;
   const date = new Date(birthday);
   if (Number.isNaN(date.getTime())) return null;

@@ -41,7 +41,8 @@ export function CommentItem({
 
   // Limit visual depth to 1 level
   const visualDepth = Math.min(depth, 1);
-  const indentClass = visualDepth === 1 ? "ml-10 pl-3 border-l border-gray-200" : "";
+  const indentClass =
+    visualDepth === 1 ? "ml-10 pl-3 border-l border-gray-200" : "";
 
   return (
     <View className={`py-3 ${indentClass}`}>
@@ -88,7 +89,9 @@ export function CommentItem({
             >
               <Icons.heartOutline
                 size={16}
-                color={comment.liked_by_user ? colors.hex.error : colors.hex.gray500}
+                color={
+                  comment.liked_by_user ? colors.hex.error : colors.hex.gray500
+                }
               />
               {comment.like_count > 0 && (
                 <Text

@@ -173,10 +173,9 @@ describe("friends RPCs", () => {
 
   describe("get_platform_statistics", () => {
     it("returns total users and connection count", async () => {
-      const { data, error } = await adminClient.rpc(
-        "get_platform_statistics",
-        { p_user_id: userA.id }
-      );
+      const { data, error } = await adminClient.rpc("get_platform_statistics", {
+        p_user_id: userA.id,
+      });
       expect(error).toBeNull();
       expect(data).toHaveLength(1);
       const stats = data[0];

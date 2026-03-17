@@ -1,4 +1,9 @@
-import { useQuery, UseQueryResult, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  UseQueryResult,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import { useSupabase } from "./useSupabase";
 import { useRequireProfile } from "./useRequireProfile";
@@ -32,7 +37,9 @@ export const useCreateComment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: CreateCommentInput): Promise<CreateCommentOutput> => {
+    mutationFn: async (
+      input: CreateCommentInput
+    ): Promise<CreateCommentOutput> => {
       const { data, error } = await supabase
         .from("comments")
         .insert({
@@ -120,7 +127,9 @@ export const useDeleteComment = () => {
   });
 };
 
-export const useGetComments = (postId?: string): UseQueryResult<GetCommentsOutput> => {
+export const useGetComments = (
+  postId?: string
+): UseQueryResult<GetCommentsOutput> => {
   const { supabase } = useSupabase();
   const profile = useRequireProfile();
 

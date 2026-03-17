@@ -25,7 +25,11 @@ const ITEM_SHADOW: ViewStyle = {
 };
 
 const MENU_ITEMS = [
-  { label: "Travel Plan", emoji: "\u2708", route: "/create-travel-plan" as const },
+  {
+    label: "Travel Plan",
+    emoji: "\u2708",
+    route: "/create-travel-plan" as const,
+  },
   { label: "List", emoji: "\ud83d\udccb", route: "/create-list" as const },
   { label: "Post", emoji: "\ud83d\udc8c", route: "/create-post" as const },
 ];
@@ -108,7 +112,11 @@ export default function SearchScreen() {
   );
 
   React.useEffect(() => {
-    return (navigation as { addListener: (event: string, callback: () => void) => () => void }).addListener('tabPress', () => {
+    return (
+      navigation as {
+        addListener: (event: string, callback: () => void) => () => void;
+      }
+    ).addListener("tabPress", () => {
       if (isFocusedRef.current) {
         setTimeout(() => router.back(), 0);
       }

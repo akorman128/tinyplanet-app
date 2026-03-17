@@ -11,6 +11,7 @@ import {
 import { FriendStatusSection } from "@/components/FriendStatusSection";
 import { Profile } from "@/types/profile";
 import { getAgeFromBirthday } from "@/utils/formatBirthday";
+import { useGetBlockStatus } from "@/hooks/useBlock";
 
 interface ProfileHeaderProps {
   profile: Profile;
@@ -38,6 +39,10 @@ export function ProfileHeader({
   onError,
 }: ProfileHeaderProps) {
   const age = getAgeFromBirthday(profile.birthday);
+  const { data: blockData } = useGetBlockStatus(
+    !isViewingOwnProfile ? userId : undefined
+  );
+  const isBlocked = blockData?.isBlocked ?? false;
   return (
     <>
       <View className="mb-4">
@@ -97,7 +102,7 @@ export function ProfileHeader({
             </Badge>
           </Pressable>
         )}
-        {!isViewingOwnProfile && userId && (
+        {!isViewingOwnProfile && userId && !isBlocked && (
           <Pressable onPress={onMessagePress}>
             <Badge variant="default" size="small">
               Message

@@ -56,9 +56,7 @@ export const ListPickerSheet = forwardRef<BottomSheet, ListPickerSheetProps>(
       >
         <Icons.list size={20} color={colors.hex.purple600} />
         <View className="flex-1 ml-3">
-          <Body className="font-medium">
-            {item.title}
-          </Body>
+          <Body className="font-medium">{item.title}</Body>
           <Caption>
             {item.location_name}
             {item.owner_name !== "You" && ` - by ${item.owner_name}`}

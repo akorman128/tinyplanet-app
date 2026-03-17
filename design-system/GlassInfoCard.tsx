@@ -2,6 +2,7 @@ import React, { ReactNode } from "react";
 import { View, Pressable, ActivityIndicator } from "react-native";
 import { Text } from "./Text";
 import { colors } from "./colors";
+import { useThemeTextStyle } from "./ThemeTextContext";
 
 export interface GlassInfoItemProps {
   label: string;
@@ -16,6 +17,8 @@ export function GlassInfoItem({
   loading = false,
   onPress,
 }: GlassInfoItemProps) {
+  const { fontColor } = useThemeTextStyle();
+
   const content = (
     <View className="py-3">
       <Text className="text-xs font-semibold text-[#9ca3af] mb-1 uppercase tracking-wide">
@@ -25,7 +28,12 @@ export function GlassInfoItem({
         <ActivityIndicator size="small" color={colors.hex.purple600} />
       ) : (
         value && (
-          <Text className="text-base font-medium text-black">{value}</Text>
+          <Text
+            className="text-base font-medium"
+            style={{ color: fontColor ?? colors.black }}
+          >
+            {value}
+          </Text>
         )
       )}
     </View>
@@ -51,11 +59,13 @@ export function GlassInfoCard({
   children,
   className = "",
 }: GlassInfoCardProps) {
+  const { backgroundColor } = useThemeTextStyle();
   const childArray = React.Children.toArray(children);
 
   return (
     <View
-      className={`bg-gray-50 rounded-xl px-5 overflow-hidden ${className}`}
+      className={`rounded-xl px-5 overflow-hidden ${className}`}
+      style={{ backgroundColor: backgroundColor ?? colors.hex.cream }}
     >
       {childArray.map((child, index) => (
         <View key={index}>

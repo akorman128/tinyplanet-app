@@ -105,20 +105,26 @@ export default function ChatScreen() {
           // Check for duplicates (from optimistic updates)
           if (firstPage.some((msg) => msg.id === newMessage.id)) return oldData;
           // We need the sender profile for the message. Use the profiles we already have.
-          const senderProfile = newMessage.sender_id === session?.user?.id
-            ? currentUserProfile.data
-            : friendProfile.data;
+          const senderProfile =
+            newMessage.sender_id === session?.user?.id
+              ? currentUserProfile.data
+              : friendProfile.data;
           const messageWithSender: MessageWithSender = {
             ...newMessage,
-            sender: senderProfile ? {
-              id: senderProfile.id,
-              full_name: senderProfile.full_name,
-              avatar_url: senderProfile.avatar_url,
-            } : { id: newMessage.sender_id, full_name: "", avatar_url: null },
+            sender: senderProfile
+              ? {
+                  id: senderProfile.id,
+                  full_name: senderProfile.full_name,
+                  avatar_url: senderProfile.avatar_url,
+                }
+              : { id: newMessage.sender_id, full_name: "", avatar_url: null },
           };
           return {
             ...oldData,
-            pages: [[messageWithSender, ...firstPage], ...oldData.pages.slice(1)],
+            pages: [
+              [messageWithSender, ...firstPage],
+              ...oldData.pages.slice(1),
+            ],
           };
         }
       );
@@ -132,22 +138,27 @@ export default function ChatScreen() {
 
   // Subscribe to message updates (edits/deletes)
   useEffect(() => {
-    const unsubscribe = subscribeToMessageUpdates(friendId, (updatedMessage) => {
-      queryClient.setQueryData(
-        queryKeys.messages.conversation(friendId),
-        (oldData: InfiniteData<MessageWithSender[]> | undefined) => {
-          if (!oldData?.pages) return oldData;
-          return {
-            ...oldData,
-            pages: oldData.pages.map((page) =>
-              page.map((msg) =>
-                msg.id === updatedMessage.id ? { ...msg, ...updatedMessage } : msg
-              )
-            ),
-          };
-        }
-      );
-    });
+    const unsubscribe = subscribeToMessageUpdates(
+      friendId,
+      (updatedMessage) => {
+        queryClient.setQueryData(
+          queryKeys.messages.conversation(friendId),
+          (oldData: InfiniteData<MessageWithSender[]> | undefined) => {
+            if (!oldData?.pages) return oldData;
+            return {
+              ...oldData,
+              pages: oldData.pages.map((page) =>
+                page.map((msg) =>
+                  msg.id === updatedMessage.id
+                    ? { ...msg, ...updatedMessage }
+                    : msg
+                )
+              ),
+            };
+          }
+        );
+      }
+    );
 
     return unsubscribe;
   }, [friendId, isLoaded, subscribeToMessageUpdates, queryClient]);
@@ -210,10 +221,14 @@ export default function ChatScreen() {
         queryClient.setQueryData(
           queryKeys.messages.conversation(friendId),
           (oldData: InfiniteData<MessageWithSender[]> | undefined) => {
-            if (!oldData?.pages) return { pages: [[optimisticMessage]], pageParams: [0] };
+            if (!oldData?.pages)
+              return { pages: [[optimisticMessage]], pageParams: [0] };
             return {
               ...oldData,
-              pages: [[optimisticMessage, ...oldData.pages[0]], ...oldData.pages.slice(1)],
+              pages: [
+                [optimisticMessage, ...oldData.pages[0]],
+                ...oldData.pages.slice(1),
+              ],
             };
           }
         );
@@ -233,7 +248,9 @@ export default function ChatScreen() {
                 ...oldData,
                 pages: oldData.pages.map((page) =>
                   page.map((msg) =>
-                    msg.id === tempId ? { ...optimisticMessage, id: result.data.id } : msg
+                    msg.id === tempId
+                      ? { ...optimisticMessage, id: result.data.id }
+                      : msg
                   )
                 ),
               };
@@ -257,7 +274,15 @@ export default function ChatScreen() {
         }
       }
     },
-    [friendId, session?.user?.id, currentUserProfile.data, editingMessage, sendMessage, updateMessage, queryClient]
+    [
+      friendId,
+      session?.user?.id,
+      currentUserProfile.data,
+      editingMessage,
+      sendMessage,
+      updateMessage,
+      queryClient,
+    ]
   );
 
   const handleTyping = useCallback(() => {
@@ -329,7 +354,6 @@ export default function ChatScreen() {
     <>
       <Stack.Screen options={{ title: friendName || "Chat" }} />
       <View className="flex-1 bg-cream">
-
         <FlatList
           ref={flatListRef}
           data={messages}
@@ -348,7 +372,9 @@ export default function ChatScreen() {
             if (messagesQuery.hasNextPage) messagesQuery.fetchNextPage();
           }}
           onEndReachedThreshold={0.5}
-          ListHeaderComponent={messagesQuery.isFetchingNextPage ? renderLoadingMore() : null}
+          ListHeaderComponent={
+            messagesQuery.isFetchingNextPage ? renderLoadingMore() : null
+          }
           ListFooterComponent={
             isTyping ? <TypingIndicator friendName={friendName} /> : null
           }

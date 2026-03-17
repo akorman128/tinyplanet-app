@@ -60,7 +60,11 @@ export const useVerifyOtpAndCreateProfile = () => {
   return useMutation({
     mutationFn: async (input: { phone: string; token: string }) => {
       const { phone, token } = input;
-      const { data, error } = await supabase.auth.verifyOtp({ phone, token, type: "sms" });
+      const { data, error } = await supabase.auth.verifyOtp({
+        phone,
+        token,
+        type: "sms",
+      });
       if (error) throw error;
       if (!data.user) throw new Error("User not found");
 
@@ -83,9 +87,14 @@ export const useVerifyOtpAndCreateProfile = () => {
       }
 
       try {
-        const { data: vibes } = await fetchVibes(supabase, { inviteCodeId: signupData.inviteCode.id });
+        const { data: vibes } = await fetchVibes(supabase, {
+          inviteCodeId: signupData.inviteCode.id,
+        });
         if (vibes.length > 0) {
-          await updateVibe.mutateAsync({ vibeId: vibes[0].id, receiverId: userId });
+          await updateVibe.mutateAsync({
+            vibeId: vibes[0].id,
+            receiverId: userId,
+          });
         }
       } catch (error) {
         console.error("Failed to link vibes:", error);

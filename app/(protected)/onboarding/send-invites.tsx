@@ -90,9 +90,10 @@ export default function SendInvitesPage() {
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 30);
 
-        const { data: inviteCodeData, code } = await createInviteCode.mutateAsync({
-          expires_at: expiresAt,
-        });
+        const { data: inviteCodeData, code } =
+          await createInviteCode.mutateAsync({
+            expires_at: expiresAt,
+          });
 
         await createVibe.mutateAsync({
           receiverId: null,
@@ -122,7 +123,9 @@ export default function SendInvitesPage() {
       console.error("Error sending invites:", error);
       Alert.alert(
         "Error",
-        error instanceof Error ? error.message : "Failed to send invites. Please try again."
+        error instanceof Error
+          ? error.message
+          : "Failed to send invites. Please try again."
       );
     } finally {
       setIsSending(false);

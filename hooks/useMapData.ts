@@ -1,4 +1,7 @@
-import { useGetFriendLocations, useGetFriendHometownLocations } from "./useFriends";
+import {
+  useGetFriendLocations,
+  useGetFriendHometownLocations,
+} from "./useFriends";
 import { useGetTravelPlanLocations } from "./useTravelPlan";
 import { useGetListLocations } from "./useLists";
 import { useLocation } from "./useLocation";
@@ -43,9 +46,11 @@ export const useMapData = () => {
       travelPlanLocations.isLoading ||
       listLocations.isLoading,
     error:
-      (friendLocations.error ||
+      (
+        friendLocations.error ||
         hometownLocations.error ||
         travelPlanLocations.error ||
-        listLocations.error)?.message ?? null,
+        listLocations.error
+      )?.message ?? null,
   };
 };

@@ -1,10 +1,17 @@
-import { useMutation, useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  UseQueryResult,
+} from "@tanstack/react-query";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 import { Profile } from "@/types/profile";
 import { useProfileStore } from "@/stores/profileStore";
 import { useSupabase } from "./useSupabase";
 import { queryKeys } from "@/lib/queryKeys";
+import { useLocationStore } from "@/stores/locationStore";
+import { applyLocationNoise } from "@/utils/locationNoise";
 
 // --- Types ---
 
@@ -60,7 +67,12 @@ export const useCreateProfile = () => {
           hometown,
           birthday,
           location: location
-            ? `POINT(${location.longitude} ${location.latitude})`
+            ? (() => {
+                const radiusMiles =
+                  useLocationStore.getState().locationPrivacyRadiusMiles;
+                const noised = applyLocationNoise(location, radiusMiles);
+                return `POINT(${noised.longitude} ${noised.latitude})`;
+              })()
             : null,
           hometown_location: hometown_location
             ? `POINT(${hometown_location.longitude} ${hometown_location.latitude})`
@@ -107,7 +119,7 @@ export const useUpdateProfile = () => {
       return data;
     },
     onMutate: async (input) => {
-      if (!profileState) return { previousState: null };
+      if (!profileState) return { previousState: null, previousQuery: null };
 
       const previousState = profileState;
       const optimisticProfile = {
@@ -117,11 +129,29 @@ export const useUpdateProfile = () => {
       };
       setProfileState(optimisticProfile);
 
-      return { previousState };
+      // Also update the query cache so displayProfile reflects changes immediately
+      const queryKey = queryKeys.profile.detail(profileState.id);
+      await queryClient.cancelQueries({ queryKey });
+      const previousQuery = queryClient.getQueryData<Profile>(queryKey);
+      if (previousQuery) {
+        queryClient.setQueryData<Profile>(queryKey, {
+          ...previousQuery,
+          ...input.updateData,
+          updated_at: new Date().toISOString(),
+        });
+      }
+
+      return { previousState, previousQuery };
     },
     onError: (_error, _input, context) => {
       if (context?.previousState) {
         setProfileState(context.previousState);
+      }
+      if (context?.previousQuery && context?.previousState) {
+        queryClient.setQueryData(
+          queryKeys.profile.detail(context.previousState.id),
+          context.previousQuery
+        );
       }
     },
     onSuccess: (data) => {

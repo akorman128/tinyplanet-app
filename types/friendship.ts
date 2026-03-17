@@ -9,6 +9,7 @@ export enum FriendshipDisplayStatus {
   FRIENDS = "friends",
   PENDING_SENT = "pending_sent",
   PENDING_RECEIVED = "pending_received",
+  BLOCKED = "blocked",
 }
 
 export interface Friendship {

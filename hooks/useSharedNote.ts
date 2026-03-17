@@ -1,5 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
-import { getSharedNote, clearSharedNote, SharedNote } from "@/modules/SharedNoteModule";
+import {
+  getSharedNote,
+  clearSharedNote,
+  SharedNote,
+} from "@/modules/SharedNoteModule";
 
 export function useSharedNote() {
   const [sharedNote, setSharedNote] = useState<SharedNote | null>(null);

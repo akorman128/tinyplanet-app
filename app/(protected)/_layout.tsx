@@ -5,6 +5,7 @@ export default function ProtectedLayout() {
     <Stack
       screenOptions={{
         headerShown: true,
+        headerShadowVisible: false,
         headerStyle: { backgroundColor: "#faf9f5" },
         headerTitleStyle: {
           fontWeight: "bold",
@@ -23,6 +24,13 @@ export default function ProtectedLayout() {
         options={{ headerShown: false }}
       />
       <Stack.Screen name="comments" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="theme-editor"
+        options={{
+          headerShown: false,
+          presentation: "modal",
+        }}
+      />
       <Stack.Screen
         name="search"
         options={{

@@ -17,7 +17,9 @@ export const anonClient: SupabaseClient = createClient(
 );
 
 /** Create a client authenticated as a specific user via service role JWT override. */
-export const createAuthenticatedClient = (accessToken: string): SupabaseClient =>
+export const createAuthenticatedClient = (
+  accessToken: string
+): SupabaseClient =>
   createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     global: { headers: { Authorization: `Bearer ${accessToken}` } },
   });

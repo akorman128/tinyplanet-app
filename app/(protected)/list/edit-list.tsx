@@ -24,11 +24,19 @@ const CATEGORY_OPTIONS: SelectOption<ListCategory>[] = [
 export default function EditListScreen() {
   const router = useRouter();
   const { listId } = useLocalSearchParams<{ listId: string }>();
-  const { data: listResult, isLoading: loading, error: queryError } = useGetList(listId);
+  const {
+    data: listResult,
+    isLoading: loading,
+    error: queryError,
+  } = useGetList(listId);
   const updateList = useUpdateList();
 
   const list = listResult?.data ?? null;
-  const error = queryError ? "Failed to load list" : !loading && !list ? "List not found" : null;
+  const error = queryError
+    ? "Failed to load list"
+    : !loading && !list
+      ? "List not found"
+      : null;
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<ListCategory>("eat_drink");
@@ -113,7 +121,6 @@ export default function EditListScreen() {
         }}
       />
       <View className="flex-1 bg-cream">
-
         <ScrollView
           className="flex-1"
           contentContainerClassName="px-6 pt-6 pb-8"
@@ -131,7 +138,9 @@ export default function EditListScreen() {
           </View>
 
           <View className="mb-6">
-            <Text className="text-sm font-medium text-gray-700 mb-2">Category</Text>
+            <Text className="text-sm font-medium text-gray-700 mb-2">
+              Category
+            </Text>
             <Select
               options={CATEGORY_OPTIONS}
               value={category}
@@ -140,7 +149,9 @@ export default function EditListScreen() {
           </View>
 
           <View className="mb-6">
-            <Text className="text-sm font-medium text-gray-700 mb-2">Notes</Text>
+            <Text className="text-sm font-medium text-gray-700 mb-2">
+              Notes
+            </Text>
             <TextInput
               value={note}
               onChangeText={setNote}

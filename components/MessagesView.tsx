@@ -2,7 +2,11 @@ import React, { useState, useCallback, useEffect } from "react";
 import { FlatList, RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
 import { useSupabase } from "@/hooks/useSupabase";
-import { useGetMessageChannels, useMarkChannelAsRead, useSubscribeToAllMessages } from "@/hooks/useMessageChannels";
+import {
+  useGetMessageChannels,
+  useMarkChannelAsRead,
+  useSubscribeToAllMessages,
+} from "@/hooks/useMessageChannels";
 import { ChannelListItem } from "../design-system/ChannelListItem";
 import { LoadingState, ErrorState, EmptyState } from "@/design-system";
 import { colors } from "@/design-system/colors";
@@ -10,7 +14,12 @@ import { colors } from "@/design-system/colors";
 export function MessagesView() {
   const { session } = useSupabase();
   const router = useRouter();
-  const { data: channelsData, isPending: loading, error: queryError, refetch } = useGetMessageChannels();
+  const {
+    data: channelsData,
+    isPending: loading,
+    error: queryError,
+    refetch,
+  } = useGetMessageChannels();
   const channels = channelsData?.data ?? [];
   const error = queryError?.message ?? null;
   const markChannelAsRead = useMarkChannelAsRead();

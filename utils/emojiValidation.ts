@@ -2,7 +2,7 @@ export function isValidEmojiString(text: string, count: number = 3): boolean {
   if (!text) return false;
 
   // Remove all whitespace to get pure emoji content
-  const trimmed = text.trim().replace(/\s/g, '');
+  const trimmed = text.trim().replace(/\s/g, "");
 
   // Match emoji using a comprehensive regex pattern
   // This pattern matches most emojis including:
@@ -19,7 +19,7 @@ export function isValidEmojiString(text: string, count: number = 3): boolean {
   if (matches.length !== count) return false;
 
   // Verify the string only contains emojis (no other characters)
-  const joinedEmojis = matches.join('');
+  const joinedEmojis = matches.join("");
   return trimmed === joinedEmojis;
 }
 

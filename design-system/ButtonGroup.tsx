@@ -64,7 +64,9 @@ export function ButtonGroup({
                 size="small"
                 className="absolute -top-1 -right-1"
               >
-                {typeof option.badge === "number" ? option.badge.toString() : "●"}
+                {typeof option.badge === "number"
+                  ? option.badge.toString()
+                  : "●"}
               </Badge>
             )}
           </TouchableOpacity>

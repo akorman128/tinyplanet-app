@@ -3,10 +3,17 @@ import { View, Pressable } from "react-native";
 import { Controller, Control, FieldErrors } from "react-hook-form";
 import { z } from "zod";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Input, Body, Label, Caption, Meta, Text } from "@/design-system";
+import {
+  Input,
+  Body,
+  Label,
+  Caption,
+  Meta,
+  Text,
+  ActiveTravelPlanBanner,
+} from "@/design-system";
 import { TravelPlan } from "@/types/travelPlan";
 import { LocationSearchInput } from "./LocationSearchInput";
-import { ActiveTravelPlanBanner } from "@/design-system";
 // Travel plan schema
 export const travelPlanSchema = z.object({
   destination: z
@@ -49,9 +56,7 @@ export function TravelPlanForm({
         <>
           {isEditingActivePlan && (
             <View className="mb-4 flex-row items-center justify-between">
-              <Body className="font-semibold">
-                Editing Travel Plan
-              </Body>
+              <Body className="font-semibold">Editing Travel Plan</Body>
               <Pressable onPress={onCancelEdit}>
                 <Text className="text-purple-600 font-medium">Cancel</Text>
               </Pressable>
@@ -77,9 +82,7 @@ export function TravelPlanForm({
             name="startDate"
             render={({ field }) => (
               <View className="mb-4">
-                <Label className="mb-2">
-                  Start Date
-                </Label>
+                <Label className="mb-2">Start Date</Label>
                 <DateTimePicker
                   value={field.value}
                   mode="date"
@@ -113,9 +116,7 @@ export function TravelPlanForm({
                   error={errors.durationDays?.message}
                 />
                 {!errors.durationDays && (
-                  <Meta className="mt-1">
-                    Maximum 31 days
-                  </Meta>
+                  <Meta className="mt-1">Maximum 31 days</Meta>
                 )}
               </View>
             )}

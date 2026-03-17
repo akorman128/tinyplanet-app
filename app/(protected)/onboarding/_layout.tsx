@@ -5,6 +5,7 @@ export default function OnboardingLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
+        headerShadowVisible: false,
       }}
     >
       <Stack.Screen name="send-invites" />

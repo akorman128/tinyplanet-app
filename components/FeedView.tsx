@@ -1,7 +1,11 @@
 import React, { useCallback } from "react";
-import { FlatList, RefreshControl, View, ActivityIndicator } from "react-native";
-import { useRouter } from "expo-router";
-import { useFocusEffect } from "expo-router";
+import {
+  FlatList,
+  RefreshControl,
+  View,
+  ActivityIndicator,
+} from "react-native";
+import { useRouter, useFocusEffect } from "expo-router";
 import { useQueryClient, InfiniteData } from "@tanstack/react-query";
 import { useGetFeed } from "@/hooks/useFeed";
 import { PostCard } from "../design-system/PostCard";
@@ -36,65 +40,77 @@ export function FeedView() {
   useFocusEffect(
     useCallback(() => {
       // Update cached posts with fresh comment counts
-      queryClient.setQueryData(queryKeys.posts.feed(), (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
-        if (!oldData?.pages) return oldData;
-        return {
-          ...oldData,
-          pages: oldData.pages.map((page) =>
-            page.map((post) => {
-              const newCount = consume(post.id);
-              if (newCount !== undefined) {
-                return { ...post, comment_count: newCount };
-              }
-              return post;
-            })
-          ),
-        };
-      });
+      queryClient.setQueryData(
+        queryKeys.posts.feed(),
+        (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
+          if (!oldData?.pages) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) =>
+              page.map((post) => {
+                const newCount = consume(post.id);
+                if (newCount !== undefined) {
+                  return { ...post, comment_count: newCount };
+                }
+                return post;
+              })
+            ),
+          };
+        }
+      );
     }, [consume, queryClient])
   );
 
   const handleLikePost = useCallback(
     (postId: string, updates: Partial<PostWithAuthor>) => {
-      queryClient.setQueryData(queryKeys.posts.feed(), (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
-        if (!oldData?.pages) return oldData;
-        return {
-          ...oldData,
-          pages: oldData.pages.map((page) =>
-            page.map((p) => (p.id === postId ? { ...p, ...updates } : p))
-          ),
-        };
-      });
+      queryClient.setQueryData(
+        queryKeys.posts.feed(),
+        (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
+          if (!oldData?.pages) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) =>
+              page.map((p) => (p.id === postId ? { ...p, ...updates } : p))
+            ),
+          };
+        }
+      );
     },
     [queryClient]
   );
 
   const handleSavePost = useCallback(
     (postId: string, updates: Partial<PostWithAuthor>) => {
-      queryClient.setQueryData(queryKeys.posts.feed(), (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
-        if (!oldData?.pages) return oldData;
-        return {
-          ...oldData,
-          pages: oldData.pages.map((page) =>
-            page.map((p) => (p.id === postId ? { ...p, ...updates } : p))
-          ),
-        };
-      });
+      queryClient.setQueryData(
+        queryKeys.posts.feed(),
+        (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
+          if (!oldData?.pages) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) =>
+              page.map((p) => (p.id === postId ? { ...p, ...updates } : p))
+            ),
+          };
+        }
+      );
     },
     [queryClient]
   );
 
   const handlePostDelete = useCallback(
     (postId: string) => {
-      queryClient.setQueryData(queryKeys.posts.feed(), (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
-        if (!oldData?.pages) return oldData;
-        return {
-          ...oldData,
-          pages: oldData.pages.map((page) =>
-            page.filter((p) => p.id !== postId)
-          ),
-        };
-      });
+      queryClient.setQueryData(
+        queryKeys.posts.feed(),
+        (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
+          if (!oldData?.pages) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) =>
+              page.filter((p) => p.id !== postId)
+            ),
+          };
+        }
+      );
     },
     [queryClient]
   );

@@ -5,6 +5,7 @@ import { fetchProfile } from "./useProfile";
 import { useProfileStore } from "@/stores/profileStore";
 import { useLocationStore, LocationCoordinates } from "@/stores/locationStore";
 import { Profile } from "@/types/profile";
+import { applyLocationNoise } from "@/utils/locationNoise";
 
 /**
  * Calculate distance between two coordinates using Haversine formula
@@ -249,9 +250,13 @@ export const useLocation = (): UseLocationReturn => {
           );
         }
 
-        const { longitude, latitude } = coords;
+        // Apply location privacy noise before writing to DB
+        const radiusMiles =
+          useLocationStore.getState().locationPrivacyRadiusMiles;
+        const noisedCoords = applyLocationNoise(coords, radiusMiles);
+        const { longitude, latitude } = noisedCoords;
 
-        // Update location in database
+        // Update location in database (noised)
         const { data, error } = await supabase
           .from("profiles")
           .update({

@@ -7,7 +7,10 @@ interface TypographyProps extends TextProps {
 
 export function SuperHeading({ className = "", ...props }: TypographyProps) {
   return (
-    <Text className={`text-5xl font-medium text-black ${className}`} {...props} />
+    <Text
+      className={`text-5xl font-medium text-black ${className}`}
+      {...props}
+    />
   );
 }
 
@@ -35,12 +38,7 @@ export function Body({ className = "", ...props }: TypographyProps) {
 }
 
 export function Label({ className = "", ...props }: TypographyProps) {
-  return (
-    <Text
-      className={`text-sm text-gray-700 ${className}`}
-      {...props}
-    />
-  );
+  return <Text className={`text-sm text-gray-700 ${className}`} {...props} />;
 }
 
 export function Caption({ className = "", ...props }: TypographyProps) {

@@ -18,7 +18,11 @@ import { PostVisibility } from "@/types/post";
 export default function EditPostScreen() {
   const router = useRouter();
   const { postId } = useLocalSearchParams<{ postId: string }>();
-  const { data: postData, isPending: loading, error: queryError } = useGetPost(postId);
+  const {
+    data: postData,
+    isPending: loading,
+    error: queryError,
+  } = useGetPost(postId);
   const updatePost = useUpdatePost();
 
   const [visibility, setVisibility] = useState<PostVisibility>("public");

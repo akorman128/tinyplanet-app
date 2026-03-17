@@ -51,12 +51,12 @@ export default function CreatePostScreen() {
   ];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#faf9f5" }} edges={["top"]}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#faf9f5" }}
+      edges={["top"]}
+    >
       <ScreenHeader title="New Post" onClose={() => router.back()} />
-      <ScrollView
-        className="flex-1"
-        contentContainerClassName="px-6 pt-3 pb-8"
-      >
+      <ScrollView className="flex-1" contentContainerClassName="px-6 pt-3 pb-8">
         <PostForm
           control={form.control}
           errors={form.formState.errors}

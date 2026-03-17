@@ -10,7 +10,9 @@ export interface ErrorStateProps {
 export const ErrorState = React.memo<ErrorStateProps>(
   ({ message, className }) => {
     return (
-      <View className={`flex-1 justify-center items-center px-6 ${className || ""}`}>
+      <View
+        className={`flex-1 justify-center items-center px-6 ${className || ""}`}
+      >
         <Body className="text-center text-red-500">{message}</Body>
       </View>
     );

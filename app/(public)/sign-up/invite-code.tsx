@@ -36,7 +36,9 @@ export default function InviteCodePage() {
   const onSubmit = async (data: InviteCodeForm) => {
     const code = data.inviteCode.trim().toUpperCase();
 
-    const { data: inviteCodes } = await fetchInviteCodes(supabase, { code: code });
+    const { data: inviteCodes } = await fetchInviteCodes(supabase, {
+      code: code,
+    });
 
     if (inviteCodes.length === 0) {
       setError("inviteCode", {

@@ -48,7 +48,9 @@ export function Badge({
 
   return (
     <View className={badgeClass} {...props}>
-      <Text className={`${textSizeStyles[size]} font-semibold ${textStyles[variant]}`}>
+      <Text
+        className={`${textSizeStyles[size]} font-semibold ${textStyles[variant]}`}
+      >
         {children}
       </Text>
     </View>

@@ -15,7 +15,11 @@ vi.mock("@/stores/profileStore", () => ({
 }));
 
 vi.mock("@/hooks/useRequireProfile", () => ({
-  useRequireProfile: () => ({ id: "user-a", full_name: "User A", avatar_url: "" }),
+  useRequireProfile: () => ({
+    id: "user-a",
+    full_name: "User A",
+    avatar_url: "",
+  }),
 }));
 
 const { useGetFeed, useGetUserPosts } = await import("@/hooks/useFeed");
@@ -68,8 +72,13 @@ describe("useGetFeed", () => {
   });
 
   it("has next page when full page returned", async () => {
-    const fullPage = Array.from({ length: 10 }, (_, i) => ({ id: `post-${i}` }));
-    mockSupabase.configureRpc("get_feed_posts", { data: fullPage, error: null });
+    const fullPage = Array.from({ length: 10 }, (_, i) => ({
+      id: `post-${i}`,
+    }));
+    mockSupabase.configureRpc("get_feed_posts", {
+      data: fullPage,
+      error: null,
+    });
 
     const { Wrapper } = createTestWrapper(mockSupabase);
     const { result } = renderHook(() => useGetFeed(), { wrapper: Wrapper });
@@ -79,8 +88,13 @@ describe("useGetFeed", () => {
   });
 
   it("has no next page when partial page returned", async () => {
-    const partialPage = Array.from({ length: 7 }, (_, i) => ({ id: `post-${i}` }));
-    mockSupabase.configureRpc("get_feed_posts", { data: partialPage, error: null });
+    const partialPage = Array.from({ length: 7 }, (_, i) => ({
+      id: `post-${i}`,
+    }));
+    mockSupabase.configureRpc("get_feed_posts", {
+      data: partialPage,
+      error: null,
+    });
 
     const { Wrapper } = createTestWrapper(mockSupabase);
     const { result } = renderHook(() => useGetFeed(), { wrapper: Wrapper });

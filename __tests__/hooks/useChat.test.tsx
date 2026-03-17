@@ -9,7 +9,11 @@ vi.mock("@/hooks/useSupabase", () => ({
 }));
 
 vi.mock("@/hooks/useRequireProfile", () => ({
-  useRequireProfile: () => ({ id: "user-a", full_name: "User A", avatar_url: "" }),
+  useRequireProfile: () => ({
+    id: "user-a",
+    full_name: "User A",
+    avatar_url: "",
+  }),
 }));
 
 vi.mock("@/stores/profileStore", () => ({
@@ -56,7 +60,9 @@ describe("useDeleteMessage", () => {
     mockSupabase.configureFrom("messages", { data: null, error: null });
 
     const { Wrapper } = createTestWrapper(mockSupabase);
-    const { result } = renderHook(() => useDeleteMessage(), { wrapper: Wrapper });
+    const { result } = renderHook(() => useDeleteMessage(), {
+      wrapper: Wrapper,
+    });
 
     await act(async () => {
       await result.current.mutateAsync({ messageId: "m1" });

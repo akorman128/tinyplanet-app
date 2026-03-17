@@ -27,7 +27,11 @@ export function Select<T extends string>({
   error,
 }: SelectProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [dropdownPosition, setDropdownPosition] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+  });
   const triggerRef = useRef<View>(null);
 
   const selectedOption = options.find((opt) => opt.value === value);
@@ -57,7 +61,11 @@ export function Select<T extends string>({
       <View ref={triggerRef} collapsable={false}>
         <Pressable
           className={`flex-row items-center justify-between px-4 py-3 bg-white border rounded-lg ${
-            error ? "border-red-500" : isOpen ? "border-purple-600" : "border-gray-300"
+            error
+              ? "border-red-500"
+              : isOpen
+                ? "border-purple-600"
+                : "border-gray-300"
           }`}
           onPress={handleOpen}
         >
@@ -78,9 +86,7 @@ export function Select<T extends string>({
         </Pressable>
       </View>
 
-      {error && (
-        <Text className="text-red-500 text-sm mt-1">{error}</Text>
-      )}
+      {error && <Text className="text-red-500 text-sm mt-1">{error}</Text>}
 
       <Modal
         visible={isOpen}
@@ -88,10 +94,7 @@ export function Select<T extends string>({
         animationType="fade"
         onRequestClose={() => setIsOpen(false)}
       >
-        <Pressable
-          className="flex-1"
-          onPress={() => setIsOpen(false)}
-        >
+        <Pressable className="flex-1" onPress={() => setIsOpen(false)}>
           <View
             style={{
               position: "absolute",
@@ -125,7 +128,9 @@ export function Select<T extends string>({
                     <View className="flex-row items-center justify-between">
                       <Text
                         className={`text-base ${
-                          isSelected ? "text-purple-600 font-medium" : "text-gray-900"
+                          isSelected
+                            ? "text-purple-600 font-medium"
+                            : "text-gray-900"
                         }`}
                       >
                         {item.label}

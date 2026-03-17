@@ -102,13 +102,14 @@ export default function AddContactScreen() {
       <Stack.Screen
         options={{
           title: "Add Contact",
-          headerRight: Platform.OS === "android"
-            ? () => (
-                <Pressable onPress={handleImportFromPhone}>
-                  <Icons.download4 size={24} color={colors.black} />
-                </Pressable>
-              )
-            : undefined,
+          headerRight:
+            Platform.OS === "android"
+              ? () => (
+                  <Pressable onPress={handleImportFromPhone}>
+                    <Icons.download4 size={24} color={colors.black} />
+                  </Pressable>
+                )
+              : undefined,
         }}
       />
       {Platform.OS === "ios" && (

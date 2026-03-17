@@ -12,9 +12,13 @@ export const formatTimeAgo = (timestamp: string): string => {
   const diffYears = Math.floor(diffDays / 365);
 
   if (diffMins < 1) return "just now";
-  if (diffMins < 60) return `${diffMins} ${diffMins === 1 ? "min" : "mins"} ago`;
-  if (diffHours < 24) return `${diffHours} ${diffHours === 1 ? "hour" : "hours"} ago`;
-  if (diffDays < 30) return `${diffDays} ${diffDays === 1 ? "day" : "days"} ago`;
-  if (diffMonths < 12) return `${diffMonths} ${diffMonths === 1 ? "month" : "months"} ago`;
+  if (diffMins < 60)
+    return `${diffMins} ${diffMins === 1 ? "min" : "mins"} ago`;
+  if (diffHours < 24)
+    return `${diffHours} ${diffHours === 1 ? "hour" : "hours"} ago`;
+  if (diffDays < 30)
+    return `${diffDays} ${diffDays === 1 ? "day" : "days"} ago`;
+  if (diffMonths < 12)
+    return `${diffMonths} ${diffMonths === 1 ? "month" : "months"} ago`;
   return `${diffYears} ${diffYears === 1 ? "year" : "years"} ago`;
 };

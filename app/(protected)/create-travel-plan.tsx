@@ -17,14 +17,19 @@ import {
   travelPlanSchema,
   TravelPlanFormData,
 } from "@/components/TravelPlanForm";
-import { useCreateTravelPlan, useGetActiveTravelPlan, useCancelTravelPlan } from "@/hooks/useTravelPlan";
+import {
+  useCreateTravelPlan,
+  useGetActiveTravelPlan,
+  useCancelTravelPlan,
+} from "@/hooks/useTravelPlan";
 import { PostVisibility } from "@/types/post";
 import { CreateTravelPlanInput } from "@/types/travelPlan";
 
 export default function CreateTravelPlanScreen() {
   const router = useRouter();
   const createTravelPlan = useCreateTravelPlan();
-  const { data: activeTravelPlanData, isPending: loading } = useGetActiveTravelPlan();
+  const { data: activeTravelPlanData, isPending: loading } =
+    useGetActiveTravelPlan();
   const cancelTravelPlan = useCancelTravelPlan();
   const activeTravelPlan = activeTravelPlanData?.data ?? null;
 
@@ -106,7 +111,10 @@ export default function CreateTravelPlanScreen() {
   ];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#faf9f5" }} edges={["top"]}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#faf9f5" }}
+      edges={["top"]}
+    >
       <ScreenHeader title="Create Plan" onClose={() => router.back()} />
 
       <View className="flex-1">
@@ -144,7 +152,9 @@ export default function CreateTravelPlanScreen() {
                 <Button
                   variant="primary"
                   onPress={form.handleSubmit(onSubmit)}
-                  disabled={createTravelPlan.isPending || !form.formState.isValid}
+                  disabled={
+                    createTravelPlan.isPending || !form.formState.isValid
+                  }
                 >
                   {createTravelPlan.isPending ? "Creating..." : "Create Plan"}
                 </Button>

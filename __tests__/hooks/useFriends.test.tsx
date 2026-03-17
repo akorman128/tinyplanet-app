@@ -9,7 +9,11 @@ vi.mock("@/hooks/useSupabase", () => ({
 }));
 
 vi.mock("@/hooks/useRequireProfile", () => ({
-  useRequireProfile: () => ({ id: "user-a", full_name: "User A", avatar_url: "" }),
+  useRequireProfile: () => ({
+    id: "user-a",
+    full_name: "User A",
+    avatar_url: "",
+  }),
 }));
 
 vi.mock("@/stores/profileStore", () => ({
@@ -30,11 +34,21 @@ describe("useSendFriendRequest", () => {
   });
 
   it("inserts a friendship row", async () => {
-    const insertedRow = { id: "f1", user_a: "user-a", user_b: "user-b", status: "pending" };
-    mockSupabase.configureFrom("friendships", { data: insertedRow, error: null });
+    const insertedRow = {
+      id: "f1",
+      user_a: "user-a",
+      user_b: "user-b",
+      status: "pending",
+    };
+    mockSupabase.configureFrom("friendships", {
+      data: insertedRow,
+      error: null,
+    });
 
     const { Wrapper } = createTestWrapper(mockSupabase);
-    const { result } = renderHook(() => useSendFriendRequest(), { wrapper: Wrapper });
+    const { result } = renderHook(() => useSendFriendRequest(), {
+      wrapper: Wrapper,
+    });
 
     await act(async () => {
       await result.current.mutateAsync({ targetUserId: "user-b" });
@@ -42,13 +56,19 @@ describe("useSendFriendRequest", () => {
 
     const chain = mockSupabase.getLastChain("friendships");
     expect(chain?.insert).toHaveBeenCalledWith(
-      expect.objectContaining({ user_a: "user-a", user_b: "user-b", status: "pending" })
+      expect.objectContaining({
+        user_a: "user-a",
+        user_b: "user-b",
+        status: "pending",
+      })
     );
   });
 
   it("rejects self-friend request", async () => {
     const { Wrapper } = createTestWrapper(mockSupabase);
-    const { result } = renderHook(() => useSendFriendRequest(), { wrapper: Wrapper });
+    const { result } = renderHook(() => useSendFriendRequest(), {
+      wrapper: Wrapper,
+    });
 
     await expect(
       act(async () => {
@@ -71,8 +91,24 @@ describe("useGetFriends", () => {
           user_a: "user-a",
           user_b: "user-b",
           status: "accepted",
-          a: { id: "user-a", full_name: "User A", avatar_url: "", website: "", hometown: "", birthday: "", location: "" },
-          b: { id: "user-b", full_name: "User B", avatar_url: "", website: "", hometown: "", birthday: "", location: "" },
+          a: {
+            id: "user-a",
+            full_name: "User A",
+            avatar_url: "",
+            website: "",
+            hometown: "",
+            birthday: "",
+            location: "",
+          },
+          b: {
+            id: "user-b",
+            full_name: "User B",
+            avatar_url: "",
+            website: "",
+            hometown: "",
+            birthday: "",
+            location: "",
+          },
         },
       ],
       error: null,
@@ -94,12 +130,22 @@ describe("useSearchFriends", () => {
 
   it("calls RPC with correct params", async () => {
     mockSupabase.configureRpc("search_friends", {
-      data: [{ id: "user-b", full_name: "User B", avatar_url: "", website: "", hometown: "" }],
+      data: [
+        {
+          id: "user-b",
+          full_name: "User B",
+          avatar_url: "",
+          website: "",
+          hometown: "",
+        },
+      ],
       error: null,
     });
 
     const { Wrapper } = createTestWrapper(mockSupabase);
-    const { result } = renderHook(() => useSearchFriends("Bob"), { wrapper: Wrapper });
+    const { result } = renderHook(() => useSearchFriends("Bob"), {
+      wrapper: Wrapper,
+    });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(mockSupabase.rpc).toHaveBeenCalledWith("search_friends", {
@@ -110,7 +156,9 @@ describe("useSearchFriends", () => {
 
   it("is disabled with empty query", () => {
     const { Wrapper } = createTestWrapper(mockSupabase);
-    const { result } = renderHook(() => useSearchFriends(""), { wrapper: Wrapper });
+    const { result } = renderHook(() => useSearchFriends(""), {
+      wrapper: Wrapper,
+    });
 
     expect(result.current.fetchStatus).toBe("idle");
   });
@@ -128,11 +176,18 @@ describe("useGetPlatformStatistics", () => {
     });
 
     const { Wrapper } = createTestWrapper(mockSupabase);
-    const { result } = renderHook(() => useGetPlatformStatistics(), { wrapper: Wrapper });
+    const { result } = renderHook(() => useGetPlatformStatistics(), {
+      wrapper: Wrapper,
+    });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockSupabase.rpc).toHaveBeenCalledWith("get_platform_statistics", { p_user_id: "user-a" });
-    expect(result.current.data?.data).toEqual({ total_users: 100, connections_count: 50 });
+    expect(mockSupabase.rpc).toHaveBeenCalledWith("get_platform_statistics", {
+      p_user_id: "user-a",
+    });
+    expect(result.current.data?.data).toEqual({
+      total_users: 100,
+      connections_count: 50,
+    });
   });
 });
 
@@ -142,11 +197,21 @@ describe("useAcceptFriendRequest", () => {
   });
 
   it("updates friendship status to accepted", async () => {
-    const acceptedRow = { id: "f1", user_a: "user-a", user_b: "user-b", status: "accepted" };
-    mockSupabase.configureFrom("friendships", { data: acceptedRow, error: null });
+    const acceptedRow = {
+      id: "f1",
+      user_a: "user-a",
+      user_b: "user-b",
+      status: "accepted",
+    };
+    mockSupabase.configureFrom("friendships", {
+      data: acceptedRow,
+      error: null,
+    });
 
     const { Wrapper } = createTestWrapper(mockSupabase);
-    const { result } = renderHook(() => useAcceptFriendRequest(), { wrapper: Wrapper });
+    const { result } = renderHook(() => useAcceptFriendRequest(), {
+      wrapper: Wrapper,
+    });
 
     await act(async () => {
       await result.current.mutateAsync({ fromUserId: "user-b" });

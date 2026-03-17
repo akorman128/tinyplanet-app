@@ -46,7 +46,8 @@ function withShareExtension(config) {
     const xcodeProject = config.modResults;
     const projectRoot = config.modRequest.projectRoot;
     const platformProjectRoot = config.modRequest.platformProjectRoot;
-    const bundleIdentifier = config.ios?.bundleIdentifier || "com.alexkorman.tinyplanet";
+    const bundleIdentifier =
+      config.ios?.bundleIdentifier || "com.alexkorman.tinyplanet";
 
     // Create Share Extension directory in ios folder
     const extensionDir = path.join(platformProjectRoot, EXTENSION_NAME);

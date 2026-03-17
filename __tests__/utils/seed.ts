@@ -240,10 +240,15 @@ export async function cleanupTestData(userIds: string[]) {
       .delete()
       .or(`created_by.eq.${userId},redeemed_by.eq.${userId}`);
     await adminClient.from("posts").delete().eq("author_id", userId);
+    await adminClient.from("conversation_reads").delete().eq("user_id", userId);
+  }
+
+  // Delete blocks involving any test user
+  for (const userId of userIds) {
     await adminClient
-      .from("conversation_reads")
+      .from("blocks")
       .delete()
-      .eq("user_id", userId);
+      .or(`blocker_id.eq.${userId},blocked_id.eq.${userId}`);
   }
 
   // Delete friendships involving any test user
