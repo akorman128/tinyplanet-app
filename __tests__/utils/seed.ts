@@ -105,7 +105,7 @@ export async function createTestComment(
 ) {
   const { data, error } = await adminClient
     .from("comments")
-    .insert({ user_id: userId, post_id: postId, text })
+    .insert({ author_id: userId, post_id: postId, body: text })
     .select("id")
     .single();
   if (error) throw error;
@@ -218,7 +218,7 @@ export async function cleanupTestData(userIds: string[]) {
       .delete()
       .or(`giver_id.eq.${userId},receiver_id.eq.${userId}`);
     await adminClient.from("likes").delete().eq("user_id", userId);
-    await adminClient.from("comments").delete().eq("user_id", userId);
+    await adminClient.from("comments").delete().eq("author_id", userId);
     await adminClient.from("travel_plans").delete().eq("user_id", userId);
     await adminClient
       .from("messages")

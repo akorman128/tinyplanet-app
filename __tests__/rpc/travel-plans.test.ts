@@ -89,6 +89,7 @@ describe("Travel Plan RPCs", () => {
           p_destination_name: "New York City",
           p_start_date: startDate,
           p_duration_days: 7,
+          p_text: null,
         }
       );
 
@@ -123,6 +124,7 @@ describe("Travel Plan RPCs", () => {
           p_destination_name: "Paris",
           p_start_date: futureDate(10),
           p_duration_days: 0,
+          p_text: null,
         }
       );
       expect(errZero).not.toBeNull();
@@ -137,6 +139,7 @@ describe("Travel Plan RPCs", () => {
           p_destination_name: "Paris",
           p_start_date: futureDate(10),
           p_duration_days: 32,
+          p_text: null,
         }
       );
       expect(errOver).not.toBeNull();
@@ -154,6 +157,7 @@ describe("Travel Plan RPCs", () => {
           p_destination_name: "Tokyo",
           p_start_date: futureDate(3),
           p_duration_days: 5,
+          p_text: null,
         }
       );
       createdPlanId = first![0].travel_plan_id;
@@ -166,6 +170,7 @@ describe("Travel Plan RPCs", () => {
         p_destination_name: "Paris",
         p_start_date: futureDate(20),
         p_duration_days: 3,
+        p_text: null,
       });
       expect(error).not.toBeNull();
       expect(error!.message).toContain(
@@ -212,6 +217,7 @@ describe("Travel Plan RPCs", () => {
         p_destination_name: "Rome",
         p_start_date: futureDate(5),
         p_duration_days: 5,
+        p_text: null,
       });
       planId = data![0].travel_plan_id;
       postId = data![0].post_id;
@@ -234,6 +240,7 @@ describe("Travel Plan RPCs", () => {
           p_destination_name: "Athens",
           p_start_date: newStart,
           p_duration_days: 3,
+          p_text: null,
         }
       );
 
@@ -267,6 +274,7 @@ describe("Travel Plan RPCs", () => {
           p_destination_name: "Madrid",
           p_start_date: futureDate(10),
           p_duration_days: 3,
+          p_text: null,
         }
       );
 
@@ -311,6 +319,7 @@ describe("Travel Plan RPCs", () => {
         p_destination_name: "Rio de Janeiro",
         p_start_date: futureDate(7),
         p_duration_days: 10,
+        p_text: null,
       });
       planId = data![0].travel_plan_id;
       postId = data![0].post_id;
@@ -362,6 +371,7 @@ describe("Travel Plan RPCs", () => {
         p_destination_name: "Bangkok",
         p_start_date: formatDate(new Date()), // starts today
         p_duration_days: 7,
+        p_text: null,
       });
       planId = data![0].travel_plan_id;
     });
