@@ -100,7 +100,7 @@ export default function EditTravelPlanScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "Edit Travel Plan" }} />
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-cream">
           <LoadingState />
         </View>
       </>
@@ -111,7 +111,7 @@ export default function EditTravelPlanScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "Edit Travel Plan" }} />
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-cream">
           <ErrorState message={queryError.message ?? "Failed to load travel plan"} />
         </View>
       </>
@@ -121,7 +121,7 @@ export default function EditTravelPlanScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Edit Travel Plan" }} />
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-cream">
 
         <ScrollView
           className="flex-1"

@@ -73,7 +73,7 @@ export default function EditListScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "Edit List" }} />
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-cream">
           <LoadingState />
         </View>
       </>
@@ -84,7 +84,7 @@ export default function EditListScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "Edit List" }} />
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-cream">
           <ErrorState message={error || "List not found"} />
         </View>
       </>
@@ -112,7 +112,7 @@ export default function EditListScreen() {
           ),
         }}
       />
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-cream">
 
         <ScrollView
           className="flex-1"

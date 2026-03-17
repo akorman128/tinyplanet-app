@@ -106,7 +106,7 @@ export default function CreateTravelPlanScreen() {
   ];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }} edges={["top"]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#faf9f5" }} edges={["top"]}>
       <ScreenHeader title="Create Plan" onClose={() => router.back()} />
 
       <View className="flex-1">

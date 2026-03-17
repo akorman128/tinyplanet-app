@@ -4,19 +4,26 @@ import {
   FlatList,
   ActivityIndicator,
   Alert,
+  Pressable,
   RefreshControl,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { colors, Input, Body } from "@/design-system";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { colors, Input, Body, ScreenHeader } from "@/design-system";
 import { UserSearchListItem } from "@/components/UserSearchList";
 import { useSearchFriends, useSendFriendRequest } from "@/hooks/useFriends";
 
 export default function SearchScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
 
-  const { data: searchData, isPending: searchLoading, refetch } = useSearchFriends(debouncedQuery);
+  const {
+    data: searchData,
+    isPending: searchLoading,
+    refetch,
+  } = useSearchFriends(debouncedQuery);
   const searchResults = searchData?.data ?? [];
 
   const sendFriendRequest = useSendFriendRequest();
@@ -52,49 +59,53 @@ export default function SearchScreen() {
   );
 
   return (
-    <View className="flex-1 bg-white">
-      <View className="px-6 pt-3 pb-3 gap-3">
-        <Input
-          placeholder="Search friends..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          returnKeyType="search"
-          clearable={true}
-          onClear={() => setSearchQuery("")}
-          autoFocus
-        />
-      </View>
+    <View className="flex-1">
+      <Pressable className="absolute inset-0" onPress={() => router.back()} />
+      <View className="flex-1 bg-cream" style={{ marginTop: insets.top }}>
+        <ScreenHeader title="Search" onClose={() => router.back()} />
+        <View className="px-6 pt-3 pb-3 gap-3">
+          <Input
+            placeholder="Search friends..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            returnKeyType="search"
+            clearable={true}
+            onClear={() => setSearchQuery("")}
+            autoFocus
+          />
+        </View>
 
-      {searchLoading && debouncedQuery ? (
-        <View className="flex-1 justify-center items-center px-6">
-          <ActivityIndicator size="large" color={colors.hex.purple600} />
-        </View>
-      ) : searchResults.length === 0 ? (
-        <View className="flex-1 justify-center items-center px-6">
-          <Body className="text-base text-gray-400 text-center">
-            {searchQuery.trim() ? "No results" : "Search your planet by name"}
-          </Body>
-        </View>
-      ) : (
-        <FlatList
-          data={searchResults}
-          renderItem={({ item }) => (
-            <UserSearchListItem
-              user={item}
-              onAddFriend={handleAddFriend}
-              onPress={handleUserPress}
-            />
-          )}
-          keyExtractor={(item) => item.id}
-          ItemSeparatorComponent={() => (
-            <View className="h-[1px] bg-gray-100 mx-6" />
-          )}
-          contentContainerClassName="pb-6"
-          refreshControl={
-            <RefreshControl refreshing={false} onRefresh={() => refetch()} />
-          }
-        />
-      )}
+        {searchLoading && debouncedQuery ? (
+          <View className="flex-1 justify-center items-center px-6">
+            <ActivityIndicator size="large" color={colors.hex.purple600} />
+          </View>
+        ) : searchResults.length === 0 ? (
+          <View className="flex-1 justify-center items-center px-6">
+            <Body className="text-base text-gray-400 text-center">
+              {searchQuery.trim() ? "No results" : "Search your planet by name"}
+            </Body>
+          </View>
+        ) : (
+          <FlatList
+            data={searchResults}
+            renderItem={({ item }) => (
+              <UserSearchListItem
+                user={item}
+                onAddFriend={handleAddFriend}
+                onPress={handleUserPress}
+              />
+            )}
+            keyExtractor={(item) => item.id}
+            ItemSeparatorComponent={() => (
+              <View className="h-[1px] bg-gray-100 mx-6" />
+            )}
+            contentContainerClassName="pb-6"
+            refreshControl={
+              <RefreshControl refreshing={false} onRefresh={() => refetch()} />
+            }
+          />
+        )}
+      </View>
     </View>
   );
 }

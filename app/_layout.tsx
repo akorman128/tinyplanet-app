@@ -136,7 +136,7 @@ function RootNavigator() {
   // Show loading while profile is being fetched
   if (session && !profileState && isLoading) {
     return (
-      <View className="flex-1 justify-center items-center bg-white">
+      <View className="flex-1 justify-center items-center bg-cream">
         <ActivityIndicator size="large" color="#9333ea" />
       </View>
     );
@@ -145,7 +145,7 @@ function RootNavigator() {
   // Show error state with retry option
   if (session && error && !profileState) {
     return (
-      <View className="flex-1 justify-center items-center bg-white px-6">
+      <View className="flex-1 justify-center items-center bg-cream px-6">
         <SectionTitle className="text-purple-900 mb-2">
           Failed to Load Profile
         </SectionTitle>

@@ -5,7 +5,7 @@ export default function ProtectedLayout() {
     <Stack
       screenOptions={{
         headerShown: true,
-        headerStyle: { backgroundColor: "#ffffff" },
+        headerStyle: { backgroundColor: "#faf9f5" },
         headerTitleStyle: {
           fontWeight: "bold",
           fontSize: 20,
@@ -16,27 +16,19 @@ export default function ProtectedLayout() {
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="create-list"
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="create-post"
-        options={{ headerShown: false }}
-      />
+      <Stack.Screen name="create-list" options={{ headerShown: false }} />
+      <Stack.Screen name="create-post" options={{ headerShown: false }} />
       <Stack.Screen
         name="create-travel-plan"
         options={{ headerShown: false }}
       />
-      <Stack.Screen
-        name="comments"
-        options={{ headerShown: false }}
-      />
+      <Stack.Screen name="comments" options={{ headerShown: false }} />
       <Stack.Screen
         name="search"
         options={{
-          title: "Search",
-          headerBackTitle: "Back",
+          headerShown: false,
+          presentation: "transparentModal",
+          animation: "fade",
         }}
       />
     </Stack>

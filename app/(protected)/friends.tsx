@@ -247,7 +247,7 @@ export default function FriendsScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Friends" }} />
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-cream">
         <TabBar
           tabs={TABS}
           activeTab={activeTab}

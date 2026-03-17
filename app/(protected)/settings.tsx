@@ -9,7 +9,7 @@ export default function MutualsScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Settings" }} />
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-cream">
         <View className="w-full py-4 px-6 flex flex-col gap-2">
           <Button
             size="md"

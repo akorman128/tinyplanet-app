@@ -173,7 +173,7 @@ export default function ListDetailScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "List" }} />
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-cream">
           <LoadingState />
         </View>
       </>
@@ -184,7 +184,7 @@ export default function ListDetailScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "List" }} />
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-cream">
           <ErrorState message={error || "List not found"} />
         </View>
       </>
@@ -225,7 +225,7 @@ export default function ListDetailScreen() {
       )}
       <Link.AppleZoomTarget />
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-cream">
 
           {/* Map */}
           <ListMiniMap
@@ -276,7 +276,7 @@ export default function ListDetailScreen() {
           </ListMiniMap>
 
           {/* List Info */}
-          <View className="px-6 py-4 bg-white border-b border-gray-200">
+          <View className="px-6 py-4 bg-cream border-b border-gray-200">
             <Text className="text-2xl font-bold text-gray-900 mb-2">
               {list.title}
             </Text>
@@ -289,7 +289,7 @@ export default function ListDetailScreen() {
           </View>
 
           {/* Places List */}
-          <ScrollView className="flex-1 bg-white">
+          <ScrollView className="flex-1 bg-cream">
             <View className="px-6 py-4">
               <SectionTitle className="mb-4">
                 Places ({list.places.length})

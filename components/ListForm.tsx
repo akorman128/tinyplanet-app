@@ -102,7 +102,7 @@ export function ListForm({
   };
 
   return (
-    <ScrollView className="flex-1 bg-white px-6 pt-2">
+    <ScrollView className="flex-1 bg-cream px-6 pt-2">
       <View className="mb-6">
         <Caption className="text-gray-600">
           📍 Add your favorite places in a city. Places will be automatically

@@ -227,7 +227,7 @@ export default function CommentsScreen() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }} edges={["top"]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#faf9f5" }} edges={["top"]}>
       <ScreenHeader title="Comments" onClose={() => router.back()} />
 
       {loading ? (
@@ -255,7 +255,7 @@ export default function CommentsScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
-        <View className="px-6 py-4 border-t border-gray-200 bg-white">
+        <View className="px-6 py-4 border-t border-gray-200 bg-cream">
           {replyingTo && (
             <View className="flex-row items-center justify-between mb-2 px-3 py-2 bg-purple-50 rounded-lg">
               <Text className="text-sm text-purple-700">

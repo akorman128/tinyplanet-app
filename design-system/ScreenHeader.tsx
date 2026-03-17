@@ -16,7 +16,7 @@ export function ScreenHeader({
 }: ScreenHeaderProps) {
   return (
     <View
-      className={`flex-row items-center justify-between px-6 py-2 bg-white ${className}`}
+      className={`flex-row items-center justify-between px-6 py-2 bg-cream ${className}`}
     >
       <Heading>{title}</Heading>
       <Pressable onPress={onClose} hitSlop={12}>

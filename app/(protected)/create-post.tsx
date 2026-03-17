@@ -51,7 +51,7 @@ export default function CreatePostScreen() {
   ];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }} edges={["top"]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#faf9f5" }} edges={["top"]}>
       <ScreenHeader title="New Post" onClose={() => router.back()} />
       <ScrollView
         className="flex-1"

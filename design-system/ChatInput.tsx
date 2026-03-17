@@ -79,7 +79,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
     >
       <View
-        className="border-t border-gray-200 bg-white px-4 py-4"
+        className="border-t border-gray-200 bg-cream px-4 py-4"
         style={{ paddingBottom: insets.bottom + 8 }}
       >
         {editingMessage && (

@@ -14,7 +14,7 @@ export default function UserPostsScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Posts" }} />
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-cream">
         <UserPostsSection
           userId={displayUserId}
           onOpenComments={(postId, commentCount) => {

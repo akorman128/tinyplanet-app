@@ -296,7 +296,7 @@ export default function ChatScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "Chat" }} />
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-cream">
           <ErrorState message="Friend ID not provided" />
         </View>
       </>
@@ -307,7 +307,7 @@ export default function ChatScreen() {
     return (
       <>
         <Stack.Screen options={{ title: friendName || "Chat" }} />
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-cream">
           <LoadingState />
         </View>
       </>
@@ -318,7 +318,7 @@ export default function ChatScreen() {
     return (
       <>
         <Stack.Screen options={{ title: friendName || "Chat" }} />
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-cream">
           <ErrorState message="Failed to load messages" />
         </View>
       </>
@@ -328,7 +328,7 @@ export default function ChatScreen() {
   return (
     <>
       <Stack.Screen options={{ title: friendName || "Chat" }} />
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-cream">
 
         <FlatList
           ref={flatListRef}

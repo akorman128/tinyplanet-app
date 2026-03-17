@@ -45,7 +45,7 @@ export default function MutualsScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "Mutual Friends" }} />
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-cream">
           <View className="flex-1 justify-center items-center">
             <ActivityIndicator size="large" color={colors.hex.purple600} />
           </View>
@@ -57,7 +57,7 @@ export default function MutualsScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Mutual Friends" }} />
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-cream">
 
         {mutuals.length === 0 ? (
           <View className="flex-1 justify-center items-center px-6">

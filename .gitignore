@@ -43,8 +43,8 @@ ios/
 # android
 android/
 
-#supabase
-supabase/
+# supabase CLI runtime
+.supabase/
 
 # test env
 .env.test

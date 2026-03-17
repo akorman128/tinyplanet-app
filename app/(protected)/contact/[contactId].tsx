@@ -64,7 +64,7 @@ export default function ContactDetailScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "Contact" }} />
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-cream">
           <LoadingState />
         </View>
       </>
@@ -75,7 +75,7 @@ export default function ContactDetailScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "Contact" }} />
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-cream">
           <ErrorState message={error || "Contact not found"} />
         </View>
       </>
@@ -105,7 +105,7 @@ export default function ContactDetailScreen() {
           />
         </Stack.Toolbar>
       )}
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-cream">
 
         <View className="px-6 pt-6">
           {/* Name */}

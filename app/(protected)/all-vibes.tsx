@@ -119,7 +119,7 @@ export default function AllVibesScreen() {
           />
         </Stack.Toolbar>
       )}
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-cream">
 
         {/* Content */}
         {loading ? (

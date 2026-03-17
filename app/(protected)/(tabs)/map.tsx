@@ -1,5 +1,11 @@
 import React from "react";
-import { View, TouchableOpacity, Pressable, Switch } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  Pressable,
+  Switch,
+  ScrollView,
+} from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { useRouter } from "expo-router";
 import Svg, { Defs, LinearGradient, Stop, Rect } from "react-native-svg";
@@ -37,7 +43,7 @@ export default function MapTab() {
           pointerEvents="box-none"
         >
           <View
-            className="bg-black px-5"
+            className="bg-cream px-5"
             style={{ paddingTop: insets.top + 12 }}
           >
             <View className="flex-row items-center gap-3">
@@ -55,64 +61,17 @@ export default function MapTab() {
 
               {/* Search Bar */}
               <Pressable
-                className="flex-1 flex-row items-center bg-white/15 rounded-full h-12 px-4"
+                className="flex-1 flex-row items-center bg-black/5 rounded-full h-12 px-4"
                 onPress={() => router.push("/search")}
               >
                 <Icons.search size={16} color={colors.hex.gray300} />
                 <Body className="ml-2 text-gray-400">Search friends...</Body>
               </Pressable>
-
-              {/* Stats Toggle */}
-              <TouchableOpacity
-                className="w-10 h-10 rounded-full bg-white/15 justify-center items-center"
-                onPress={() => setShowStats(!showStats)}
-              >
-                <Icons.chevronDown
-                  size={16}
-                  color={colors.hex.gray300}
-                  style={{
-                    transform: [{ rotate: showStats ? "180deg" : "0deg" }],
-                  }}
-                />
-              </TouchableOpacity>
             </View>
-
-            {showStats && statistics && (
-              <View className="bg-white/15 rounded-xl px-4 py-2 mt-2 self-end">
-                <View className="flex-row items-center justify-between px-2 py-1">
-                  <Caption className="mr-3">🧵</Caption>
-                  <Switch
-                    value={showConnectionLines}
-                    onValueChange={setShowConnectionLines}
-                    trackColor={{
-                      false: colors.hex.placeholder,
-                      true: colors.hex.purple600,
-                    }}
-                    thumbColor={colors.hex.white}
-                    ios_backgroundColor={colors.hex.placeholder}
-                    style={{ transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }] }}
-                  />
-                </View>
-                <View className="flex-row items-center gap-3">
-                  <View className="flex-row items-center">
-                    <Caption className="text-white">🌎</Caption>
-                    <Caption className="ml-1 font-bold text-white">
-                      {statistics.total_users.toLocaleString()}
-                    </Caption>
-                  </View>
-                  <View className="flex-row items-center">
-                    <Caption className="text-white">🤝</Caption>
-                    <Caption className="ml-1 font-bold text-white">
-                      {statistics.connections_count}
-                    </Caption>
-                  </View>
-                </View>
-              </View>
-            )}
           </View>
 
           {/* Gradient fade + floating filter badges */}
-          <View pointerEvents="box-none">
+          <View pointerEvents="box-none" className="pb-22">
             <Svg
               style={{
                 position: "absolute",
@@ -125,38 +84,92 @@ export default function MapTab() {
             >
               <Defs>
                 <LinearGradient id="headerFade" x1="0" y1="0" x2="0" y2="1">
-                  <Stop offset="0" stopColor="#000" />
-                  <Stop offset="1" stopColor="#000" stopOpacity={0} />
+                  <Stop offset="0" stopColor="#faf9f5" stopOpacity={1} />
+                  <Stop offset="0.4" stopColor="#faf9f5" stopOpacity={1} />
+                  <Stop offset="1" stopColor="#faf9f5" stopOpacity={0} />
                 </LinearGradient>
               </Defs>
               <Rect width="100%" height="100%" fill="url(#headerFade)" />
             </Svg>
 
             {/* Filter Badges */}
-            <View className="flex-row gap-2 px-5 pt-2 pb-4">
-              {(["friends", "hometown", "lists"] as const).map((filter) => (
-                <TouchableOpacity
-                  key={filter}
-                  className={`px-4 py-1.5 rounded-full ${
-                    mapFilter === filter ? "bg-white/20" : "bg-white/10"
-                  }`}
-                  onPress={() => setMapFilter(filter)}
-                >
-                  <Caption
-                    className={
+            <View className="relative flex-row items-center gap-2 px-5 pt-2 pb-2">
+              <TouchableOpacity
+                className="w-8 h-8 rounded-full bg-white/90 border border-gray-200 justify-center items-center"
+                onPress={() => setShowStats(!showStats)}
+              >
+                <Icons.chevronDown
+                  size={16}
+                  color={colors.hex.gray300}
+                  style={{
+                    transform: [{ rotate: showStats ? "180deg" : "0deg" }],
+                  }}
+                />
+              </TouchableOpacity>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ gap: 8 }}
+              >
+                {(["friends", "hometown", "lists"] as const).map((filter) => (
+                  <TouchableOpacity
+                    key={filter}
+                    className={`px-4 py-2 rounded-full border ${
                       mapFilter === filter
-                        ? "font-semibold text-white"
-                        : "text-gray-400"
-                    }
+                        ? "bg-purple-600 border-purple-600"
+                        : "bg-white/90 border-gray-200"
+                    }`}
+                    onPress={() => setMapFilter(filter)}
                   >
-                    {filter === "friends"
-                      ? "✨ Friends"
-                      : filter === "hometown"
-                        ? "🏠 Hometowns"
-                        : "📋 Lists"}
-                  </Caption>
-                </TouchableOpacity>
-              ))}
+                    <Caption
+                      className={
+                        mapFilter === filter
+                          ? "font-semibold text-white"
+                          : "font-medium text-gray-700"
+                      }
+                    >
+                      {filter === "friends"
+                        ? "✨ Friends"
+                        : filter === "hometown"
+                          ? "🏠 Hometowns"
+                          : "📋 Lists"}
+                    </Caption>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              {showStats && statistics && (
+                <View className="absolute top-full left-0 mt-4 ml-4 rounded-xl overflow-hidden bg-white/70 px-4 py-2">
+                  <View className="flex-row items-center justify-between px-2 py-1">
+                    <Caption className="mr-3">🧵</Caption>
+                    <Switch
+                      value={showConnectionLines}
+                      onValueChange={setShowConnectionLines}
+                      trackColor={{
+                        false: colors.hex.placeholder,
+                        true: colors.hex.purple600,
+                      }}
+                      thumbColor={colors.hex.white}
+                      ios_backgroundColor={colors.hex.placeholder}
+                      style={{ transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }] }}
+                    />
+                  </View>
+                  <View className="flex-row items-center gap-3">
+                    <View className="flex-row items-center">
+                      <Caption className="text-gray-700">🌎</Caption>
+                      <Caption className="ml-1 font-bold text-gray-700">
+                        {statistics.total_users.toLocaleString()}
+                      </Caption>
+                    </View>
+                    <View className="flex-row items-center">
+                      <Caption className="text-gray-700">🤝</Caption>
+                      <Caption className="ml-1 font-bold text-gray-700">
+                        {statistics.connections_count}
+                      </Caption>
+                    </View>
+                  </View>
+                </View>
+              )}
             </View>
           </View>
         </Animated.View>

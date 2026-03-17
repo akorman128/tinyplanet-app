@@ -119,7 +119,7 @@ export default function AddContactScreen() {
           />
         </Stack.Toolbar>
       )}
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-cream">
         <KeyboardAwareScrollView
           className="flex-1"
           contentContainerClassName="px-6 pt-6 pb-12"

@@ -36,7 +36,7 @@ export default function UserContactsScreen() {
           />
         </Stack.Toolbar>
       )}
-      <GestureHandlerRootView className="flex-1 bg-white">
+      <GestureHandlerRootView className="flex-1 bg-cream">
         <ContactsSection userId={displayUserId} />
       </GestureHandlerRootView>
     </>

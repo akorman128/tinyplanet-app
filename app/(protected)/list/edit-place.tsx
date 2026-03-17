@@ -101,7 +101,7 @@ export default function EditPlaceScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "Edit Location" }} />
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-cream">
           <LoadingState />
         </View>
       </>
@@ -112,7 +112,7 @@ export default function EditPlaceScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "Edit Location" }} />
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-cream">
           <ErrorState message={error || "Place not found"} />
         </View>
       </>
@@ -122,7 +122,7 @@ export default function EditPlaceScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Edit Location" }} />
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-cream">
 
         <ScrollView
           className="flex-1"

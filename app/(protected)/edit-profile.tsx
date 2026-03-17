@@ -159,7 +159,7 @@ export default function EditProfileScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Edit Profile" }} />
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-cream">
 
         {/* Tabs */}
         <TabBar

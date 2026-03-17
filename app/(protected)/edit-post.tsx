@@ -69,7 +69,7 @@ export default function EditPostScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "Edit Post" }} />
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-cream">
           <LoadingState />
         </View>
       </>
@@ -80,7 +80,7 @@ export default function EditPostScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "Edit Post" }} />
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-cream">
           <ErrorState message={queryError.message} />
         </View>
       </>
@@ -90,7 +90,7 @@ export default function EditPostScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Edit Post" }} />
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-cream">
         <ScrollView
           className="flex-1"
           contentContainerClassName="px-6 pt-6 pb-8"

@@ -6,7 +6,7 @@ import { Button, Heading, Subheading, Caption, Text } from "@/design-system";
 export default function WelcomePage() {
   return (
     <KeyboardAwareScrollView
-      className="flex-1 bg-white"
+      className="flex-1 bg-cream"
       contentContainerClassName="flex-1 items-center justify-center px-6"
     >
       <View className="items-center mb-12">

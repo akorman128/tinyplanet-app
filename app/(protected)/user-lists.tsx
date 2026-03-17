@@ -13,7 +13,7 @@ export default function UserListsScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Lists" }} />
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-cream">
         <UserListsSection userId={displayUserId} />
       </View>
     </>

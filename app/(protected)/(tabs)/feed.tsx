@@ -11,7 +11,7 @@ export default function FeedTab() {
   const { profileState } = useProfileStore();
 
   return (
-    <GestureHandlerRootView className="flex-1 bg-white">
+    <GestureHandlerRootView className="flex-1 bg-cream">
       <View className="px-5 pt-12 flex-row items-center justify-between">
         <Pressable onPress={() => router.push("/profile")}>
           <Avatar

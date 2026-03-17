@@ -77,7 +77,7 @@ export const ListPickerSheet = forwardRef<BottomSheet, ListPickerSheetProps>(
         snapPoints={["60%"]}
         enablePanDownToClose
         onChange={handleSheetChange}
-        backgroundStyle={{ backgroundColor: colors.hex.white }}
+        backgroundStyle={{ backgroundColor: colors.hex.cream }}
       >
         <BottomSheetView className="flex-1">
           <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200">

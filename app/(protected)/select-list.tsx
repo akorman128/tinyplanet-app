@@ -79,7 +79,7 @@ export default function SelectListScreen() {
           />
         </Stack.Toolbar>
       )}
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-cream">
 
         {loading ? (
           <LoadingState />

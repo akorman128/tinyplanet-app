@@ -27,8 +27,15 @@ interface MapViewProps {
 }
 
 export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
-  const { friendLocations, hometownLocations, travelPlanLocations, listLocations, userLocation, loading, error } =
-    useMapData();
+  const {
+    friendLocations,
+    hometownLocations,
+    travelPlanLocations,
+    listLocations,
+    userLocation,
+    loading,
+    error,
+  } = useMapData();
   const router = useRouter();
   const showConnectionLines = useMapStore((state) => state.showConnectionLines);
   const [mapDimensions, setMapDimensions] = useState({ width: 0, height: 0 });
@@ -92,7 +99,7 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-white">
+      <View className="flex-1 justify-center items-center bg-cream">
         <ActivityIndicator size="large" color={colors.hex.purple600} />
       </View>
     );
@@ -100,7 +107,7 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
 
   if (error) {
     return (
-      <View className="flex-1 justify-center items-center bg-white">
+      <View className="flex-1 justify-center items-center bg-cream">
         <Text className="text-error text-base text-center px-6">{error}</Text>
       </View>
     );
@@ -111,7 +118,7 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
       {mapDimensions.width > 0 && mapDimensions.height > 0 && (
         <Mapbox.MapView
           style={{ width: mapDimensions.width, height: mapDimensions.height }}
-          styleURL={Mapbox.StyleURL.Dark}
+          // styleURL={Mapbox.StyleURL.Dark}
           compassViewPosition={3}
           scaleBarEnabled={false}
           logoEnabled={false}
@@ -168,8 +175,8 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
                   textSize: 12,
                   textColor: colors.hex.white,
                   textHaloColor: colors.hex.purple800,
-                  textHaloWidth: 12,
-                  textHaloBlur: 0,
+                  textHaloWidth: 0.5,
+                  textHaloBlur: 1,
                   textOffset: [0, 1.5],
                   textAnchor: "top",
                   textFont: [
@@ -208,7 +215,7 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
               <LineLayer
                 id="friend-to-mutual-line-layer"
                 style={{
-                  lineColor: colors.hex.purple200,
+                  lineColor: colors.hex.purple600,
                   lineWidth: 2,
                   lineOpacity: 0.6,
                   lineDasharray: [2, 2],

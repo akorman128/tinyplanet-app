@@ -38,7 +38,7 @@ export default function ProfileScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "Profile" }} />
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-cream">
           <LoadingState />
         </View>
       </>
@@ -50,7 +50,7 @@ export default function ProfileScreen() {
     return (
       <>
         <Stack.Screen options={{ title: "Profile" }} />
-        <View className="flex-1 bg-white">
+        <View className="flex-1 bg-cream">
           <ErrorState message={error || "Profile not found"} />
         </View>
       </>
@@ -93,10 +93,11 @@ export default function ProfileScreen() {
       )}
       <Link.AppleZoomTarget />
       {/* <AnimatedEmojiBorder> */}
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-cream">
         <ScrollView
           className="flex-1"
-          contentContainerClassName="px-6 pt-2  items-center"
+          contentInsetAdjustmentBehavior="automatic"
+          contentContainerClassName="px-6 pt-4  items-center"
         >
           <ProfileHeader
             profile={displayProfile}
