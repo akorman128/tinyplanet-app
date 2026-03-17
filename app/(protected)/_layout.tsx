@@ -13,7 +13,7 @@ export default function ProtectedLayout() {
           color: "#111827",
         },
         headerTintColor: "#111827",
-        headerBackTitle: "",
+        headerBackButtonDisplayMode: "minimal",
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

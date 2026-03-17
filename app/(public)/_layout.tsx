@@ -4,7 +4,7 @@ export default function PublicLayout() {
   return (
     <Stack
       initialRouteName="welcome"
-      screenOptions={{ headerShadowVisible: false }}
+      screenOptions={{ headerShadowVisible: false, headerBackButtonDisplayMode: "minimal" }}
     >
       <Stack.Screen
         name="welcome"
