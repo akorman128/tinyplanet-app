@@ -66,7 +66,7 @@ export function Slider({
   };
 
   return (
-    <View className="gap-1">
+    <View className="gap-1 px-4">
       <View className="flex-row justify-between items-center">
         <Text className="text-sm font-medium text-gray-700">{label}</Text>
         <Text className="text-sm text-gray-500">{displayValue}</Text>

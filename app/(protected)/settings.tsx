@@ -38,7 +38,13 @@ export default function MutualsScreen() {
             icon={<Body>🚫</Body>}
             label="Blocked Users"
             onPress={() => router.push("/blocked-users")}
-            position="standalone"
+            position="first"
+          />
+          <MenuRow
+            icon={<Body>🎨</Body>}
+            label="Theme"
+            onPress={() => router.push("/theme-editor")}
+            position="last"
           />
           <View className="flex flex-col gap-2">
             <Button
