@@ -55,6 +55,7 @@ export function MessagesView() {
 
   if (loading && !refreshing) return <LoadingState />;
   if (error && !refreshing) return <ErrorState message={error} />;
+  if (!session?.user) return <LoadingState />;
   if (channels.length === 0 && !loading)
     return <EmptyState message="No messages yet" />;
 

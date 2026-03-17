@@ -23,6 +23,7 @@ export default function ProtectedLayout() {
         name="create-travel-plan"
         options={{ headerShown: false }}
       />
+      <Stack.Screen name="create-intro" options={{ headerShown: false }} />
       <Stack.Screen name="comments" options={{ headerShown: false }} />
       <Stack.Screen
         name="theme-editor"

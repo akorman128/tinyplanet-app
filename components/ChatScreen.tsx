@@ -7,6 +7,7 @@ import {
   ErrorState,
   ChatInput,
   TypingIndicator,
+  IntroBanner,
   colors,
 } from "@/design-system";
 import { MessageBubble } from "@/components";
@@ -21,6 +22,7 @@ import {
   useSubscribeToTypingIndicators,
 } from "@/hooks/useChat";
 import { useGetProfile } from "@/hooks/useProfile";
+import { useGetIntro } from "@/hooks/useIntros";
 import { useSupabase } from "@/hooks/useSupabase";
 import { useMarkChannelAsRead } from "@/hooks/useMessageChannels";
 import { MessageWithSender } from "@/types/chat";
@@ -42,6 +44,7 @@ export default function ChatScreen() {
   const updateMessage = useUpdateMessage();
   const deleteMessage = useDeleteMessage();
   const messagesQuery = useGetMessages(friendId);
+  const introQuery = useGetIntro(friendId);
   const subscribeToMessages = useSubscribeToMessages();
   const subscribeToMessageUpdates = useSubscribeToMessageUpdates();
   const sendTypingIndicator = useSendTypingIndicator();
@@ -376,7 +379,16 @@ export default function ChatScreen() {
             messagesQuery.isFetchingNextPage ? renderLoadingMore() : null
           }
           ListFooterComponent={
-            isTyping ? <TypingIndicator friendName={friendName} /> : null
+            <>
+              {isTyping && <TypingIndicator friendName={friendName} />}
+              {introQuery.data?.data && (
+                <IntroBanner
+                  introducerName={introQuery.data.data.introducer.full_name}
+                  introducerAvatarUrl={introQuery.data.data.introducer.avatar_url}
+                  message={introQuery.data.data.message}
+                />
+              )}
+            </>
           }
         />
 

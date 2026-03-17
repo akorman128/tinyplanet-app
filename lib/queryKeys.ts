@@ -100,6 +100,12 @@ export const queryKeys = {
     detail: (userId: string) => ["profile", "detail", userId] as const,
   },
 
+  // Intros
+  intros: {
+    all: ["intros"] as const,
+    byFriend: (friendId: string) => ["intros", "byFriend", friendId] as const,
+  },
+
   // Blocks
   blocks: {
     all: ["blocks"] as const,

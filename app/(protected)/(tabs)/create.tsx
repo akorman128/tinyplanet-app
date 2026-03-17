@@ -32,6 +32,7 @@ const MENU_ITEMS = [
   },
   { label: "List", emoji: "\ud83d\udccb", route: "/create-list" as const },
   { label: "Post", emoji: "\ud83d\udc8c", route: "/create-post" as const },
+  { label: "Intro", emoji: "\ud83e\udd1d", route: "/create-intro" as const },
 ];
 
 function useItemStyle(
