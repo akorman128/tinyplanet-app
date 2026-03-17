@@ -7,6 +7,7 @@ import { parsePostGISPoint } from "@/utils/postgis";
 import { queryKeys } from "@/lib/queryKeys";
 import {
   List,
+  ListCategory,
   ListPlace,
   ListLocation,
   ListWithPlaces,
@@ -194,15 +195,30 @@ export const useGetLists = (userId?: string): UseQueryResult<GetListsOutput> => 
   return useQuery({
     queryKey: queryKeys.lists.byUser(targetUserId),
     queryFn: async () => {
-      const { data: listsWithPlaces, error } = await supabase.rpc("get_lists_with_places", {
+      interface ListWithPlacesRow {
+        id: string;
+        user_id: string;
+        title: string;
+        category: ListCategory;
+        location_name: string;
+        note: string | null;
+        created_at: string;
+        updated_at: string;
+        longitude: number | null;
+        latitude: number | null;
+        places: ListPlace[];
+        total_count: number;
+      }
+      const { data: rawData, error } = await supabase.rpc("get_lists_with_places", {
         p_user_id: targetUserId, p_limit: null, p_offset: 0,
       });
       if (error) throw new Error(`Failed to fetch lists for user ${targetUserId}: ${error.message}`);
-      const total = listsWithPlaces?.[0]?.total_count ?? 0;
-      const typedLists: ListWithPlaces[] = (listsWithPlaces || []).map((list: any) => ({
+      const listsWithPlaces = (rawData || []) as ListWithPlacesRow[];
+      const total = listsWithPlaces[0]?.total_count ?? 0;
+      const typedLists: ListWithPlaces[] = listsWithPlaces.map((list) => ({
         ...list,
         location: list.longitude && list.latitude ? { longitude: list.longitude, latitude: list.latitude } : null,
-        places: (list.places as unknown as ListPlace[]) || [],
+        places: list.places || [],
       }));
       return { data: typedLists, total };
     },
@@ -216,18 +232,34 @@ export const useGetViewableLists = (): UseQueryResult<GetViewableListsOutput> =>
   return useQuery({
     queryKey: queryKeys.lists.viewable(profile.id),
     queryFn: async () => {
-      const { data: ownLists, error: ownError } = await supabase.from("lists").select("*").eq("user_id", profile.id).order("created_at", { ascending: false });
+      interface RawListRow {
+        id: string;
+        user_id: string;
+        title: string;
+        category: ListCategory;
+        location_name: string;
+        location: string | null;
+        note: string | null;
+        created_at: string;
+        updated_at: string;
+      }
+      interface RawListRowWithOwner extends RawListRow {
+        owner: { id: string; full_name: string } | null;
+      }
+      const { data: rawOwnLists, error: ownError } = await supabase.from("lists").select("*").eq("user_id", profile.id).order("created_at", { ascending: false });
       if (ownError) throw new Error(`Failed to fetch own lists: ${ownError.message}`);
-      const { data: friendLists, error: friendError } = await supabase
+      const { data: rawFriendLists, error: friendError } = await supabase
         .from("lists")
         .select(`*, owner:profiles!lists_user_id_fkey(id, full_name)`)
         .neq("user_id", profile.id)
         .order("created_at", { ascending: false });
       if (friendError) throw new Error(`Failed to fetch friends' lists: ${friendError.message}`);
-      const transformedOwnLists: ViewableList[] = (ownLists || []).map((list: any) => ({
+      const ownLists = (rawOwnLists || []) as RawListRow[];
+      const friendLists = (rawFriendLists || []) as RawListRowWithOwner[];
+      const transformedOwnLists: ViewableList[] = ownLists.map((list) => ({
         ...list, location: typeof list.location === "string" ? parsePostGISPoint(list.location) : null, places: [], owner_name: "You",
       }));
-      const transformedFriendLists: ViewableList[] = (friendLists || []).map((list: any) => ({
+      const transformedFriendLists: ViewableList[] = friendLists.map((list) => ({
         ...list, location: typeof list.location === "string" ? parsePostGISPoint(list.location) : null, places: [], owner_name: list.owner?.full_name || "Unknown",
       }));
       const allLists = [...transformedOwnLists, ...transformedFriendLists];
@@ -243,9 +275,19 @@ export const useGetListLocations = (): UseQueryResult<ListLocation[]> => {
   return useQuery({
     queryKey: queryKeys.lists.locations,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_viewable_list_locations", { p_user_id: profile.id });
+      interface ListLocationRow {
+        id: string;
+        title: string;
+        category: ListCategory;
+        location_name: string;
+        longitude: number;
+        latitude: number;
+        owner_name: string;
+      }
+      const { data: rawData, error } = await supabase.rpc("get_viewable_list_locations", { p_user_id: profile.id });
       if (error) throw new Error(`Failed to fetch list locations: ${error.message}`);
-      return (data || []).map((row: any) => ({
+      const rows = (rawData || []) as ListLocationRow[];
+      return rows.map((row) => ({
         id: row.id, title: row.title, category: row.category, location_name: row.location_name,
         location: { longitude: row.longitude, latitude: row.latitude }, owner_name: row.owner_name,
       }));

@@ -79,11 +79,12 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
   };
 
   const handleMarkerPress = useCallback(
-    (event: any) => {
+    (event: { features: GeoJSON.Feature[] }) => {
       const { features } = event;
       if (features && features.length > 0) {
         const feature = features[0];
-        const userId = feature.properties.user_id || feature.properties.id;
+        const props = (feature.properties ?? {}) as Record<string, string>;
+        const userId = props.user_id || props.id;
         router.push({ pathname: "/profile", params: { userId } });
       }
     },

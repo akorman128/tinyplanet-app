@@ -122,10 +122,17 @@ export function LocationSearchInput({
         );
       }
 
+      interface MapboxSuggestion {
+        mapbox_id: string;
+        name: string;
+        full_address?: string;
+        place_formatted?: string;
+      }
+
       const locations: LocationResult[] =
         data.suggestions
-          ?.filter((s: any) => s.mapbox_id)
-          .map((s: any) => ({
+          ?.filter((s: MapboxSuggestion) => s.mapbox_id)
+          .map((s: MapboxSuggestion) => ({
             id: s.mapbox_id,
             name: s.name,
             full_address: s.full_address || "",

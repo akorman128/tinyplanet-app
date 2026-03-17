@@ -38,8 +38,9 @@ describe("useCreateList", () => {
     await act(async () => {
       await result.current.mutateAsync({
         title: "My List",
-        category: "food",
+        category: "eat_drink",
         location: { name: "NYC", latitude: 40.7, longitude: -74.0 },
+        places: [],
       });
     });
 
@@ -48,7 +49,7 @@ describe("useCreateList", () => {
     expect(chain?.insert).toHaveBeenCalledWith({
       user_id: "user-a",
       title: "My List",
-      category: "food",
+      category: "eat_drink",
       location_name: "NYC",
       location: "POINT(-74 40.7)",
       note: null,
@@ -118,7 +119,7 @@ describe("useGetListLocations", () => {
       {
         id: "list-1",
         title: "List 1",
-        category: "food",
+        category: "eat_drink",
         location_name: "NYC",
         longitude: -74.0,
         latitude: 40.7,
@@ -145,7 +146,7 @@ describe("useGetListLocations", () => {
       {
         id: "list-1",
         title: "List 1",
-        category: "food",
+        category: "eat_drink",
         location_name: "NYC",
         location: { longitude: -74.0, latitude: 40.7 },
         owner_name: "User A",

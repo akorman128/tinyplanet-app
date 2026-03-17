@@ -59,7 +59,7 @@ export default function EditPostScreen() {
   const visibilityOptions: {
     value: PostVisibility;
     label: string;
-    icon?: any;
+    icon?: (props: { size?: number; color?: string }) => React.JSX.Element;
   }[] = [
     { value: "public", label: "Public", icon: Icons.globe },
     { value: "friends", label: "Friends", icon: Icons.unlocked },

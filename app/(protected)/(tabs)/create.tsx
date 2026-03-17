@@ -1,6 +1,6 @@
 import React from "react";
 import { Pressable, View, ViewStyle } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, Href } from "expo-router";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Animated, {
   SharedValue,
@@ -108,7 +108,7 @@ export default function SearchScreen() {
   );
 
   React.useEffect(() => {
-    return (navigation as any).addListener('tabPress', () => {
+    return (navigation as { addListener: (event: string, callback: () => void) => () => void }).addListener('tabPress', () => {
       if (isFocusedRef.current) {
         setTimeout(() => router.back(), 0);
       }
@@ -122,7 +122,7 @@ export default function SearchScreen() {
   const handleItemPress = (route: string) => {
     hapticMedium();
     router.back();
-    router.push(route as any);
+    router.push(route as Href);
   };
 
   return (

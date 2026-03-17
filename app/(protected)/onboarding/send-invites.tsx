@@ -118,11 +118,11 @@ export default function SendInvitesPage() {
 
       // Navigate immediately to next screen
       router.replace("/(protected)/(tabs)/map");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error sending invites:", error);
       Alert.alert(
         "Error",
-        error.message || "Failed to send invites. Please try again."
+        error instanceof Error ? error.message : "Failed to send invites. Please try again."
       );
     } finally {
       setIsSending(false);

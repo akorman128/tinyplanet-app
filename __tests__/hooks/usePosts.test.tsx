@@ -38,7 +38,7 @@ describe("useCreatePost", () => {
       await result.current.mutateAsync({
         text: "hello",
         visibility: "friends",
-      } as any);
+      } as { text: string; visibility: "friends" | "mutuals" | "public" });
     });
 
     expect(mockSupabase.from).toHaveBeenCalledWith("posts");
@@ -104,7 +104,7 @@ describe("useUpdatePost", () => {
 
     const chain = mockSupabase.getLastChain("posts");
     expect(chain?.update).toHaveBeenCalled();
-    const updateArg = (chain?.update as any).mock.calls[0][0];
+    const updateArg = (chain?.update as ReturnType<typeof vi.fn>).mock.calls[0][0];
     expect(updateArg.text).toBe("updated");
     expect(updateArg.edited_at).toBeDefined();
     // edited_at should be a recent ISO string

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { View, FlatList, Alert, ActivityIndicator } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, InfiniteData } from "@tanstack/react-query";
 import {
   LoadingState,
   ErrorState,
@@ -99,11 +99,11 @@ export default function ChatScreen() {
       // Prepend new message to first page of infinite query cache
       queryClient.setQueryData(
         queryKeys.messages.conversation(friendId),
-        (oldData: any) => {
+        (oldData: InfiniteData<MessageWithSender[]> | undefined) => {
           if (!oldData?.pages) return oldData;
           const firstPage = oldData.pages[0] || [];
           // Check for duplicates (from optimistic updates)
-          if (firstPage.some((msg: any) => msg.id === newMessage.id)) return oldData;
+          if (firstPage.some((msg) => msg.id === newMessage.id)) return oldData;
           // We need the sender profile for the message. Use the profiles we already have.
           const senderProfile = newMessage.sender_id === session?.user?.id
             ? currentUserProfile.data
@@ -135,11 +135,11 @@ export default function ChatScreen() {
     const unsubscribe = subscribeToMessageUpdates(friendId, (updatedMessage) => {
       queryClient.setQueryData(
         queryKeys.messages.conversation(friendId),
-        (oldData: any) => {
+        (oldData: InfiniteData<MessageWithSender[]> | undefined) => {
           if (!oldData?.pages) return oldData;
           return {
             ...oldData,
-            pages: oldData.pages.map((page: MessageWithSender[]) =>
+            pages: oldData.pages.map((page) =>
               page.map((msg) =>
                 msg.id === updatedMessage.id ? { ...msg, ...updatedMessage } : msg
               )
@@ -209,7 +209,7 @@ export default function ChatScreen() {
         // Optimistic: prepend to first page
         queryClient.setQueryData(
           queryKeys.messages.conversation(friendId),
-          (oldData: any) => {
+          (oldData: InfiniteData<MessageWithSender[]> | undefined) => {
             if (!oldData?.pages) return { pages: [[optimisticMessage]], pageParams: [0] };
             return {
               ...oldData,
@@ -227,11 +227,11 @@ export default function ChatScreen() {
           // Replace temp message with real one
           queryClient.setQueryData(
             queryKeys.messages.conversation(friendId),
-            (oldData: any) => {
+            (oldData: InfiniteData<MessageWithSender[]> | undefined) => {
               if (!oldData?.pages) return oldData;
               return {
                 ...oldData,
-                pages: oldData.pages.map((page: MessageWithSender[]) =>
+                pages: oldData.pages.map((page) =>
                   page.map((msg) =>
                     msg.id === tempId ? { ...optimisticMessage, id: result.data.id } : msg
                   )
@@ -244,11 +244,11 @@ export default function ChatScreen() {
           // Remove optimistic message on error
           queryClient.setQueryData(
             queryKeys.messages.conversation(friendId),
-            (oldData: any) => {
+            (oldData: InfiniteData<MessageWithSender[]> | undefined) => {
               if (!oldData?.pages) return oldData;
               return {
                 ...oldData,
-                pages: oldData.pages.map((page: MessageWithSender[]) =>
+                pages: oldData.pages.map((page) =>
                   page.filter((msg) => !msg.id.startsWith("temp-"))
                 ),
               };

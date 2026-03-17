@@ -2,8 +2,13 @@ import { View } from "react-native";
 import { Control, Controller } from "react-hook-form";
 import { Button, Input } from "@/design-system";
 
+interface VibeFormValues {
+  emojis: string;
+  phone: string;
+}
+
 interface VibePhoneFormProps {
-  control: Control<any>;
+  control: Control<VibeFormValues>;
   vibeError?: string;
   phoneError?: string;
   onSelectContact?: () => void;

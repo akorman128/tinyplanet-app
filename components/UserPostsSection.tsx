@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { View, FlatList, RefreshControl, ActivityIndicator } from "react-native";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, InfiniteData } from "@tanstack/react-query";
 import { PostCard } from "@/design-system/PostCard";
 import { TravelPlanCard } from "@/design-system/TravelPlanCard";
 import { useGetUserPosts } from "@/hooks/useFeed";
@@ -62,11 +62,11 @@ export function UserPostsSection({
 
   const handleLike = useCallback((postId: string, updates: Partial<PostWithAuthor>) => {
     const key = isPostsTab ? queryKeys.posts.userPosts(userId) : queryKeys.posts.saved();
-    queryClient.setQueryData(key, (oldData: any) => {
+    queryClient.setQueryData(key, (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
       if (!oldData?.pages) return oldData;
       return {
         ...oldData,
-        pages: oldData.pages.map((page: PostWithAuthor[]) =>
+        pages: oldData.pages.map((page) =>
           page.map((p) => (p.id === postId ? { ...p, ...updates } : p))
         ),
       };
@@ -77,21 +77,21 @@ export function UserPostsSection({
     const key = isPostsTab ? queryKeys.posts.userPosts(userId) : queryKeys.posts.saved();
     if (!isPostsTab && updates.saved_by_user === false) {
       // If unsaved in "Saved" filter, remove from list
-      queryClient.setQueryData(key, (oldData: any) => {
+      queryClient.setQueryData(key, (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
         if (!oldData?.pages) return oldData;
         return {
           ...oldData,
-          pages: oldData.pages.map((page: PostWithAuthor[]) =>
+          pages: oldData.pages.map((page) =>
             page.filter((p) => p.id !== postId)
           ),
         };
       });
     } else {
-      queryClient.setQueryData(key, (oldData: any) => {
+      queryClient.setQueryData(key, (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
         if (!oldData?.pages) return oldData;
         return {
           ...oldData,
-          pages: oldData.pages.map((page: PostWithAuthor[]) =>
+          pages: oldData.pages.map((page) =>
             page.map((p) => (p.id === postId ? { ...p, ...updates } : p))
           ),
         };
@@ -101,11 +101,11 @@ export function UserPostsSection({
 
   const handleDelete = useCallback((postId: string) => {
     const key = isPostsTab ? queryKeys.posts.userPosts(userId) : queryKeys.posts.saved();
-    queryClient.setQueryData(key, (oldData: any) => {
+    queryClient.setQueryData(key, (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
       if (!oldData?.pages) return oldData;
       return {
         ...oldData,
-        pages: oldData.pages.map((page: PostWithAuthor[]) =>
+        pages: oldData.pages.map((page) =>
           page.filter((p) => p.id !== postId)
         ),
       };

@@ -5,6 +5,7 @@ type MockResponse<T = unknown> =
   | { data: null; error: { message: string; code?: string } };
 
 interface ChainableMock {
+  [method: string]: ReturnType<typeof vi.fn>;
   select: ReturnType<typeof vi.fn>;
   insert: ReturnType<typeof vi.fn>;
   update: ReturnType<typeof vi.fn>;
@@ -57,14 +58,14 @@ export function createMockSupabase() {
       "limit",
     ];
     for (const m of methods) {
-      (chain as any)[m] = vi.fn().mockReturnValue(chain);
+      chain[m] = vi.fn().mockReturnValue(chain);
     }
     chain.single = vi.fn().mockResolvedValue(resolvedValue);
     chain.maybeSingle = vi.fn().mockResolvedValue(resolvedValue);
 
     // Make the chain itself thenable (for queries without .single())
-    (chain as any).then = (onFulfilled?: any, onRejected?: any) =>
-      Promise.resolve(resolvedValue).then(onFulfilled, onRejected);
+    chain.then = vi.fn((onFulfilled?: (value: MockResponse) => unknown, onRejected?: (reason: unknown) => unknown) =>
+      Promise.resolve(resolvedValue).then(onFulfilled, onRejected));
     return chain;
   };
 

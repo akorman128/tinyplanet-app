@@ -253,13 +253,23 @@ export const useGetFriendHometownLocations = (): UseQueryResult<GeoJSONFeatureCo
   return useQuery({
     queryKey: queryKeys.friends.hometownLocations,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_friend_hometown_locations", { p_user_id: profile.id });
+      interface HometownLocationRow {
+        id: string;
+        full_name: string;
+        type: string;
+        avatar_url: string | null;
+        latitude: number;
+        longitude: number;
+        hometown_name: string;
+      }
+      const { data: rawData, error } = await supabase.rpc("get_friend_hometown_locations", { p_user_id: profile.id });
       if (error) throw error;
+      const data = (rawData || []) as HometownLocationRow[];
 
-      const features: GeoJSONFeature[] = (data || []).map((loc: any) => ({
+      const features: GeoJSONFeature[] = data.map((loc) => ({
         type: "Feature" as const,
         geometry: { type: "Point" as const, coordinates: [loc.longitude, loc.latitude] },
-        properties: { id: loc.id, name: loc.full_name, type: loc.type as "friend_hometown" | "mutual_hometown", avatar_url: loc.avatar_url, hometown_name: loc.hometown_name },
+        properties: { id: loc.id, name: loc.full_name, type: loc.type as "friend_hometown" | "mutual_hometown", avatar_url: loc.avatar_url ?? undefined, hometown_name: loc.hometown_name },
       }));
 
       return { type: "FeatureCollection" as const, features };

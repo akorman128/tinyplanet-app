@@ -10,6 +10,7 @@ import {
   GetMessageChannelsOutput,
   MarkChannelAsReadInput,
 } from "@/types/messageChannel";
+import { Message } from "@/types/chat";
 
 // --- Mutation hooks ---
 
@@ -75,14 +76,14 @@ export const useSubscribeToAllMessages = () => {
   const queryClient = useQueryClient();
 
   return useCallback(
-    (onMessage: (friendId: string, message: any) => void) => {
+    (onMessage: (friendId: string, message: Message) => void) => {
       const userId = profile.id;
 
       const channel = supabase
         .channel("all-messages")
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `user_id_a=eq.${userId}` },
           (payload) => {
-            const message = payload.new;
+            const message = payload.new as Message;
             const friendId = message.sender_id === userId ? message.user_id_b : message.sender_id;
             onMessage(friendId, message);
             queryClient.invalidateQueries({ queryKey: queryKeys.messages.channels });
@@ -90,7 +91,7 @@ export const useSubscribeToAllMessages = () => {
           })
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `user_id_b=eq.${userId}` },
           (payload) => {
-            const message = payload.new;
+            const message = payload.new as Message;
             const friendId = message.sender_id === userId ? message.user_id_a : message.sender_id;
             onMessage(friendId, message);
             queryClient.invalidateQueries({ queryKey: queryKeys.messages.channels });

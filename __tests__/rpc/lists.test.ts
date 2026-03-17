@@ -97,7 +97,7 @@ describe("Lists RPCs", () => {
 
       // Ordered by created_at DESC, so empty list comes first (created second)
       const listWithPlaces = data.find(
-        (l: any) => l.id === listAWithPlaces
+        (l: { id: string; [key: string]: unknown }) => l.id === listAWithPlaces
       );
       expect(listWithPlaces).toBeDefined();
       expect(listWithPlaces.title).toBe("NYC Favorites");
@@ -117,7 +117,7 @@ describe("Lists RPCs", () => {
       });
       expect(error).toBeNull();
 
-      const emptyList = data.find((l: any) => l.id === listAEmpty);
+      const emptyList = data.find((l: { id: string; [key: string]: unknown }) => l.id === listAEmpty);
       expect(emptyList).toBeDefined();
       expect(emptyList.places).toEqual([]);
     });
@@ -170,18 +170,18 @@ describe("Lists RPCs", () => {
 
       // A's list with location + B's list with location (both have coordinates)
       // A's empty list has no location so it's excluded
-      const ids = data.map((l: any) => l.id);
+      const ids = data.map((l: { id: string; [key: string]: unknown }) => l.id);
       expect(ids).toContain(listAWithPlaces);
       expect(ids).toContain(listB);
       // Empty list has no location, should not appear
       expect(ids).not.toContain(listAEmpty);
 
-      const ownList = data.find((l: any) => l.id === listAWithPlaces);
+      const ownList = data.find((l: { id: string; [key: string]: unknown }) => l.id === listAWithPlaces);
       expect(ownList.owner_name).toBe("You");
       expect(ownList.longitude).toBeCloseTo(-74.006, 2);
       expect(ownList.latitude).toBeCloseTo(40.7128, 2);
 
-      const friendList = data.find((l: any) => l.id === listB);
+      const friendList = data.find((l: { id: string; [key: string]: unknown }) => l.id === listB);
       expect(friendList.owner_name).toBe("Lists User B");
       expect(friendList.longitude).toBeCloseTo(-118.2437, 2);
       expect(friendList.latitude).toBeCloseTo(34.0522, 2);

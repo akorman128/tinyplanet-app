@@ -130,7 +130,7 @@ export default function EditProfileScreen() {
 
   const handleDateChange = (
     onChange: (date: Date) => void,
-    _: any,
+    _event: unknown,
     selectedDate?: Date
   ) => {
     if (Platform.OS === "android") {

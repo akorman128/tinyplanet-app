@@ -1,6 +1,6 @@
 import { View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { router } from "expo-router";
+import { router, Href } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -22,7 +22,7 @@ interface PhoneInputScreenProps {
   buttonText?: string;
   footerText: string;
   footerLinkText: string;
-  footerLinkPath: string;
+  footerLinkPath: Href;
   verifyOtpPath: string;
 }
 
@@ -59,9 +59,9 @@ export function PhoneInputScreen({
       await onSubmitPhone(phone);
 
       router.push({
-        pathname: verifyOtpPath as any,
+        pathname: verifyOtpPath,
         params: { phone },
-      });
+      } as Href);
     } catch (err) {
       setError("phone", {
         type: "manual",
@@ -117,7 +117,7 @@ export function PhoneInputScreen({
         <Body className="text-gray-600">{footerText} </Body>
         <Body
           className="text-purple-600 font-semibold"
-          onPress={() => router.replace(footerLinkPath as any)}
+          onPress={() => router.replace(footerLinkPath)}
         >
           {footerLinkText}
         </Body>
