@@ -27,6 +27,7 @@ import { useSupabase } from "@/hooks/useSupabase";
 import { useMarkChannelAsRead } from "@/hooks/useMessageChannels";
 import { MessageWithSender } from "@/types/chat";
 import { queryKeys } from "@/lib/queryKeys";
+import { useNotificationStore } from "@/stores/notificationStore";
 
 // Helper to order user IDs consistently (same as useChat)
 const orderUserIds = (userId1: string, userId2: string): [string, string] => {
@@ -83,6 +84,15 @@ export default function ChatScreen() {
 
     return timeDiffInMinutes >= 1;
   };
+
+  // Track active chat for foreground notification suppression
+  const setActiveChatFriendId = useNotificationStore(
+    (s) => s.setActiveChatFriendId
+  );
+  useEffect(() => {
+    if (friendId) setActiveChatFriendId(friendId);
+    return () => setActiveChatFriendId(null);
+  }, [friendId, setActiveChatFriendId]);
 
   // Mark channel as read when opening chat
   useEffect(() => {

@@ -101,7 +101,7 @@ export function PostCard({
 
     Alert.alert("Post Options", "Choose an action", [
       {
-        text: "Edit Post",
+        text: "Edit",
         onPress: () => {
           router.push({
             pathname: "/edit-post",

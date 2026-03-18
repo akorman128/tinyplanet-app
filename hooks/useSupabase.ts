@@ -1,9 +1,12 @@
 import { useContext, useEffect, useState } from "react";
 import { SupabaseClient, Session } from "@supabase/supabase-js";
 import { useQueryClient } from "@tanstack/react-query";
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
 
 import { SupabaseContext } from "../context/supabase-context";
 import { queryKeys } from "@/lib/queryKeys";
+import { EAS_PROJECT_ID } from "@/lib/constants";
 
 interface UseSupabaseProps {
   isLoaded: boolean;
@@ -53,6 +56,23 @@ export const useSupabase = (): UseSupabaseProps => {
 
   const signOut = async () => {
     if (!supabase) return;
+
+    // Fire-and-forget: clean up push token without blocking sign-out UX
+    if (Device.isDevice && session?.user?.id) {
+      const userId = session.user.id;
+      Notifications.getExpoPushTokenAsync({ projectId: EAS_PROJECT_ID })
+        .then((tokenData) =>
+          supabase
+            .from("push_tokens")
+            .delete()
+            .eq("user_id", userId)
+            .eq("token", tokenData.data)
+        )
+        .catch((err) =>
+          console.error("Failed to remove push token on sign out:", err)
+        );
+    }
+
     await supabase.auth.signOut();
     setSession(null);
     queryClient?.clear();

@@ -1,5 +1,3 @@
-const { colors } = require("./design-system/colors");
-
 export default {
   expo: {
     name: "Tiny Planet",
@@ -27,6 +25,7 @@ export default {
         NSLocationAlwaysAndWhenInUseUsageDescription:
           "We need your location to show you on the map with your friends.",
         LSApplicationQueriesSchemes: ["instagram", "twitter", "comgooglemaps"],
+        UIBackgroundModes: ["remote-notification"],
       },
     },
     android: {
@@ -64,13 +63,14 @@ export default {
           RNMapboxMapsImpl: "mapbox",
         },
       ],
+      "expo-notifications",
       [
         "expo-splash-screen",
         {
           image: "./assets/splash-icon.png",
           imageWidth: 250,
           resizeMode: "contain",
-          backgroundColor: colors.hex.cream,
+          backgroundColor: "#faf9f5",
         },
       ],
     ],

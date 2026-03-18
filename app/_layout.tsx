@@ -2,12 +2,15 @@ import { useEffect, useRef } from "react";
 
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import * as Notifications from "expo-notifications";
 import { View, ActivityIndicator } from "react-native";
 
 import { useSupabase } from "@/hooks/useSupabase";
 import { useLocationStore } from "@/stores/locationStore";
 import { fetchProfile } from "@/hooks/useProfile";
 import { useProfileStore } from "@/stores/profileStore";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { useNotificationStore } from "@/stores/notificationStore";
 import { SupabaseProvider } from "../providers/supabase-provider";
 import { QueryProvider } from "../providers/QueryProvider";
 import { LocationPermissionProvider } from "../providers/LocationPermissionProvider";
@@ -20,6 +23,28 @@ import "../global.css";
 
 // Initialize Mapbox once at app startup
 initializeMapbox();
+
+// Configure foreground notification behavior (must be at module level)
+Notifications.setNotificationHandler({
+  handleNotification: async (notification) => {
+    const friendId = notification.request.content.data?.friendId as
+      | string
+      | undefined;
+    const activeChatFriendId =
+      useNotificationStore.getState().activeChatFriendId;
+
+    // Suppress notification if user is already viewing that chat
+    const suppress = friendId != null && friendId === activeChatFriendId;
+
+    return {
+      shouldShowAlert: !suppress,
+      shouldPlaySound: !suppress,
+      shouldSetBadge: !suppress,
+      shouldShowBanner: !suppress,
+      shouldShowList: !suppress,
+    };
+  },
+});
 
 SplashScreen.setOptions({
   duration: 500,
@@ -43,6 +68,7 @@ export default function RootLayout() {
 function RootNavigator() {
   const { warningVisible, dismissWarning } = useScreenshotDetection();
   const { isLoaded, session, signOut, supabase } = useSupabase();
+  usePushNotifications();
   const { permissionRequired, clearPermissionRequirement } = useLocationStore();
   const {
     profileState,
