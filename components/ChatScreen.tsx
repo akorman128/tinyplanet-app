@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { View, FlatList, Alert, ActivityIndicator } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useQueryClient, InfiniteData } from "@tanstack/react-query";
@@ -8,9 +8,11 @@ import {
   ChatInput,
   TypingIndicator,
   IntroBanner,
+  DateSeparator,
   colors,
 } from "@/design-system";
 import { MessageBubble } from "@/components";
+import { formatDateLabel } from "@/lib/formatDateLabel";
 import {
   useSendMessage,
   useUpdateMessage,
@@ -28,6 +30,10 @@ import { useMarkChannelAsRead } from "@/hooks/useMessageChannels";
 import { MessageWithSender } from "@/types/chat";
 import { queryKeys } from "@/lib/queryKeys";
 import { useNotificationStore } from "@/stores/notificationStore";
+
+type ChatListItem =
+  | { type: "message"; data: MessageWithSender }
+  | { type: "separator"; id: string; label: string };
 
 // Helper to order user IDs consistently (same as useChat)
 const orderUserIds = (userId1: string, userId2: string): [string, string] => {
@@ -57,12 +63,40 @@ export default function ChatScreen() {
   } | null>(null);
   const [isTyping, setIsTyping] = useState(false);
 
-  const flatListRef = useRef<FlatList>(null);
+  const flatListRef = useRef<FlatList<ChatListItem>>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Derived values
-  const messages = messagesQuery.data?.pages.flat() ?? [];
+  const messages = useMemo(
+    () => messagesQuery.data?.pages.flat() ?? [],
+    [messagesQuery.data]
+  );
   const friendName = friendProfile.data?.full_name ?? "";
+
+  // Build mixed array with date separators between day boundaries
+  const chatItems = useMemo((): ChatListItem[] => {
+    const items: ChatListItem[] = [];
+    for (let i = 0; i < messages.length; i++) {
+      items.push({ type: "message", data: messages[i] });
+
+      const currentDate = new Date(messages[i].created_at);
+      const nextMessage = messages[i + 1];
+
+      // Insert separator at day boundaries or after the oldest message
+      const isDayBoundary =
+        nextMessage &&
+        currentDate.toDateString() !==
+          new Date(nextMessage.created_at).toDateString();
+      if (!nextMessage || isDayBoundary) {
+        items.push({
+          type: "separator",
+          id: `sep-${messages[i].id}`,
+          label: formatDateLabel(currentDate),
+        });
+      }
+    }
+    return items;
+  }, [messages]);
 
   // Helper to determine if timestamp should be shown
   // Note: messages array is in reverse chronological order (newest first)
@@ -367,18 +401,34 @@ export default function ChatScreen() {
     <>
       <Stack.Screen options={{ title: friendName || "Chat" }} />
       <View className="flex-1 bg-cream">
-        <FlatList
+        <FlatList<ChatListItem>
           ref={flatListRef}
-          data={messages}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item, index }) => (
-            <MessageBubble
-              message={item}
-              onEdit={handleEditMessage}
-              onDelete={handleDeleteMessage}
-              showTimestamp={shouldShowTimestamp(item, messages[index + 1])}
-            />
-          )}
+          data={chatItems}
+          keyExtractor={(item) =>
+            item.type === "message" ? item.data.id : item.id
+          }
+          renderItem={({ item, index }) => {
+            if (item.type === "separator") {
+              return <DateSeparator label={item.label} />;
+            }
+            // Find the next message item (skipping separators) for timestamp logic
+            let nextMessage: MessageWithSender | undefined;
+            for (let j = index + 1; j < chatItems.length; j++) {
+              const next = chatItems[j];
+              if (next.type === "message") {
+                nextMessage = next.data;
+                break;
+              }
+            }
+            return (
+              <MessageBubble
+                message={item.data}
+                onEdit={handleEditMessage}
+                onDelete={handleDeleteMessage}
+                showTimestamp={shouldShowTimestamp(item.data, nextMessage)}
+              />
+            );
+          }}
           contentContainerClassName="px-4 pt-4"
           inverted
           onEndReached={() => {

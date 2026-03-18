@@ -61,6 +61,7 @@ export { MenuRow } from "./MenuRow";
 export type { MenuRowProps } from "./MenuRow";
 export { ActiveTravelPlanBanner } from "./ActiveTravelPlanBanner";
 export type { ActiveTravelPlanBannerProps } from "./ActiveTravelPlanBanner";
+export { DateSeparator } from "./DateSeparator";
 export { IntroBanner } from "./IntroBanner";
 export type { IntroBannerProps } from "./IntroBanner";
 export { ScreenHeader } from "./ScreenHeader";
