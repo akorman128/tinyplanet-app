@@ -276,14 +276,6 @@ export default function ProfileScreen() {
               }
               position="last"
             />
-            {isViewingOwnProfile && (
-              <MenuRow
-                icon={<Body>🎨</Body>}
-                label="Theme"
-                onPress={() => router.push("/theme-editor")}
-                position="standalone"
-              />
-            )}
           </View>
 
           <ProfileInfoCard

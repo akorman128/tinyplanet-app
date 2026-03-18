@@ -8,6 +8,7 @@ import {
   SocialMediaLinks,
   VibeDisplay,
 } from "@/design-system";
+import { AvatarUpload } from "@/components/AvatarUpload";
 import { FriendStatusSection } from "@/components/FriendStatusSection";
 import { Profile } from "@/types/profile";
 import { getAgeFromBirthday } from "@/utils/formatBirthday";
@@ -46,11 +47,18 @@ export function ProfileHeader({
   return (
     <>
       <View className="mb-4">
-        <Avatar
-          fullName={profile.full_name}
-          avatarUrl={profile.avatar_url}
-          size="large"
-        />
+        {isViewingOwnProfile ? (
+          <AvatarUpload
+            fullName={profile.full_name}
+            avatarUrl={profile.avatar_url}
+          />
+        ) : (
+          <Avatar
+            fullName={profile.full_name}
+            avatarUrl={profile.avatar_url}
+            size="large"
+          />
+        )}
       </View>
 
       <View className="flex-row items-center justify-center mb-2">

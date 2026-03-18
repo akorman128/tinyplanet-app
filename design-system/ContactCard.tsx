@@ -38,7 +38,7 @@ export function ContactCard({
   const content = (
     <Pressable
       onPress={onPress}
-      className="bg-gray-50 rounded-xl px-4 py-3 active:opacity-70"
+      className="rounded-xl px-4 py-3 active:opacity-70"
       disabled={!onPress}
     >
       <View className="flex-row items-start justify-between">

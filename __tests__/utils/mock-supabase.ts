@@ -23,6 +23,11 @@ interface ChainableMock {
   limit: ReturnType<typeof vi.fn>;
 }
 
+interface StorageMockResponse {
+  upload?: { data: unknown; error: unknown };
+  getPublicUrl?: { data: { publicUrl: string } };
+}
+
 /**
  * Build a mock Supabase client for hook unit tests.
  *
@@ -39,6 +44,7 @@ export function createMockSupabase() {
   const rpcResponses = new Map<string, MockResponse>();
   const fromResponses = new Map<string, MockResponse>();
   const lastChains = new Map<string, ChainableMock>();
+  const storageResponses = new Map<string, StorageMockResponse>();
 
   const createChain = (resolvedValue: MockResponse): ChainableMock => {
     const chain: ChainableMock = {} as ChainableMock;
@@ -115,6 +121,20 @@ export function createMockSupabase() {
       send: vi.fn().mockResolvedValue("ok"),
     }),
     removeChannel: vi.fn(),
+    storage: {
+      from: vi.fn((bucket: string) => {
+        const responses = storageResponses.get(bucket) ?? {
+          upload: { data: { path: "test.jpg" }, error: null },
+          getPublicUrl: {
+            data: { publicUrl: `https://test.supabase.co/storage/v1/object/public/${bucket}/test.jpg` },
+          },
+        };
+        return {
+          upload: vi.fn().mockResolvedValue(responses.upload),
+          getPublicUrl: vi.fn().mockReturnValue(responses.getPublicUrl),
+        };
+      }),
+    },
 
     // Configuration helpers (not part of real client)
     configureRpc(fnName: string, response: MockResponse) {
@@ -122,6 +142,9 @@ export function createMockSupabase() {
     },
     configureFrom(table: string, response: MockResponse) {
       fromResponses.set(table, response);
+    },
+    configureStorage(bucket: string, response: StorageMockResponse) {
+      storageResponses.set(bucket, response);
     },
   };
 

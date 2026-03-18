@@ -2,7 +2,7 @@ import React from "react";
 import { View, Pressable } from "react-native";
 import { Body } from "./Typography";
 import { Icons } from "./Icons";
-import { colors } from "./colors";
+
 import { useThemeTextStyle } from "./ThemeTextContext";
 
 export interface MenuRowProps {
@@ -33,18 +33,15 @@ export function MenuRow({
     <Pressable
       onPress={onPress}
       className={`w-full px-4 py-3 flex-row items-center justify-between ${rounded}`}
-      style={{ backgroundColor: backgroundColor ?? colors.hex.cream }}
+      style={{ backgroundColor: backgroundColor }}
     >
       <View className="flex-row items-center gap-3">
         {icon}
-        <Body
-          className="font-semibold"
-          style={{ color: fontColor ?? colors.black }}
-        >
+        <Body className="font-semibold" style={{ color: fontColor }}>
           {label}
         </Body>
       </View>
-      <Icons.chevronRight size={20} color={fontColor ?? colors.black} />
+      <Icons.chevronRight size={20} color={fontColor} />
     </Pressable>
   );
 }

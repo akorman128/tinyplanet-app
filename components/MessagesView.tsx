@@ -53,9 +53,9 @@ export function MessagesView() {
     [markChannelAsRead, router]
   );
 
+  if (!session?.user) return <LoadingState />;
   if (loading && !refreshing) return <LoadingState />;
   if (error && !refreshing) return <ErrorState message={error} />;
-  if (!session?.user) return <LoadingState />;
   if (channels.length === 0 && !loading)
     return <EmptyState message="No messages yet" />;
 
@@ -65,7 +65,7 @@ export function MessagesView() {
       renderItem={({ item }) => (
         <ChannelListItem
           channel={item}
-          currentUserId={session!.user!.id}
+          currentUserId={session.user.id}
           onPress={handleChannelPress}
         />
       )}

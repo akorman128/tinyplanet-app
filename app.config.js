@@ -1,3 +1,5 @@
+const { colors } = require("./design-system/colors");
+
 export default {
   expo: {
     name: "Tiny Planet",
@@ -46,6 +48,15 @@ export default {
       "expo-contacts",
       "expo-location",
       [
+        "expo-image-picker",
+        {
+          photosPermission:
+            "Allow Tiny Planet to access your photos so you can set a profile picture.",
+          cameraPermission:
+            "Allow Tiny Planet to use your camera so you can take a profile picture.",
+        },
+      ],
+      [
         "@rnmapbox/maps",
         {
           RNMAPBOX_MAPS_DOWNLOAD_TOKEN:
@@ -59,7 +70,7 @@ export default {
           image: "./assets/splash-icon.png",
           imageWidth: 250,
           resizeMode: "contain",
-          backgroundColor: "#ffffff",
+          backgroundColor: colors.hex.cream,
         },
       ],
     ],

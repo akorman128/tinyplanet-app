@@ -65,7 +65,7 @@ export function GlassInfoCard({
   return (
     <View
       className={`rounded-xl px-5 overflow-hidden ${className}`}
-      style={{ backgroundColor: backgroundColor ?? colors.hex.cream }}
+      style={{ backgroundColor: backgroundColor }}
     >
       {childArray.map((child, index) => (
         <View key={index}>
