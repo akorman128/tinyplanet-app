@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { View, ActivityIndicator, LayoutChangeEvent } from "react-native";
 import Mapbox, {
   Camera,
@@ -38,7 +38,26 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
   } = useMapData();
   const router = useRouter();
   const showConnectionLines = useMapStore((state) => state.showConnectionLines);
+  const recenterRequestId = useMapStore((state) => state.recenterRequestId);
   const [mapDimensions, setMapDimensions] = useState({ width: 0, height: 0 });
+
+  // Recenter the camera on the user's location when the recenter button is
+  // tapped. userLocation is read from a ref so this fires only on button press,
+  // not whenever the location updates.
+  const cameraRef = useRef<React.ElementRef<typeof Camera>>(null);
+  const userLocationRef = useRef(userLocation);
+  userLocationRef.current = userLocation;
+
+  useEffect(() => {
+    if (recenterRequestId > 0 && userLocationRef.current) {
+      cameraRef.current?.setCamera({
+        centerCoordinate: userLocationRef.current,
+        zoomLevel: 12,
+        animationDuration: 1000,
+        animationMode: "flyTo",
+      });
+    }
+  }, [recenterRequestId]);
 
   // GeoJSON transforms
   const connectionLines = useMemo(() => {
@@ -101,7 +120,7 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-cream">
-        <ActivityIndicator size="large" color={colors.hex.purple600} />
+        <ActivityIndicator size="large" color={colors.black} />
       </View>
     );
   }
@@ -125,6 +144,7 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
           logoEnabled={false}
         >
           <Camera
+            ref={cameraRef}
             zoomLevel={12}
             centerCoordinate={userLocation || [0, 0]}
             animationDuration={1000}
@@ -159,14 +179,14 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
                   circleColor: "#53d769",
                   circleOpacity: 0.85,
                   circleStrokeWidth: 3,
-                  circleStrokeColor: colors.hex.white,
+                  circleStrokeColor: colors.white,
                 }}
               />
               <CircleLayer
                 id="user-marker-center"
                 style={{
                   circleRadius: 3,
-                  circleColor: colors.hex.white,
+                  circleColor: colors.white,
                 }}
               />
               <SymbolLayer
@@ -174,8 +194,8 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
                 style={{
                   textField: ["get", "name"],
                   textSize: 12,
-                  textColor: colors.hex.white,
-                  textHaloColor: colors.hex.purple800,
+                  textColor: colors.black,
+                  textHaloColor: colors.black,
                   textHaloWidth: 0.5,
                   textHaloBlur: 1,
                   textOffset: [0, 1.5],
@@ -199,7 +219,7 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
               <LineLayer
                 id="user-to-friend-line-layer"
                 style={{
-                  lineColor: colors.hex.purple600,
+                  lineColor: colors.black,
                   lineWidth: 2,
                   lineOpacity: 0.6,
                 }}
@@ -216,7 +236,7 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
               <LineLayer
                 id="friend-to-mutual-line-layer"
                 style={{
-                  lineColor: colors.hex.purple600,
+                  lineColor: colors.black,
                   lineWidth: 2,
                   lineOpacity: 0.6,
                   lineDasharray: [2, 2],
@@ -272,8 +292,8 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
                 style={{
                   textField: ["get", "title"],
                   textSize: 12,
-                  textColor: colors.hex.white,
-                  textHaloColor: colors.hex.purple900,
+                  textColor: colors.black,
+                  textHaloColor: colors.black,
                   textHaloWidth: 8,
                   textHaloBlur: 0,
                   textOffset: [0, 2],

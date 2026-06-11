@@ -15,7 +15,6 @@ import { MapView } from "@/components/MapView";
 import { Avatar, Body, Caption, Icons, colors } from "@/design-system";
 import { useProfileStore } from "@/stores/profileStore";
 import { useMapStore } from "@/stores/mapStore";
-import { useGetPlatformStatistics } from "@/hooks/useFriends";
 
 export default function MapTab() {
   const router = useRouter();
@@ -26,10 +25,8 @@ export default function MapTab() {
     setShowConnectionLines,
     mapFilter,
     setMapFilter,
+    requestRecenter,
   } = useMapStore();
-  const { data: statsData } = useGetPlatformStatistics();
-  const statistics = statsData?.data ?? null;
-  const [showStats, setShowStats] = React.useState(false);
 
   return (
     <GestureHandlerRootView className="flex-1">
@@ -93,19 +90,7 @@ export default function MapTab() {
             </Svg>
 
             {/* Filter Badges */}
-            <View className="relative flex-row items-center gap-2 px-5 pt-2 pb-2">
-              <TouchableOpacity
-                className="w-8 h-8 rounded-full bg-white/90 border border-gray-200 justify-center items-center"
-                onPress={() => setShowStats(!showStats)}
-              >
-                <Icons.chevronDown
-                  size={16}
-                  color={colors.hex.gray300}
-                  style={{
-                    transform: [{ rotate: showStats ? "180deg" : "0deg" }],
-                  }}
-                />
-              </TouchableOpacity>
+            <View className="flex-row items-center gap-2 px-5 pt-2 pb-2">
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -116,7 +101,7 @@ export default function MapTab() {
                     key={filter}
                     className={`px-4 py-2 rounded-full border ${
                       mapFilter === filter
-                        ? "bg-purple-600 border-purple-600"
+                        ? "bg-gray-800 border-gray-800"
                         : "bg-white/90 border-gray-200"
                     }`}
                     onPress={() => setMapFilter(filter)}
@@ -137,42 +122,41 @@ export default function MapTab() {
                   </TouchableOpacity>
                 ))}
               </ScrollView>
-
-              {showStats && statistics && (
-                <View className="absolute top-full left-0 mt-4 ml-4 rounded-xl overflow-hidden bg-white/70 px-4 py-2">
-                  <View className="flex-row items-center justify-between px-2 py-1">
-                    <Caption className="mr-3">🧵</Caption>
-                    <Switch
-                      value={showConnectionLines}
-                      onValueChange={setShowConnectionLines}
-                      trackColor={{
-                        false: colors.hex.placeholder,
-                        true: colors.hex.purple600,
-                      }}
-                      thumbColor={colors.hex.white}
-                      ios_backgroundColor={colors.hex.placeholder}
-                      style={{ transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }] }}
-                    />
-                  </View>
-                  <View className="flex-row items-center gap-3">
-                    <View className="flex-row items-center">
-                      <Caption className="text-gray-700">🌎</Caption>
-                      <Caption className="ml-1 font-bold text-gray-700">
-                        {statistics.total_users.toLocaleString()}
-                      </Caption>
-                    </View>
-                    <View className="flex-row items-center">
-                      <Caption className="text-gray-700">🤝</Caption>
-                      <Caption className="ml-1 font-bold text-gray-700">
-                        {statistics.connections_count}
-                      </Caption>
-                    </View>
-                  </View>
-                </View>
-              )}
             </View>
           </View>
         </Animated.View>
+
+        {/* Right-side map controls */}
+        <View
+          className="absolute right-4 z-20 items-center gap-3"
+          style={{ top: insets.top + 120 }}
+        >
+          {/* Connection-lines toggle (rotated vertical) */}
+          <View className="w-12 h-16 rounded-full bg-white/90 border border-gray-200 justify-center items-center">
+            <Switch
+              value={showConnectionLines}
+              onValueChange={setShowConnectionLines}
+              trackColor={{
+                false: colors.hex.placeholder,
+                true: colors.hex.purple600,
+              }}
+              thumbColor={colors.hex.white}
+              ios_backgroundColor={colors.hex.placeholder}
+              style={{
+                transform: [{ rotate: "-90deg" }, { scaleX: 0.7 }, { scaleY: 0.7 }],
+              }}
+            />
+          </View>
+
+          {/* Recenter on user location */}
+          <TouchableOpacity
+            className="w-12 h-12 rounded-full bg-white/90 border border-gray-200 justify-center items-center"
+            onPress={requestRecenter}
+            accessibilityLabel="Recenter on my location"
+          >
+            <Icons.pinOutline size={20} color={colors.hex.gray600} />
+          </TouchableOpacity>
+        </View>
       </View>
     </GestureHandlerRootView>
   );
