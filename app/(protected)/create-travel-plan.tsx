@@ -24,6 +24,7 @@ import {
 } from "@/hooks/useTravelPlan";
 import { PostVisibility } from "@/types/post";
 import { CreateTravelPlanInput } from "@/types/travelPlan";
+import { logger } from "@/utils/logger";
 
 export default function CreateTravelPlanScreen() {
   const router = useRouter();
@@ -96,7 +97,7 @@ export default function CreateTravelPlanScreen() {
       await createTravelPlan.mutateAsync(input);
       router.back();
     } catch (err) {
-      console.error("Error creating travel plan:", err);
+      logger.error("Error creating travel plan:", err);
       Alert.alert("Error", "Failed to create travel plan. Please try again.");
     }
   };

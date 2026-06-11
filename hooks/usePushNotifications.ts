@@ -6,6 +6,7 @@ import { router } from "expo-router";
 
 import { useSupabase } from "@/hooks/useSupabase";
 import { EAS_PROJECT_ID } from "@/lib/constants";
+import { logger } from "@/utils/logger";
 
 export function usePushNotifications() {
   const { session, supabase } = useSupabase();
@@ -59,7 +60,7 @@ export function usePushNotifications() {
     );
 
     if (error) {
-      console.error("Failed to save push token:", error.message);
+      logger.error("Failed to save push token:", error.message);
     }
 
     if (Platform.OS === "android") {

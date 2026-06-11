@@ -11,6 +11,7 @@ import {
 } from "@/design-system";
 import { useGetList, useUpdateList } from "@/hooks/useLists";
 import { ListCategory } from "@/types/list";
+import { logger } from "@/utils/logger";
 
 const CATEGORY_OPTIONS: SelectOption<ListCategory>[] = [
   { value: "nightlife", label: "Nightlife" },
@@ -64,7 +65,7 @@ export default function EditListScreen() {
       });
       router.back();
     } catch (err) {
-      console.error("Error updating list:", err);
+      logger.error("Error updating list:", err);
       Alert.alert("Error", "Failed to update list. Please try again.");
     } finally {
       setIsSubmitting(false);

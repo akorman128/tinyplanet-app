@@ -2,6 +2,8 @@
  * PostGIS coordinate utilities for parsing and working with POINT geometry
  */
 
+import { logger } from "@/utils/logger";
+
 /**
  * Parse PostGIS POINT format: "POINT(lng lat)" → { latitude, longitude }
  * Returns null if format is invalid
@@ -32,7 +34,7 @@ export function parsePostGISPoint(pointString: string): {
  * @example
  * if (isValidCoordinate(coords)) {
  *   // coords is now { latitude: number; longitude: number }
- *   console.log(coords.latitude, coords.longitude);
+ *   logger.log(coords.latitude, coords.longitude);
  * }
  */
 export function isValidCoordinate(

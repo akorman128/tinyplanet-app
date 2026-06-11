@@ -8,6 +8,7 @@ import {
 } from "@/components/LocationSearchInput";
 import { useGetList, useUpdatePlace } from "@/hooks/useLists";
 import { ListPlace } from "@/types/list";
+import { logger } from "@/utils/logger";
 
 export default function EditPlaceScreen() {
   const router = useRouter();
@@ -69,7 +70,7 @@ export default function EditPlaceScreen() {
 
       router.back();
     } catch (err) {
-      console.error("Error updating place:", err);
+      logger.error("Error updating place:", err);
       Alert.alert("Error", "Failed to update place. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -90,7 +91,7 @@ export default function EditPlaceScreen() {
 
       router.back();
     } catch (err) {
-      console.error("Error updating place:", err);
+      logger.error("Error updating place:", err);
       Alert.alert("Error", "Failed to update place. Please try again.");
     } finally {
       setIsSubmitting(false);

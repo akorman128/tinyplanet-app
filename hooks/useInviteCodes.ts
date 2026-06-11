@@ -12,6 +12,7 @@ import { useSupabase } from "./useSupabase";
 import { queryKeys } from "@/lib/queryKeys";
 import { InviteCode, InviteCodeStatus } from "../types/invite_code";
 import { generateInviteCode } from "../utils/inviteCode";
+import { logger } from "@/utils/logger";
 
 // --- Types ---
 
@@ -82,7 +83,7 @@ export async function fetchInviteCodes(
 
   const { data, error } = await query;
   if (error) {
-    console.error("Supabase error:", error);
+    logger.error("Supabase error:", error);
     throw error;
   }
   return { data };

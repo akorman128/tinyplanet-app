@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { View, TextInput, Pressable, ScrollView } from "react-native";
 import { colors, Label, Body, Caption, Text } from "@/design-system";
 import { useLocationStore } from "@/stores/locationStore";
+import { logger } from "@/utils/logger";
 
 const MAPBOX_ACCESS_TOKEN = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
@@ -116,7 +117,7 @@ export function LocationSearchInput({
       const data = await response.json();
 
       if (!response.ok) {
-        console.error("Search API error:", response.status, data);
+        logger.error("Search API error:", response.status, data);
         throw new Error(
           `Search API error: ${response.status} - ${data?.message || "Unknown error"}`
         );
@@ -141,7 +142,7 @@ export function LocationSearchInput({
 
       setResults(locations);
     } catch (err) {
-      console.error("Error searching locations:", err);
+      logger.error("Error searching locations:", err);
       setResults([]);
     } finally {
       setIsLoading(false);
@@ -167,7 +168,7 @@ export function LocationSearchInput({
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Retrieve API error:", response.status, errorData);
+        logger.error("Retrieve API error:", response.status, errorData);
         throw new Error(`Retrieve API error: ${response.status}`);
       }
 
@@ -184,7 +185,7 @@ export function LocationSearchInput({
         sessionTokenRef.current = generateSessionToken();
       }
     } catch (err) {
-      console.error("Error retrieving location details:", err);
+      logger.error("Error retrieving location details:", err);
     }
   };
 

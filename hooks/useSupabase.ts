@@ -7,6 +7,7 @@ import * as Device from "expo-device";
 import { SupabaseContext } from "../context/supabase-context";
 import { queryKeys } from "@/lib/queryKeys";
 import { EAS_PROJECT_ID } from "@/lib/constants";
+import { logger } from "@/utils/logger";
 
 interface UseSupabaseProps {
   isLoaded: boolean;
@@ -69,7 +70,7 @@ export const useSupabase = (): UseSupabaseProps => {
             .eq("token", tokenData.data)
         )
         .catch((err) =>
-          console.error("Failed to remove push token on sign out:", err)
+          logger.error("Failed to remove push token on sign out:", err)
         );
     }
 

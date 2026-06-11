@@ -64,6 +64,7 @@
     "@types/react": "~19.2.10",
     "@types/react-native": "^0.73.0",
     "babel-plugin-module-resolver": "^5.0.2",
+    "babel-plugin-transform-remove-console": "^6.9.4",
     "babel-preset-expo": "~55.0.5",
     "baseline-browser-mapping": "^2.9.11",
     "dotenv": "^17.3.1",

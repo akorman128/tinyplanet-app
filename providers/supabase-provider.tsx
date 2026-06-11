@@ -5,6 +5,7 @@ import { createClient, processLock } from "@supabase/supabase-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { SupabaseContext } from "../context/supabase-context";
+import { logger } from "@/utils/logger";
 
 // Custom fetch with timeout for React Native
 // React Native's default timeout is 60s, which is too long for a good UX
@@ -14,13 +15,13 @@ const customFetch = (url: RequestInfo | URL, options: RequestInit = {}) => {
   const timeout = 60000; // 60s timeout for Edge Functions
 
   const startTime = Date.now();
-  console.log(`[Fetch] Starting request to ${url} (timeout: ${timeout}ms)`);
+  logger.debug(`[Fetch] Starting request to ${url} (timeout: ${timeout}ms)`);
 
   const timeoutPromise = new Promise<Response>((_, reject) =>
     setTimeout(() => {
       controller.abort();
       const elapsed = Date.now() - startTime;
-      console.log(`[Fetch] TIMEOUT after ${elapsed}ms`);
+      logger.debug(`[Fetch] TIMEOUT after ${elapsed}ms`);
       reject(new Error(`Network request timeout after ${timeout}ms`));
     }, timeout)
   );
@@ -31,12 +32,12 @@ const customFetch = (url: RequestInfo | URL, options: RequestInit = {}) => {
   })
     .then((response) => {
       const elapsed = Date.now() - startTime;
-      console.log(`[Fetch] Completed in ${elapsed}ms`);
+      logger.debug(`[Fetch] Completed in ${elapsed}ms`);
       return response;
     })
     .catch((error) => {
       const elapsed = Date.now() - startTime;
-      console.log(`[Fetch] Failed after ${elapsed}ms:`, error.message);
+      logger.debug(`[Fetch] Failed after ${elapsed}ms:`, error.message);
       throw error;
     });
 

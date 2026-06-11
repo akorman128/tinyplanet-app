@@ -16,6 +16,7 @@ import { isValidVibe, extractEmojis } from "@/utils/emojiValidation";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { VibePhoneForm } from "@/components";
 import { formatPhoneNumber } from "@/utils";
+import { logger } from "@/utils/logger";
 
 // Zod schema for vibe creation
 const vibeSchema = z.object({
@@ -120,7 +121,7 @@ export default function SendInvitesPage() {
       // Navigate immediately to next screen
       router.replace("/(protected)/(tabs)/map");
     } catch (error: unknown) {
-      console.error("Error sending invites:", error);
+      logger.error("Error sending invites:", error);
       Alert.alert(
         "Error",
         error instanceof Error

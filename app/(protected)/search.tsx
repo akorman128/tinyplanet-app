@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, Input, Body, ScreenHeader } from "@/design-system";
 import { UserSearchListItem } from "@/components/UserSearchList";
 import { useSearchFriends, useSendFriendRequest } from "@/hooks/useFriends";
+import { logger } from "@/utils/logger";
 
 export default function SearchScreen() {
   const router = useRouter();
@@ -43,7 +44,7 @@ export default function SearchScreen() {
         await sendFriendRequest.mutateAsync({ targetUserId: userId });
         Alert.alert("Success", "Friend request sent!");
       } catch (error) {
-        console.error("Error sending friend request:", error);
+        logger.error("Error sending friend request:", error);
         Alert.alert("Error", "Failed to send friend request");
       }
     },

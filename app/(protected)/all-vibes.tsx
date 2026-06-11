@@ -29,6 +29,7 @@ import { VibeWithSender } from "@/types/vibe";
 import { formatTimeAgo } from "@/utils";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
 import { extractEmojis } from "@/utils/emojiValidation";
+import { logger } from "@/utils/logger";
 
 export default function AllVibesScreen() {
   const { userId } = useLocalSearchParams<{ userId: string }>();
@@ -69,7 +70,7 @@ export default function AllVibesScreen() {
       setShowModal(false);
       setEmojiInput("");
     } catch (error) {
-      console.error("Error creating vibe:", error);
+      logger.error("Error creating vibe:", error);
       Alert.alert("Error", "Failed to send vibe. Please try again.");
     } finally {
       setIsSubmitting(false);

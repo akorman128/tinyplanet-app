@@ -28,6 +28,7 @@ import { useProfileStore } from "@/stores/profileStore";
 import { useContactPicker } from "@/hooks/useContactPicker";
 import { isValidVibe, extractEmojis } from "@/utils/emojiValidation";
 import { formatPhoneNumber } from "@/utils";
+import { logger } from "@/utils/logger";
 
 type TabId = "requests" | "invite";
 
@@ -92,7 +93,7 @@ export default function FriendsScreen() {
         await acceptFriendRequest.mutateAsync({ fromUserId: userId });
         Alert.alert("Success", "Friend request accepted!");
       } catch (error) {
-        console.error("Error accepting friend request:", error);
+        logger.error("Error accepting friend request:", error);
         Alert.alert("Error", "Failed to accept friend request");
       }
     },
@@ -104,7 +105,7 @@ export default function FriendsScreen() {
       try {
         await declineFriendRequest.mutateAsync({ targetUserId: userId });
       } catch (error) {
-        console.error("Error declining friend request:", error);
+        logger.error("Error declining friend request:", error);
         Alert.alert("Error", "Failed to decline friend request");
       }
     },
@@ -168,7 +169,7 @@ export default function FriendsScreen() {
       form1.reset();
       form2.reset();
     } catch (error: unknown) {
-      console.error("Error sending invites:", error);
+      logger.error("Error sending invites:", error);
       Alert.alert(
         "Error",
         error instanceof Error
