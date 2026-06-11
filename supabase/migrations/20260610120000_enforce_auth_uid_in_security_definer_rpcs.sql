@@ -1185,7 +1185,11 @@ RETURNS TABLE (
   theme_settings JSONB
 ) AS $$
 BEGIN
-  IF p_current_user_id IS DISTINCT FROM auth.uid() THEN
+  -- p_current_user_id is the OPTIONAL viewer param (DEFAULT NULL); it only drives
+  -- mutual_friend_count below (ELSE 0 when NULL). Auth-bootstrap paths fetch your
+  -- own profile with a NULL viewer (useSignIn, app/_layout session-restore), so the
+  -- guard must permit NULL while still rejecting a non-null spoofed viewer id.
+  IF p_current_user_id IS NOT NULL AND p_current_user_id IS DISTINCT FROM auth.uid() THEN
     RAISE EXCEPTION 'forbidden: user mismatch' USING ERRCODE = '42501';
   END IF;
   RETURN QUERY
