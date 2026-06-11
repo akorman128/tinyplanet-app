@@ -5,6 +5,14 @@
 // installed. A static top-level import would break the type-check until the
 // package is added. Typing the module as `any` keeps it decoupled.
 
+// `__DEV__` is a React Native runtime global and is undefined in non-RN
+// contexts (e.g. tests). Guard the access so this module is safe to import
+// anywhere without throwing a ReferenceError.
+const isDev =
+  typeof __DEV__ !== "undefined"
+    ? __DEV__
+    : process.env.NODE_ENV !== "production";
+
 let Sentry: any = null;
 let initialized = false;
 
@@ -33,7 +41,7 @@ export async function initMonitoring(): Promise<void> {
     initialized = true;
   } catch (error) {
     Sentry = null;
-    if (__DEV__) {
+    if (isDev) {
       console.error("Failed to initialize Sentry monitoring:", error);
     }
   }
@@ -53,7 +61,7 @@ export function captureError(
     return;
   }
 
-  if (__DEV__) {
+  if (isDev) {
     console.error("captureError:", error, context ?? "");
   }
 }

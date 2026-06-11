@@ -11,10 +11,18 @@
 
 const noop = (..._args: unknown[]): void => {};
 
+// `__DEV__` is a React Native runtime global and is undefined in non-RN
+// contexts (e.g. the vitest/jsdom test environment). Guard the access so the
+// logger can be imported anywhere without throwing a ReferenceError.
+const isDev =
+  typeof __DEV__ !== "undefined"
+    ? __DEV__
+    : process.env.NODE_ENV !== "production";
+
 export const logger = {
-  log: __DEV__ ? console.log.bind(console) : noop,
-  info: __DEV__ ? console.info.bind(console) : noop,
-  debug: __DEV__ ? console.debug.bind(console) : noop,
+  log: isDev ? console.log.bind(console) : noop,
+  info: isDev ? console.info.bind(console) : noop,
+  debug: isDev ? console.debug.bind(console) : noop,
   warn: (...args: unknown[]): void => console.warn(...args),
   error: (...args: unknown[]): void => console.error(...args),
 };
