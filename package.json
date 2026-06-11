@@ -9,6 +9,7 @@
     "android": "npx expo run:android",
     "ios": "npx expo run:ios",
     "lint": "npx expo lint . --fix",
+    "gen:types": "supabase gen types typescript --linked > types/database.types.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:rpc": "vitest run __tests__/rpc/",
