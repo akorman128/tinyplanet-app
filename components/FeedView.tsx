@@ -61,59 +61,11 @@ export function FeedView() {
     }, [consume, queryClient])
   );
 
-  const handleLikePost = useCallback(
-    (postId: string, updates: Partial<PostWithAuthor>) => {
-      queryClient.setQueryData(
-        queryKeys.posts.feed(),
-        (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
-          if (!oldData?.pages) return oldData;
-          return {
-            ...oldData,
-            pages: oldData.pages.map((page) =>
-              page.map((p) => (p.id === postId ? { ...p, ...updates } : p))
-            ),
-          };
-        }
-      );
-    },
-    [queryClient]
-  );
-
-  const handleSavePost = useCallback(
-    (postId: string, updates: Partial<PostWithAuthor>) => {
-      queryClient.setQueryData(
-        queryKeys.posts.feed(),
-        (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
-          if (!oldData?.pages) return oldData;
-          return {
-            ...oldData,
-            pages: oldData.pages.map((page) =>
-              page.map((p) => (p.id === postId ? { ...p, ...updates } : p))
-            ),
-          };
-        }
-      );
-    },
-    [queryClient]
-  );
-
-  const handlePostDelete = useCallback(
-    (postId: string) => {
-      queryClient.setQueryData(
-        queryKeys.posts.feed(),
-        (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
-          if (!oldData?.pages) return oldData;
-          return {
-            ...oldData,
-            pages: oldData.pages.map((page) =>
-              page.filter((p) => p.id !== postId)
-            ),
-          };
-        }
-      );
-    },
-    [queryClient]
-  );
+  // Optimistic like / save / delete cache updates now live inside the mutation
+  // hooks (useLikes, useSavedPosts, usePosts), so the cards drive those edits
+  // directly. These no-op callbacks satisfy the card props without duplicating
+  // cache logic in the view.
+  const noop = useCallback(() => {}, []);
 
   const handleOpenComments = useCallback(
     (postId: string, commentCount: number) => {
@@ -157,17 +109,17 @@ export function FeedView() {
         isTravelPlanPost(item) ? (
           <TravelPlanCard
             post={item}
-            onLike={handleLikePost}
-            onSave={handleSavePost}
-            onDelete={handlePostDelete}
+            onLike={noop}
+            onSave={noop}
+            onDelete={noop}
             onOpenComments={handleOpenComments}
           />
         ) : (
           <PostCard
             post={item}
-            onLike={handleLikePost}
-            onSave={handleSavePost}
-            onDelete={handlePostDelete}
+            onLike={noop}
+            onSave={noop}
+            onDelete={noop}
             onOpenComments={handleOpenComments}
           />
         )

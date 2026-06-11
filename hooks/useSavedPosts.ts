@@ -8,6 +8,11 @@ import { useSupabase } from "./useSupabase";
 import { useRequireProfile } from "./useRequireProfile";
 import { queryKeys } from "@/lib/queryKeys";
 import { PostWithAuthor } from "@/types/post";
+import {
+  optimisticallyPatchPost,
+  restorePostListCaches,
+  type PostListCacheSnapshot,
+} from "./usePosts";
 
 const PAGE_SIZE = 10;
 
@@ -28,6 +33,16 @@ export const useSavePost = () => {
       });
       if (error) throw error;
     },
+    onMutate: (postId): { snapshot: PostListCacheSnapshot } => {
+      const snapshot = optimisticallyPatchPost(queryClient, postId, (post) => ({
+        ...post,
+        saved_by_user: true,
+      }));
+      return { snapshot };
+    },
+    onError: (_err, _postId, context) => {
+      restorePostListCaches(queryClient, context?.snapshot);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
     },
@@ -47,6 +62,16 @@ export const useUnsavePost = () => {
         .eq("user_id", profile.id)
         .eq("post_id", postId);
       if (error) throw error;
+    },
+    onMutate: (postId): { snapshot: PostListCacheSnapshot } => {
+      const snapshot = optimisticallyPatchPost(queryClient, postId, (post) => ({
+        ...post,
+        saved_by_user: false,
+      }));
+      return { snapshot };
+    },
+    onError: (_err, _postId, context) => {
+      restorePostListCaches(queryClient, context?.snapshot);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
