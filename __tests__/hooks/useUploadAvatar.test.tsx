@@ -72,7 +72,8 @@ function setupHappyPath() {
   });
   mockManipulateAsync.mockResolvedValue({ uri: "file://resized.jpg" });
   mockFetch.mockResolvedValue({
-    blob: () => Promise.resolve(new Blob(["image-data"], { type: "image/jpeg" })),
+    blob: () =>
+      Promise.resolve(new Blob(["image-data"], { type: "image/jpeg" })),
   });
   global.fetch = mockFetch;
 
@@ -127,7 +128,9 @@ describe("useUploadAvatar", () => {
     expect(mockSupabase.storage.from).toHaveBeenCalledWith("avatars");
     expect(mockUpdateProfileMutateAsync).toHaveBeenCalledWith({
       updateData: {
-        avatar_url: expect.stringContaining("https://storage.test/avatars/user-a.jpg?t="),
+        avatar_url: expect.stringContaining(
+          "https://storage.test/avatars/user-a.jpg?t="
+        ),
       },
     });
   });
@@ -202,7 +205,10 @@ describe("useUploadAvatar", () => {
     });
 
     await waitFor(() => {
-      expect(mockAlert).toHaveBeenCalledWith("Upload failed", expect.any(String));
+      expect(mockAlert).toHaveBeenCalledWith(
+        "Upload failed",
+        expect.any(String)
+      );
     });
 
     expect(mockUpdateProfileMutateAsync).not.toHaveBeenCalled();
@@ -243,7 +249,10 @@ describe("useUploadAvatar", () => {
     });
 
     await waitFor(() => {
-      expect(mockAlert).toHaveBeenCalledWith("Upload failed", "Profile update failed");
+      expect(mockAlert).toHaveBeenCalledWith(
+        "Upload failed",
+        "Profile update failed"
+      );
     });
   });
 });

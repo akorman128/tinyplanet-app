@@ -25,6 +25,9 @@ export const useSupabase = (): UseSupabaseProps => {
   // (e.g., in components above it in the tree). Gracefully handle this.
   let queryClient: ReturnType<typeof useQueryClient> | null = null;
   try {
+    // Intentional: useSupabase may render above QueryProvider; the try/catch
+    // degrades gracefully. This is a deliberate, documented exception.
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     queryClient = useQueryClient();
   } catch {
     // QueryProvider not mounted yet — skip cache operations

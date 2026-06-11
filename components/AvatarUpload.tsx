@@ -1,5 +1,12 @@
 import React from "react";
-import { Pressable, View, ActivityIndicator, Platform, ActionSheetIOS, Alert } from "react-native";
+import {
+  Pressable,
+  View,
+  ActivityIndicator,
+  Platform,
+  ActionSheetIOS,
+  Alert,
+} from "react-native";
 import { Avatar } from "@/design-system";
 import { Icons } from "@/design-system/Icons";
 import { useUploadAvatar } from "@/hooks/useUploadAvatar";

@@ -134,12 +134,7 @@ export const gif = (props: IconProps) => (
     </G>
     <Defs>
       <ClipPath id="clip0_9695_7385">
-        <Rect
-          width="18"
-          height="18"
-          fill="white"
-          transform="translate(0.5)"
-        />
+        <Rect width="18" height="18" fill="white" transform="translate(0.5)" />
       </ClipPath>
     </Defs>
   </Svg>

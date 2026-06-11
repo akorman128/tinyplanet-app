@@ -561,12 +561,7 @@ export const messageDelete = (props: IconProps) => (
     </G>
     <Defs>
       <ClipPath id="clip0_6936_86448">
-        <Rect
-          width="24"
-          height="24"
-          fill="white"
-          transform="translate(0.5)"
-        />
+        <Rect width="24" height="24" fill="white" transform="translate(0.5)" />
       </ClipPath>
     </Defs>
   </Svg>

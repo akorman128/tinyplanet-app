@@ -20,5 +20,5 @@ export const Icons = {
   ...icons_p_r,
   ...icons_s_u,
   ...icons_v_z,
-  "delete": delete_,
+  delete: delete_,
 };

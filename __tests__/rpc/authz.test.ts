@@ -40,11 +40,15 @@ async function signInAsUser(email: string) {
   if (error) throw error;
 
   const { createClient } = await import("@supabase/supabase-js");
-  return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!, {
-    global: {
-      headers: { Authorization: `Bearer ${data.session.access_token}` },
-    },
-  });
+  return createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_ANON_KEY!,
+    {
+      global: {
+        headers: { Authorization: `Bearer ${data.session.access_token}` },
+      },
+    }
+  );
 }
 
 /**
@@ -68,7 +72,7 @@ function expectAuthzRejected(result: { data: unknown; error: unknown }) {
     expect(matchesContract).toBe(true);
   } else {
     // If it didn't raise, it must at least not have leaked another user's rows.
-    expect(Array.isArray(data) ? data.length : data ?? 0).toBeFalsy();
+    expect(Array.isArray(data) ? data.length : (data ?? 0)).toBeFalsy();
   }
 }
 

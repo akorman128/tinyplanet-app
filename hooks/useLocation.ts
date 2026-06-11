@@ -269,10 +269,7 @@ export const useLocation = (): UseLocationReturn => {
           .single();
 
         if (error) {
-          logger.error(
-            "Failed to update location in database:",
-            error.message
-          );
+          logger.error("Failed to update location in database:", error.message);
           return;
         }
 

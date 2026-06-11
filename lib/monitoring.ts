@@ -36,7 +36,7 @@ export async function initMonitoring(): Promise<void> {
   try {
     // @ts-ignore - optional dependency; may not be installed. Resolved lazily
     // at runtime, and the `any` type keeps the rest of the module type-safe.
-    Sentry = await import("@sentry/react-native");
+    Sentry = await import("@sentry/react-native"); // eslint-disable-line import/no-unresolved -- optional dep installed via follow-up
     Sentry.init({ dsn });
     initialized = true;
   } catch (error) {

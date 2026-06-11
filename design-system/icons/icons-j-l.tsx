@@ -1,5 +1,13 @@
 import * as React from "react";
-import Svg, { Path, G, Defs, ClipPath, Rect, Circle, Line } from "react-native-svg";
+import Svg, {
+  Path,
+  G,
+  Defs,
+  ClipPath,
+  Rect,
+  Circle,
+  Line,
+} from "react-native-svg";
 import { IconProps } from "./types";
 
 export const link = (props: IconProps) => (

@@ -49,7 +49,9 @@ export const optimisticallyPatchPost = (
   postId: string,
   mutate: (post: PostWithAuthor) => PostWithAuthor
 ): PostListCacheSnapshot => {
-  const snapshot = queryClient.getQueriesData({ queryKey: queryKeys.posts.all });
+  const snapshot = queryClient.getQueriesData({
+    queryKey: queryKeys.posts.all,
+  });
 
   queryClient.setQueriesData<PostListData>(
     { queryKey: queryKeys.posts.all },
@@ -74,7 +76,9 @@ export const optimisticallyRemovePost = (
   queryClient: QueryClient,
   postId: string
 ): PostListCacheSnapshot => {
-  const snapshot = queryClient.getQueriesData({ queryKey: queryKeys.posts.all });
+  const snapshot = queryClient.getQueriesData({
+    queryKey: queryKeys.posts.all,
+  });
 
   queryClient.setQueriesData<PostListData>(
     { queryKey: queryKeys.posts.all },

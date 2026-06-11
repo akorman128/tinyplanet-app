@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import { View, FlatList, Alert, ActivityIndicator } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useQueryClient, InfiniteData } from "@tanstack/react-query";
@@ -445,7 +451,9 @@ export default function ChatScreen() {
               {introQuery.data?.data && (
                 <IntroBanner
                   introducerName={introQuery.data.data.introducer.full_name}
-                  introducerAvatarUrl={introQuery.data.data.introducer.avatar_url}
+                  introducerAvatarUrl={
+                    introQuery.data.data.introducer.avatar_url
+                  }
                   message={introQuery.data.data.message}
                 />
               )}

@@ -1016,14 +1016,7 @@ export const ban = (props: IconProps) => (
 
 export const beli = ({ color = "currentColor", ...props }: IconProps) => (
   <Svg width="24" height="24" viewBox="0 0 24 24" {...props}>
-    <Circle
-      cx="12"
-      cy="12"
-      r="10"
-      stroke={color}
-      strokeWidth="2"
-      fill="none"
-    />
+    <Circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2" fill="none" />
     <Path
       d="M8 7h4.5c1.38 0 2.5 1.12 2.5 2.5S13.88 12 12.5 12H8V7zm0 5h5c1.38 0 2.5 1.12 2.5 2.5S14.38 17 13 17H8v-5z"
       fill={color}

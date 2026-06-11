@@ -121,12 +121,7 @@ export const volume = (props: IconProps) => (
     </G>
     <Defs>
       <ClipPath id="clip0_6926_58621">
-        <Rect
-          width="24"
-          height="24"
-          fill="white"
-          transform="translate(0.5)"
-        />
+        <Rect width="24" height="24" fill="white" transform="translate(0.5)" />
       </ClipPath>
     </Defs>
   </Svg>
