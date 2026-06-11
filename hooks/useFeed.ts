@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useSupabase } from "./useSupabase";
 import { useProfileStore } from "../stores/profileStore";
+import { useRequireProfile } from "./useRequireProfile";
 import { queryKeys } from "@/lib/queryKeys";
 import { PostWithAuthor } from "../types/post";
 
@@ -16,12 +17,13 @@ const PAGE_SIZE = 10;
 export const useGetFeed = () => {
   const { supabase } = useSupabase();
   const { profileState } = useProfileStore();
+  const profile = useRequireProfile();
 
   return useInfiniteQuery({
     queryKey: queryKeys.posts.feed(),
     queryFn: async ({ pageParam = 0 }) => {
       const { data: posts, error } = await supabase.rpc("get_feed_posts", {
-        user_id_param: profileState!.id,
+        user_id_param: profile.id,
         limit_param: PAGE_SIZE,
         offset_param: pageParam,
       });
@@ -38,12 +40,13 @@ export const useGetFeed = () => {
 export const useGetUserPosts = (userId?: string) => {
   const { supabase } = useSupabase();
   const { profileState } = useProfileStore();
+  const profile = useRequireProfile();
 
   return useInfiniteQuery({
     queryKey: queryKeys.posts.userPosts(userId!),
     queryFn: async ({ pageParam = 0 }) => {
       const { data: posts, error } = await supabase.rpc("get_user_posts", {
-        user_id_param: profileState!.id,
+        user_id_param: profile.id,
         target_user_id: userId!,
         limit_param: PAGE_SIZE,
         offset_param: pageParam,

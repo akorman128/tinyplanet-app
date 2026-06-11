@@ -7,6 +7,7 @@ import * as Device from "expo-device";
 import { SupabaseContext } from "../context/supabase-context";
 import { queryKeys } from "@/lib/queryKeys";
 import { EAS_PROJECT_ID } from "@/lib/constants";
+import { logger } from "@/utils/logger";
 
 interface UseSupabaseProps {
   isLoaded: boolean;
@@ -24,6 +25,9 @@ export const useSupabase = (): UseSupabaseProps => {
   // (e.g., in components above it in the tree). Gracefully handle this.
   let queryClient: ReturnType<typeof useQueryClient> | null = null;
   try {
+    // Intentional: useSupabase may render above QueryProvider; the try/catch
+    // degrades gracefully. This is a deliberate, documented exception.
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     queryClient = useQueryClient();
   } catch {
     // QueryProvider not mounted yet — skip cache operations
@@ -69,7 +73,7 @@ export const useSupabase = (): UseSupabaseProps => {
             .eq("token", tokenData.data)
         )
         .catch((err) =>
-          console.error("Failed to remove push token on sign out:", err)
+          logger.error("Failed to remove push token on sign out:", err)
         );
     }
 

@@ -3,6 +3,8 @@ import {
   UseQueryResult,
   useMutation,
   useQueryClient,
+  type QueryClient,
+  type InfiniteData,
 } from "@tanstack/react-query";
 
 import { useSupabase } from "./useSupabase";
@@ -20,6 +22,90 @@ import {
 export interface GetPostOutput {
   data: PostWithAuthor;
 }
+
+type PostListData = InfiniteData<PostWithAuthor[]>;
+
+const isPostListData = (data: unknown): data is PostListData =>
+  !!data &&
+  typeof data === "object" &&
+  Array.isArray((data as PostListData).pages);
+
+// --- Optimistic cache helpers (shared by post mutation hooks) ---
+
+/**
+ * Snapshot of every post-list cache, captured before an optimistic edit so it
+ * can be restored if the mutation fails.
+ */
+export type PostListCacheSnapshot = ReturnType<QueryClient["getQueriesData"]>;
+
+/**
+ * Apply `mutate` to every post-list cache (feed / saved / user posts) that
+ * holds a post matching `postId`. Returns a snapshot of the affected caches for
+ * rollback. Detail caches (a different shape) are left untouched and refreshed
+ * via invalidation in onSuccess.
+ */
+export const optimisticallyPatchPost = (
+  queryClient: QueryClient,
+  postId: string,
+  mutate: (post: PostWithAuthor) => PostWithAuthor
+): PostListCacheSnapshot => {
+  const snapshot = queryClient.getQueriesData({
+    queryKey: queryKeys.posts.all,
+  });
+
+  queryClient.setQueriesData<PostListData>(
+    { queryKey: queryKeys.posts.all },
+    (oldData) => {
+      if (!isPostListData(oldData)) return oldData;
+      return {
+        ...oldData,
+        pages: oldData.pages.map((page) =>
+          page.map((post) => (post.id === postId ? mutate(post) : post))
+        ),
+      };
+    }
+  );
+
+  return snapshot;
+};
+
+/**
+ * Remove `postId` from every post-list cache. Returns a snapshot for rollback.
+ */
+export const optimisticallyRemovePost = (
+  queryClient: QueryClient,
+  postId: string
+): PostListCacheSnapshot => {
+  const snapshot = queryClient.getQueriesData({
+    queryKey: queryKeys.posts.all,
+  });
+
+  queryClient.setQueriesData<PostListData>(
+    { queryKey: queryKeys.posts.all },
+    (oldData) => {
+      if (!isPostListData(oldData)) return oldData;
+      return {
+        ...oldData,
+        pages: oldData.pages.map((page) =>
+          page.filter((post) => post.id !== postId)
+        ),
+      };
+    }
+  );
+
+  return snapshot;
+};
+
+/** Restore caches captured by an optimistic helper after a failed mutation. */
+export const restorePostListCaches = (
+  queryClient: QueryClient,
+  snapshot: PostListCacheSnapshot | undefined
+) => {
+  if (!snapshot) return;
+  for (const [key, data] of snapshot) {
+    queryClient.setQueryData(key, data);
+  }
+};
 
 interface CreatePostOutput {
   data: Post;
@@ -122,7 +208,9 @@ export const useDeletePost = () => {
 
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_data, postId) => {
+      // Remove the deleted post from every post-list cache, then refresh.
+      optimisticallyRemovePost(queryClient, postId);
       queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
     },
   });

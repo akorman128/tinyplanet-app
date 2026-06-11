@@ -9,6 +9,7 @@ import { PostForm, postSchema, PostFormData } from "@/components/PostForm";
 import { useCreatePost } from "@/hooks/usePosts";
 import { PostVisibility } from "@/types/post";
 import { useListSelectionStore } from "@/stores/listSelectionStore";
+import { logger } from "@/utils/logger";
 
 export default function CreatePostScreen() {
   const router = useRouter();
@@ -36,7 +37,7 @@ export default function CreatePostScreen() {
       });
       router.back();
     } catch (err) {
-      console.error("Error creating post:", err);
+      logger.error("Error creating post:", err);
       Alert.alert("Error", "Failed to create post. Please try again.");
     }
   };

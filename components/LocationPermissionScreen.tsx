@@ -5,6 +5,7 @@ import * as Location from "expo-location";
 
 import { Button, Heading, Body } from "@/design-system";
 import { useLocation } from "@/hooks/useLocation";
+import { logger } from "@/utils/logger";
 
 type LocationPermissionContext = "signup" | "app-resume";
 
@@ -47,7 +48,7 @@ export function LocationPermissionScreen({
         }
       } catch (err) {
         // Error will be captured in the error state
-        console.error("Error getting location:", err);
+        logger.error("Error getting location:", err);
       }
     })();
   }, [getCurrentLocation, onSuccess]);
@@ -60,7 +61,7 @@ export function LocationPermissionScreen({
         onSuccess(coords);
       }
     } catch (err) {
-      console.error("Error retrying location:", err);
+      logger.error("Error retrying location:", err);
     }
   };
 

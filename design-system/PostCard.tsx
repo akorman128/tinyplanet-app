@@ -12,6 +12,7 @@ import { useSavePost, useUnsavePost } from "@/hooks/useSavedPosts";
 import { useDeletePost } from "@/hooks/usePosts";
 import { useSupabase } from "@/hooks/useSupabase";
 import { formatTimeAgo, hapticLight } from "@/utils";
+import { logger } from "@/utils/logger";
 
 interface PostCardProps {
   post: PostWithAuthor;
@@ -57,7 +58,7 @@ export function PostCard({
         await likePost.mutateAsync(post.id);
       }
     } catch (err) {
-      console.error("Error toggling like:", err);
+      logger.error("Error toggling like:", err);
     }
   };
 
@@ -79,7 +80,7 @@ export function PostCard({
         await savePost.mutateAsync(post.id);
       }
     } catch (err) {
-      console.error("Error toggling save:", err);
+      logger.error("Error toggling save:", err);
       // Revert optimistic update on error
       onSave(post.id, {
         saved_by_user: wasSaved,
@@ -128,7 +129,7 @@ export function PostCard({
                     await deletePostMutation.mutateAsync(post.id);
                     onDelete(post.id);
                   } catch (err) {
-                    console.error("Error deleting post:", err);
+                    logger.error("Error deleting post:", err);
                     Alert.alert(
                       "Error",
                       "Failed to delete post. Please try again."

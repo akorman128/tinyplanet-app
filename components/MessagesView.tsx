@@ -10,6 +10,7 @@ import {
 import { ChannelListItem } from "../design-system/ChannelListItem";
 import { LoadingState, ErrorState, EmptyState } from "@/design-system";
 import { colors } from "@/design-system/colors";
+import { logger } from "@/utils/logger";
 
 export function MessagesView() {
   const { session } = useSupabase();
@@ -45,7 +46,7 @@ export function MessagesView() {
       try {
         await markChannelAsRead.mutateAsync({ friendId });
       } catch (err) {
-        console.error("Error marking channel as read:", err);
+        logger.error("Error marking channel as read:", err);
         // Continue navigation even if marking as read fails
       }
       router.push(`/chat/${friendId}`);

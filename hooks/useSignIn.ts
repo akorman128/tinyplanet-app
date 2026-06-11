@@ -4,6 +4,7 @@ import { useSupabase } from "./useSupabase";
 import { useProfileStore } from "@/stores/profileStore";
 import { fetchProfile } from "./useProfile";
 import { useLocation } from "./useLocation";
+import { logger } from "@/utils/logger";
 
 // --- Mutation hooks ---
 
@@ -45,7 +46,7 @@ export const useVerifySignInOtp = () => {
       try {
         await updateLocationInDatabase(false, profile);
       } catch (error) {
-        console.error("Failed to update location on sign-in:", error);
+        logger.error("Failed to update location on sign-in:", error);
       }
     },
   });
@@ -70,7 +71,7 @@ export const useSignInWithPassword = () => {
       try {
         await updateLocationInDatabase(false, user);
       } catch (error) {
-        console.error("Failed to update location on sign-in:", error);
+        logger.error("Failed to update location on sign-in:", error);
       }
     },
   });

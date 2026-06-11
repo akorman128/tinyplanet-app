@@ -6,6 +6,7 @@ import { useProfileStore } from "@/stores/profileStore";
 import { useLocationStore, LocationCoordinates } from "@/stores/locationStore";
 import { Profile } from "@/types/profile";
 import { applyLocationNoise } from "@/utils/locationNoise";
+import { logger } from "@/utils/logger";
 
 /**
  * Calculate distance between two coordinates using Haversine formula
@@ -91,7 +92,7 @@ export const useLocation = (): UseLocationReturn => {
 
       // Only enforce for returning users (hasBeenGranted = true)
       if (hasBeenGranted && status !== Location.PermissionStatus.GRANTED) {
-        console.log(
+        logger.log(
           `Location permission revoked (status: ${status}) - triggering blocking screen`
         );
         requirePermission();
@@ -130,7 +131,7 @@ export const useLocation = (): UseLocationReturn => {
       markPermissionGranted();
       return true;
     } catch (err) {
-      console.error("Error requesting location permission:", err);
+      logger.error("Error requesting location permission:", err);
       setError("Failed to request location permission");
       return false;
     } finally {
@@ -172,7 +173,7 @@ export const useLocation = (): UseLocationReturn => {
         setLocation(coords);
         return coords;
       } catch (err) {
-        console.error("Error getting current location:", err);
+        logger.error("Error getting current location:", err);
         setError("Failed to get current location");
         return { latitude: 0, longitude: 0 };
       } finally {
@@ -200,7 +201,7 @@ export const useLocation = (): UseLocationReturn => {
       const { status } = await Location.getForegroundPermissionsAsync();
       setPermissionStatusWithEnforcement(status);
     } catch (err) {
-      console.error("Error checking permission status:", err);
+      logger.error("Error checking permission status:", err);
     }
   }, [setPermissionStatusWithEnforcement]);
 
@@ -217,7 +218,7 @@ export const useLocation = (): UseLocationReturn => {
       const currentProfile = profile || profileState;
 
       if (!currentProfile) {
-        console.error("No profile loaded, skipping location update");
+        logger.error("No profile loaded, skipping location update");
         return;
       }
 
@@ -227,7 +228,7 @@ export const useLocation = (): UseLocationReturn => {
 
         // Check if location was successfully retrieved
         if (coords.latitude === 0 && coords.longitude === 0) {
-          console.error(
+          logger.error(
             "Location permission not granted, skipping location update"
           );
           return;
@@ -239,13 +240,13 @@ export const useLocation = (): UseLocationReturn => {
 
           // Skip update if moved less than 100 meters
           if (distance < 100) {
-            console.log(
+            logger.log(
               `Skipping DB update - only moved ${distance.toFixed(0)}m (threshold: 100m)`
             );
             return;
           }
 
-          console.log(
+          logger.log(
             `Updating location - moved ${distance.toFixed(0)}m from last update`
           );
         }
@@ -268,10 +269,7 @@ export const useLocation = (): UseLocationReturn => {
           .single();
 
         if (error) {
-          console.error(
-            "Failed to update location in database:",
-            error.message
-          );
+          logger.error("Failed to update location in database:", error.message);
           return;
         }
 
@@ -288,9 +286,9 @@ export const useLocation = (): UseLocationReturn => {
           setProfileState(enrichedProfile);
         }
 
-        console.log("Location successfully updated in database");
+        logger.log("Location successfully updated in database");
       } catch (err) {
-        console.error("Error updating location in database:", err);
+        logger.error("Error updating location in database:", err);
       }
     },
     [

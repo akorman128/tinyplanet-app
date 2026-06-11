@@ -19,10 +19,16 @@ import { initializeMapbox } from "@/utils/mapboxConfig";
 import { Button } from "@/design-system/Button";
 import { SectionTitle, Body, ScreenshotWarningModal } from "@/design-system";
 import { useScreenshotDetection } from "@/hooks/useScreenshotDetection";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { initMonitoring } from "@/lib/monitoring";
 import "../global.css";
+import { logger } from "@/utils/logger";
 
 // Initialize Mapbox once at app startup
 initializeMapbox();
+
+// Initialize crash/error reporting once at app startup
+initMonitoring();
 
 // Configure foreground notification behavior (must be at module level)
 Notifications.setNotificationHandler({
@@ -55,13 +61,15 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   return (
-    <SupabaseProvider>
-      <QueryProvider>
-        <LocationPermissionProvider>
-          <RootNavigator />
-        </LocationPermissionProvider>
-      </QueryProvider>
-    </SupabaseProvider>
+    <ErrorBoundary>
+      <SupabaseProvider>
+        <QueryProvider>
+          <LocationPermissionProvider>
+            <RootNavigator />
+          </LocationPermissionProvider>
+        </QueryProvider>
+      </SupabaseProvider>
+    </ErrorBoundary>
   );
 }
 
@@ -95,7 +103,7 @@ function RootNavigator() {
         (profileState.latitude === undefined ||
           profileState.longitude === undefined)
       ) {
-        console.log(
+        logger.log(
           "Profile loaded from cache but missing location - re-fetching"
         );
         setLoading(true);
@@ -107,14 +115,14 @@ function RootNavigator() {
             profileState?.id ?? null
           );
           setProfileState(freshProfile);
-          console.log("Profile location refreshed successfully");
+          logger.log("Profile location refreshed successfully");
         } catch (error) {
           const profileError =
             error instanceof Error
               ? error
               : new Error("Failed to refresh profile");
           setProfileError(profileError);
-          console.error("Failed to refresh profile:", profileError);
+          logger.error("Failed to refresh profile:", profileError);
         }
 
         return;
@@ -122,20 +130,20 @@ function RootNavigator() {
 
       // If no profile exists, fetch from database
       if (!profileState) {
-        console.log("Session exists but no profile - fetching from database");
+        logger.log("Session exists but no profile - fetching from database");
         setLoading(true);
 
         try {
           const profile = await fetchProfile(supabase, session.user.id, null);
           setProfileState(profile);
-          console.log("Profile loaded successfully:", profile.id);
+          logger.log("Profile loaded successfully:", profile.id);
         } catch (error) {
           const profileError =
             error instanceof Error
               ? error
               : new Error("Failed to load profile");
           setProfileError(profileError);
-          console.error("Failed to load profile:", profileError);
+          logger.error("Failed to load profile:", profileError);
         }
       }
     };
@@ -201,7 +209,7 @@ function RootNavigator() {
       <LocationPermissionScreen
         context="app-resume"
         onSuccess={(coords) => {
-          console.log("Location permission re-granted:", coords);
+          logger.log("Location permission re-granted:", coords);
           clearPermissionRequirement();
         }}
       />

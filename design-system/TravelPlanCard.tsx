@@ -11,6 +11,7 @@ import { useSavePost, useUnsavePost } from "@/hooks/useSavedPosts";
 import { useDeletePost } from "@/hooks/usePosts";
 import { useSupabase } from "@/hooks/useSupabase";
 import { formatTimeAgo, hapticLight } from "@/utils";
+import { logger } from "@/utils/logger";
 
 interface TravelPlanCardProps {
   post: PostWithAuthor;
@@ -60,7 +61,7 @@ export function TravelPlanCard({
         await likePost.mutateAsync(post.id);
       }
     } catch (err) {
-      console.error("Error toggling like:", err);
+      logger.error("Error toggling like:", err);
       // Revert optimistic update on error
       onLike(post.id, {
         liked_by_user: wasLiked,
@@ -87,7 +88,7 @@ export function TravelPlanCard({
         await savePost.mutateAsync(post.id);
       }
     } catch (err) {
-      console.error("Error toggling save:", err);
+      logger.error("Error toggling save:", err);
       // Revert optimistic update on error
       onSave(post.id, {
         saved_by_user: wasSaved,
@@ -136,7 +137,7 @@ export function TravelPlanCard({
                     await deletePostMutation.mutateAsync(post.id);
                     onDelete(post.id);
                   } catch (err) {
-                    console.error("Error deleting travel plan:", err);
+                    logger.error("Error deleting travel plan:", err);
                     Alert.alert(
                       "Error",
                       "Failed to delete travel plan. Please try again."

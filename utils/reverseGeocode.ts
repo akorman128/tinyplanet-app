@@ -4,6 +4,7 @@
  */
 
 import { geocodeCache } from "./geocodeCache";
+import { logger } from "@/utils/logger";
 
 const MAPBOX_ACCESS_TOKEN = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
@@ -38,7 +39,7 @@ const fetchGeocodeData = async (
   latitude: number
 ): Promise<ReverseGeocodeResult> => {
   const startTime = Date.now();
-  console.log(`[Geocode] Starting fetch for (${longitude}, ${latitude})`);
+  logger.log(`[Geocode] Starting fetch for (${longitude}, ${latitude})`);
 
   if (!MAPBOX_ACCESS_TOKEN) {
     throw new Error("Mapbox access token not configured");
@@ -49,7 +50,7 @@ const fetchGeocodeData = async (
   const fetchStartTime = Date.now();
   const response = await fetch(url);
   const fetchDuration = Date.now() - fetchStartTime;
-  console.log(`[Geocode] Fetch completed in ${fetchDuration}ms`);
+  logger.log(`[Geocode] Fetch completed in ${fetchDuration}ms`);
 
   if (!response.ok) {
     throw new Error(`Geocoding API error: ${response.statusText}`);
@@ -58,11 +59,11 @@ const fetchGeocodeData = async (
   const parseStartTime = Date.now();
   const data = await response.json();
   const parseDuration = Date.now() - parseStartTime;
-  console.log(`[Geocode] JSON parsing completed in ${parseDuration}ms`);
+  logger.log(`[Geocode] JSON parsing completed in ${parseDuration}ms`);
 
   if (!data.features || data.features.length === 0) {
     const totalDuration = Date.now() - startTime;
-    console.log(
+    logger.log(
       `[Geocode] Total duration: ${totalDuration}ms (no features found)`
     );
     return {
@@ -95,7 +96,7 @@ const fetchGeocodeData = async (
       : `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
 
   const totalDuration = Date.now() - startTime;
-  console.log(
+  logger.log(
     `[Geocode] Total duration: ${totalDuration}ms - Result: ${formattedAddress}`
   );
 
@@ -126,7 +127,7 @@ export const reverseGeocode = async (
   const cached = geocodeCache.get(longitude, latitude);
 
   if (cached) {
-    console.log(
+    logger.log(
       `[Geocode] Cache HIT for (${longitude}, ${latitude}) - ${cached.isStale ? "STALE" : "FRESH"}`
     );
 
@@ -137,25 +138,25 @@ export const reverseGeocode = async (
 
     // If stale, fetch fresh data in background
     if (cached.isStale && onRevalidate) {
-      console.log(`[Geocode] Revalidating stale cache in background`);
+      logger.log(`[Geocode] Revalidating stale cache in background`);
       fetchGeocodeData(longitude, latitude)
         .then((freshResult) => {
           geocodeCache.set(longitude, latitude, freshResult.formattedAddress);
           onRevalidate(freshResult);
         })
         .catch((error) => {
-          console.error("[Geocode] Background revalidation error:", error);
+          logger.error("[Geocode] Background revalidation error:", error);
         });
     }
 
     const duration = Date.now() - reverseGeocodeStartTime;
-    console.log(
+    logger.log(
       `[Geocode] reverseGeocode completed in ${duration}ms (from cache)`
     );
     return cachedResult;
   }
 
-  console.log(
+  logger.log(
     `[Geocode] Cache MISS for (${longitude}, ${latitude}) - fetching from API`
   );
 
@@ -164,12 +165,12 @@ export const reverseGeocode = async (
     const result = await fetchGeocodeData(longitude, latitude);
     geocodeCache.set(longitude, latitude, result.formattedAddress);
     const duration = Date.now() - reverseGeocodeStartTime;
-    console.log(
+    logger.log(
       `[Geocode] reverseGeocode completed in ${duration}ms (from API)`
     );
     return result;
   } catch (error) {
-    console.error("[Geocode] Reverse geocoding error:", error);
+    logger.error("[Geocode] Reverse geocoding error:", error);
     // Fallback to coordinates
     return {
       formattedAddress: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,

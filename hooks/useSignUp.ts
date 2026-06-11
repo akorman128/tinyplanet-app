@@ -6,6 +6,7 @@ import { useCreateProfile } from "./useProfile";
 import { fetchVibes, useUpdateVibe } from "./useVibe";
 import { useRedeemInviteCode } from "./useInviteCodes";
 import { useCreateFriend } from "./useFriends";
+import { logger } from "@/utils/logger";
 
 // --- Mutation hooks ---
 
@@ -82,7 +83,7 @@ export const useVerifyOtpAndCreateProfile = () => {
           invited_by: signupData.inviteCode.inviter_id,
         });
       } catch (error) {
-        console.error("Failed to create profile:", error);
+        logger.error("Failed to create profile:", error);
         throw error;
       }
 
@@ -97,7 +98,7 @@ export const useVerifyOtpAndCreateProfile = () => {
           });
         }
       } catch (error) {
-        console.error("Failed to link vibes:", error);
+        logger.error("Failed to link vibes:", error);
       }
 
       try {
@@ -106,13 +107,13 @@ export const useVerifyOtpAndCreateProfile = () => {
           targetUserId: signupData.inviteCode.inviter_id,
         });
       } catch (error) {
-        console.error("Failed to create friend relationship:", error);
+        logger.error("Failed to create friend relationship:", error);
       }
 
       try {
         await redeemInviteCode({ code: signupData.inviteCode.code });
       } catch (error) {
-        console.error("Failed to redeem invite code:", error);
+        logger.error("Failed to redeem invite code:", error);
       }
     },
   });

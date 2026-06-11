@@ -20,6 +20,7 @@ import {
 import { useProfileStore } from "@/stores/profileStore";
 import { useUpdateProfile } from "@/hooks/useProfile";
 import { parsePostGISPoint } from "@/utils/postgis";
+import { logger } from "@/utils/logger";
 
 // Zod schema for profile edit validation
 const editProfileSchema = z.object({
@@ -116,7 +117,7 @@ export default function EditProfileScreen() {
         },
       ]);
     } catch (error) {
-      console.error("Error updating profile:", error);
+      logger.error("Error updating profile:", error);
       Alert.alert(
         "Error",
         error instanceof Error ? error.message : "Failed to update profile"

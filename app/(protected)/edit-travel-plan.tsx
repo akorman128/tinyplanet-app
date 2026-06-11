@@ -20,6 +20,7 @@ import {
   useGetTravelPlanByPostId,
 } from "@/hooks/useTravelPlan";
 import { PostVisibility } from "@/types/post";
+import { logger } from "@/utils/logger";
 
 export default function EditTravelPlanScreen() {
   const router = useRouter();
@@ -89,7 +90,7 @@ export default function EditTravelPlanScreen() {
       // Navigate back after successful update
       router.back();
     } catch (err) {
-      console.error("Error updating travel plan:", err);
+      logger.error("Error updating travel plan:", err);
       Alert.alert("Error", "Failed to update travel plan. Please try again.");
     }
   };

@@ -73,7 +73,9 @@ describe("useCreateIntro", () => {
         });
       })
     ).rejects.toEqual(
-      expect.objectContaining({ message: "You must be friends with both users" })
+      expect.objectContaining({
+        message: "You must be friends with both users",
+      })
     );
   });
 });

@@ -3,6 +3,7 @@ import { View } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { UserPostsSection } from "@/components/UserPostsSection";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
+import { logger } from "@/utils/logger";
 
 export default function UserPostsScreen() {
   const { userId } = useLocalSearchParams<{ userId?: string }>();
@@ -19,7 +20,7 @@ export default function UserPostsScreen() {
           userId={displayUserId}
           onOpenComments={(postId, commentCount) => {
             // Could navigate to comments screen here if implemented
-            console.log("Open comments for post:", postId);
+            logger.log("Open comments for post:", postId);
           }}
         />
       </View>

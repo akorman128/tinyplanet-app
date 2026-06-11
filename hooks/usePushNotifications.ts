@@ -6,11 +6,13 @@ import { router } from "expo-router";
 
 import { useSupabase } from "@/hooks/useSupabase";
 import { EAS_PROJECT_ID } from "@/lib/constants";
+import { logger } from "@/utils/logger";
 
 export function usePushNotifications() {
   const { session, supabase } = useSupabase();
-  const responseListenerRef =
-    useRef<Notifications.EventSubscription | null>(null);
+  const responseListenerRef = useRef<Notifications.EventSubscription | null>(
+    null
+  );
 
   useEffect(() => {
     const userId = session?.user?.id;
@@ -21,10 +23,8 @@ export function usePushNotifications() {
     // Handle notification taps → navigate to chat
     responseListenerRef.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        const friendId =
-          response.notification.request.content.data?.friendId as
-            | string
-            | undefined;
+        const friendId = response.notification.request.content.data
+          ?.friendId as string | undefined;
         if (friendId) {
           router.push(`/chat/${friendId}`);
         }
@@ -53,13 +53,15 @@ export function usePushNotifications() {
       projectId: EAS_PROJECT_ID,
     });
 
-    const { error } = await supabase.from("push_tokens").upsert(
-      { user_id: userId, token: tokenData.data },
-      { onConflict: "user_id,token" }
-    );
+    const { error } = await supabase
+      .from("push_tokens")
+      .upsert(
+        { user_id: userId, token: tokenData.data },
+        { onConflict: "user_id,token" }
+      );
 
     if (error) {
-      console.error("Failed to save push token:", error.message);
+      logger.error("Failed to save push token:", error.message);
     }
 
     if (Platform.OS === "android") {

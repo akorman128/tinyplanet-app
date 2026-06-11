@@ -14,6 +14,7 @@ import {
 import { PostForm, postSchema, PostFormData } from "@/components/PostForm";
 import { useGetPost, useUpdatePost } from "@/hooks/usePosts";
 import { PostVisibility } from "@/types/post";
+import { logger } from "@/utils/logger";
 
 export default function EditPostScreen() {
   const router = useRouter();
@@ -55,7 +56,7 @@ export default function EditPostScreen() {
 
       router.back();
     } catch (err) {
-      console.error("Error updating post:", err);
+      logger.error("Error updating post:", err);
       Alert.alert("Error", "Failed to update post. Please try again.");
     }
   };

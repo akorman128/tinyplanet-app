@@ -3,6 +3,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSupabase } from "./useSupabase";
 import { useRequireProfile } from "./useRequireProfile";
 import { queryKeys } from "@/lib/queryKeys";
+import {
+  optimisticallyPatchPost,
+  restorePostListCaches,
+  type PostListCacheSnapshot,
+} from "./usePosts";
 
 export const useLikePost = () => {
   const { supabase } = useSupabase();
@@ -17,6 +22,17 @@ export const useLikePost = () => {
         comment_id: null,
       });
       if (error) throw error;
+    },
+    onMutate: (postId): { snapshot: PostListCacheSnapshot } => {
+      const snapshot = optimisticallyPatchPost(queryClient, postId, (post) => ({
+        ...post,
+        liked_by_user: true,
+        like_count: post.like_count + 1,
+      }));
+      return { snapshot };
+    },
+    onError: (_err, _postId, context) => {
+      restorePostListCaches(queryClient, context?.snapshot);
     },
     onSuccess: (_data, postId) => {
       queryClient.invalidateQueries({
@@ -40,6 +56,17 @@ export const useUnlikePost = () => {
         .eq("user_id", profile.id)
         .eq("post_id", postId);
       if (error) throw error;
+    },
+    onMutate: (postId): { snapshot: PostListCacheSnapshot } => {
+      const snapshot = optimisticallyPatchPost(queryClient, postId, (post) => ({
+        ...post,
+        liked_by_user: false,
+        like_count: Math.max(0, post.like_count - 1),
+      }));
+      return { snapshot };
+    },
+    onError: (_err, _postId, context) => {
+      restorePostListCaches(queryClient, context?.snapshot);
     },
     onSuccess: (_data, postId) => {
       queryClient.invalidateQueries({

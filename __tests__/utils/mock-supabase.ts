@@ -126,7 +126,9 @@ export function createMockSupabase() {
         const responses = storageResponses.get(bucket) ?? {
           upload: { data: { path: "test.jpg" }, error: null },
           getPublicUrl: {
-            data: { publicUrl: `https://test.supabase.co/storage/v1/object/public/${bucket}/test.jpg` },
+            data: {
+              publicUrl: `https://test.supabase.co/storage/v1/object/public/${bucket}/test.jpg`,
+            },
           },
         };
         return {

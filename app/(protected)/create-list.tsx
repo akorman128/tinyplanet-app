@@ -7,6 +7,7 @@ import { ListForm } from "@/components/ListForm";
 import { useCreateList } from "@/hooks/useLists";
 import { CreateListInput } from "@/types/list";
 import { getSharedNote, clearSharedNote } from "@/modules/SharedNoteModule";
+import { logger } from "@/utils/logger";
 
 export default function CreateListScreen() {
   const router = useRouter();
@@ -40,7 +41,7 @@ export default function CreateListScreen() {
 
     // Fire-and-forget: create the list in the background
     createList.mutateAsync(data).catch((error) => {
-      console.error("Failed to create list:", error);
+      logger.error("Failed to create list:", error);
       Alert.alert(
         "Error",
         error instanceof Error ? error.message : "Failed to create list"

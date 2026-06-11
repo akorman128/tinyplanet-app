@@ -1,4 +1,5 @@
 import Mapbox from "@rnmapbox/maps";
+import { logger } from "@/utils/logger";
 
 /**
  * Initialize Mapbox with access token.
@@ -8,7 +9,7 @@ export function initializeMapbox(): void {
   const MAPBOX_ACCESS_TOKEN = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
   if (!MAPBOX_ACCESS_TOKEN) {
-    console.warn(
+    logger.warn(
       "Mapbox access token not found. Set EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN in your .env file."
     );
     return;

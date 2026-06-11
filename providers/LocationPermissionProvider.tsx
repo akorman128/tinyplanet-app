@@ -2,6 +2,7 @@ import { ReactNode, useEffect } from "react";
 import { AppState } from "react-native";
 import { useLocation } from "@/hooks/useLocation";
 import { useLocationStore } from "@/stores/locationStore";
+import { logger } from "@/utils/logger";
 
 interface LocationPermissionProviderProps {
   children: ReactNode;
@@ -33,7 +34,7 @@ export const LocationPermissionProvider = ({
 
         // Refresh location if stale (>5 minutes old)
         if (locationStore.isLocationStale()) {
-          console.log("App became active - refreshing stale location");
+          logger.log("App became active - refreshing stale location");
 
           // Get fresh location (will be cached)
           await getCurrentLocation(true);

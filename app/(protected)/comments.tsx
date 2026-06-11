@@ -28,6 +28,7 @@ import { useLikeComment, useUnlikeComment } from "@/hooks/useLikes";
 import { useListSelectionStore } from "@/stores/listSelectionStore";
 import { useCommentCountStore } from "@/stores/commentCountStore";
 import { CommentWithAuthor } from "@/types/comment";
+import { logger } from "@/utils/logger";
 
 const commentSchema = z.object({
   body: z
@@ -159,7 +160,7 @@ export default function CommentsScreen() {
         );
       }
 
-      console.error("Error creating comment:", err);
+      logger.error("Error creating comment:", err);
       Alert.alert("Error", "Failed to post comment");
     } finally {
       setIsSubmitting(false);
@@ -200,7 +201,7 @@ export default function CommentsScreen() {
         }
       } catch (err) {
         setComments((prev) => updateCommentLike(prev));
-        console.error("Error toggling like:", err);
+        logger.error("Error toggling like:", err);
       }
     },
     [likeComment, unlikeComment]
