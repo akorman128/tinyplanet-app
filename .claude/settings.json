@@ -1,3 +1,9 @@
 {
-  "enabledPlugins": {}
+  "plansDirectory": ".claude/plans",
+  "enabledPlugins": {
+    "cloudflare@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "linear@claude-plugins-official": true,
+    "paper-desktop@paper": true
+  }
 }

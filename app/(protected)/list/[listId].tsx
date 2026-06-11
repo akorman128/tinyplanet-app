@@ -194,7 +194,13 @@ export default function ListDetailScreen() {
     <>
       <Stack.Screen
         options={{
-          title: "List",
+          title: "",
+          headerShadowVisible: false,
+          headerTransparent: true,
+          headerStyle: {
+            backgroundColor: "transparent",
+          },
+          headerTintColor: colors.black,
           headerRight:
             Platform.OS === "android" && isOwnList
               ? () => (

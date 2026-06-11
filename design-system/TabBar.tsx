@@ -23,17 +23,13 @@ export function TabBar({
   className = "",
 }: TabBarProps) {
   return (
-    <View
-      className={`flex-row bg-cream border-b border-[#f0f0f0] ${className}`}
-    >
+    <View className={`flex-row bg-cream  rounded-sm shadow-lg ${className}`}>
       {tabs.map((tab) => {
         const isActive = tab.id === activeTab;
         return (
           <TouchableOpacity
             key={tab.id}
-            className={`flex-1 py-4 items-center justify-center border-b-2 ${
-              isActive ? "border-purple-600" : "border-transparent"
-            }`}
+            className={`flex-1 py-4 items-center justify-center ${isActive ? "border-b" : ""}`}
             onPress={() => {
               hapticSelection();
               onTabChange(tab.id);
@@ -43,7 +39,7 @@ export function TabBar({
             <Text
               className="text-sm font-semibold"
               style={{
-                color: isActive ? colors.hex.purple600 : colors.hex.placeholder,
+                color: isActive ? colors.black : colors.hex.gray300,
               }}
             >
               {tab.label}

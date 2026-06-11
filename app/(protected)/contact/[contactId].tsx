@@ -129,7 +129,7 @@ export default function ContactDetailScreen() {
             {contact.phone && (
               <Pressable
                 onPress={handleCall}
-                className="flex-1 bg-purple-600 py-3 rounded-lg items-center justify-center"
+                className="flex-1 bg-black py-3 rounded-lg items-center justify-center"
               >
                 <Text className="text-white font-semibold">Call</Text>
               </Pressable>
@@ -137,9 +137,9 @@ export default function ContactDetailScreen() {
             {contact.email && (
               <Pressable
                 onPress={handleEmail}
-                className="flex-1 bg-purple-100 py-3 rounded-lg items-center justify-center"
+                className="flex-1 bg-gray-300 py-3 rounded-lg items-center justify-center"
               >
-                <Text className="text-purple-600 font-semibold">Email</Text>
+                <Text className="text-black font-semibold">Email</Text>
               </Pressable>
             )}
           </View>

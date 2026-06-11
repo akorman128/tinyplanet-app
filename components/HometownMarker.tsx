@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Image, Pressable, StyleSheet, Platform } from "react-native";
+import { View, Image, Pressable, StyleSheet } from "react-native";
 import { MarkerView } from "@rnmapbox/maps";
 import { colors, Text } from "@/design-system";
 import { getInitials } from "@/utils";
@@ -38,15 +38,25 @@ export const HometownMarker = React.memo<HometownMarkerProps>(
               />
             ) : (
               <View style={styles.initialsCircle}>
-                <Text style={styles.initialsText}>{getInitials(name)}</Text>
+                <Text className="font-semibold" style={styles.initialsText}>
+                  {getInitials(name)}
+                </Text>
               </View>
             )}
           </View>
-          <Text style={styles.nameLabel} numberOfLines={1}>
+          <Text
+            className="font-thin"
+            style={styles.nameLabel}
+            numberOfLines={1}
+          >
             {name}
           </Text>
           {hometownName && (
-            <Text style={styles.hometownLabel} numberOfLines={1}>
+            <Text
+              className="font-thin"
+              style={styles.hometownLabel}
+              numberOfLines={1}
+            >
               {hometownName}
             </Text>
           )}
@@ -84,29 +94,23 @@ const styles = StyleSheet.create({
   },
   initialsText: {
     fontSize: 11,
-    fontWeight: "600",
     color: colors.hex.white,
-    fontFamily: Platform.OS === "ios" ? "HelveticaNeue" : undefined,
   },
   nameLabel: {
     marginTop: 2,
     fontSize: 10,
-    fontWeight: "100",
     color: colors.hex.white,
     textShadowColor: colors.hex.purple800,
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 4,
     textAlign: "center" as const,
-    fontFamily: Platform.OS === "ios" ? "HelveticaNeue" : undefined,
   },
   hometownLabel: {
     fontSize: 9,
-    fontWeight: "100",
     color: colors.hex.purple200,
     textShadowColor: colors.hex.purple800,
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 4,
     textAlign: "center" as const,
-    fontFamily: Platform.OS === "ios" ? "HelveticaNeue" : undefined,
   },
 });

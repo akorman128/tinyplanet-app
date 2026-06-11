@@ -55,7 +55,7 @@ export function ListsSection({ userId, isOwnProfile }: ListsSectionProps) {
         {isOwnProfile && (
           <Pressable
             onPress={() => router.push("/create-list")}
-            className="bg-purple-600 px-4 py-2 rounded-lg"
+            className="bg-black px-4 py-2 rounded-lg"
           >
             <Text className="text-white text-sm font-medium">Create List</Text>
           </Pressable>
@@ -69,7 +69,7 @@ export function ListsSection({ userId, isOwnProfile }: ListsSectionProps) {
           </Text>
           <Pressable
             onPress={() => router.push("/create-list")}
-            className="bg-purple-600 px-6 py-3 rounded-lg"
+            className="bg-black px-6 py-3 rounded-lg"
           >
             <Text className="text-white font-medium">
               Create Your First List

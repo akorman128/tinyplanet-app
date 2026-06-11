@@ -40,10 +40,9 @@ export function ChannelListItem({
         avatarUrl={channel.avatar_url || undefined}
         size="small"
       />
+
       <View className="flex-1 ml-3">
-        <Text
-          className={`text-base ${hasUnread ? "font-bold" : "font-normal"} text-purple-900`}
-        >
+        <Text className={`text-base font-bold text-black`}>
           {channel.full_name}
         </Text>
         <Text

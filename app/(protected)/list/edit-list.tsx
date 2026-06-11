@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, ScrollView, Alert, TextInput, Pressable } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   LoadingState,
   ErrorState,
@@ -22,8 +23,17 @@ const CATEGORY_OPTIONS: SelectOption<ListCategory>[] = [
   { value: "work", label: "Work" },
 ];
 
+const HEADER_OPTIONS = {
+  title: "",
+  headerTransparent: true,
+  headerShadowVisible: false,
+  headerStyle: { backgroundColor: "transparent" },
+  headerTintColor: colors.black,
+};
+
 export default function EditListScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { listId } = useLocalSearchParams<{ listId: string }>();
   const {
     data: listResult,
@@ -81,7 +91,7 @@ export default function EditListScreen() {
   if (loading) {
     return (
       <>
-        <Stack.Screen options={{ title: "Edit List" }} />
+        <Stack.Screen options={HEADER_OPTIONS} />
         <View className="flex-1 bg-cream">
           <LoadingState />
         </View>
@@ -92,7 +102,7 @@ export default function EditListScreen() {
   if (error || !list) {
     return (
       <>
-        <Stack.Screen options={{ title: "Edit List" }} />
+        <Stack.Screen options={HEADER_OPTIONS} />
         <View className="flex-1 bg-cream">
           <ErrorState message={error || "List not found"} />
         </View>
@@ -104,7 +114,7 @@ export default function EditListScreen() {
     <>
       <Stack.Screen
         options={{
-          title: "Edit List",
+          ...HEADER_OPTIONS,
           headerRight: () => (
             <Pressable
               onPress={handleSave}
@@ -124,7 +134,11 @@ export default function EditListScreen() {
       <View className="flex-1 bg-cream">
         <ScrollView
           className="flex-1"
-          contentContainerClassName="px-6 pt-6 pb-8"
+          contentContainerStyle={{
+            paddingHorizontal: 24,
+            paddingTop: insets.top + 64,
+            paddingBottom: 32,
+          }}
           keyboardShouldPersistTaps="handled"
         >
           <View className="mb-6">

@@ -35,14 +35,17 @@ export const colors = {
 
   // Special hex values (for React Native components that need hex)
   hex: {
-    // Primary colors - blue-purple palette
-    purple200: "#c7d2fe",
-    purple400: "#6057db",
-    purple500: "#564ec2",
+    // Primary colors - blue-purple palette (light → dark, brand at 600)
+    purple50: "#f7f6fe",
+    purple100: "#efedfe",
+    purple200: "#dedbfd",
+    purple300: "#c7c1fb",
+    purple400: "#a79ef8",
+    purple500: "#8b81f6",
     purple600: "#6b61f3", // Main brand color
-    purple700: "#5a52d5",
-    purple800: "#4a44b8",
-    purple900: "#3a369a",
+    purple700: "#5249c9",
+    purple800: "#3c359b",
+    purple900: "#29246e",
 
     // Neutral colors
     gray300: "#d1d5db", // gray-300

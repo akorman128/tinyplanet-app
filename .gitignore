@@ -48,3 +48,6 @@ android/
 
 # test env
 .env.test
+
+# Claude Code personal memory (plans are committed; memory stays local)
+.claude/memory/

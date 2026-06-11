@@ -1,9 +1,37 @@
-import { View } from "react-native";
+import { useEffect } from "react";
+import { View, Image } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated";
 import { router } from "expo-router";
-import { Button, Heading, Subheading, Caption, Text } from "@/design-system";
+import { Button, Heading, Subheading, Caption } from "@/design-system";
 
 export default function WelcomePage() {
+  const reducedMotion = useReducedMotion();
+  const float = useSharedValue(0);
+
+  useEffect(() => {
+    if (reducedMotion) {
+      float.value = 0;
+      return;
+    }
+    float.value = withRepeat(
+      withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.ease) }),
+      -1,
+      true
+    );
+  }, [float, reducedMotion]);
+
+  const floatStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: -10 * float.value }],
+  }));
+
   return (
     <KeyboardAwareScrollView
       className="flex-1 bg-cream"
@@ -16,11 +44,17 @@ export default function WelcomePage() {
         </Subheading>
       </View>
 
-      <View className="w-32 h-32 bg-purple-200 rounded-full items-center justify-center mb-16">
-        <Text className="text-6xl">🌍</Text>
+      <View className="mb-16">
+        <Animated.View style={floatStyle}>
+          <Image
+            source={require("../../assets/heart-planet.png")}
+            className="w-48 h-48"
+            resizeMode="contain"
+          />
+        </Animated.View>
       </View>
 
-      <View className="w-full gap-4">
+      <View className="w-full gap-2">
         <Button
           variant="primary"
           className="shadow-lg"
@@ -30,7 +64,7 @@ export default function WelcomePage() {
         </Button>
 
         <Button variant="secondary" onPress={() => router.push("/sign-in")}>
-          Sign In
+          Login
         </Button>
       </View>
 

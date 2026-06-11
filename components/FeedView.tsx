@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQueryClient, InfiniteData } from "@tanstack/react-query";
 import { useGetFeed } from "@/hooks/useFeed";
 import { PostCard } from "../design-system/PostCard";
@@ -21,6 +22,7 @@ const isTravelPlanPost = (post: PostWithAuthor): boolean => {
 
 export function FeedView() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const {
     data,
@@ -137,7 +139,7 @@ export function FeedView() {
       }}
       onEndReachedThreshold={0.5}
       ListFooterComponent={renderFooter}
-      contentContainerClassName="pb-20"
+      contentContainerStyle={{ paddingTop: insets.top, paddingBottom: 80 }}
     />
   );
 }

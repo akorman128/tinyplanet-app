@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { FlatList, RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSupabase } from "@/hooks/useSupabase";
 import {
   useGetMessageChannels,
@@ -15,6 +16,7 @@ import { logger } from "@/utils/logger";
 export function MessagesView() {
   const { session } = useSupabase();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const {
     data: channelsData,
     isPending: loading,
@@ -78,7 +80,7 @@ export function MessagesView() {
           tintColor={colors.hex.purple600}
         />
       }
-      contentContainerClassName="pb-20"
+      contentContainerStyle={{ paddingTop: insets.top, paddingBottom: 80 }}
     />
   );
 }

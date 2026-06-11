@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Pressable, StyleSheet, Platform } from "react-native";
+import { View, Pressable, StyleSheet } from "react-native";
 import { MarkerView } from "@rnmapbox/maps";
 import { colors, Text } from "@/design-system";
 
@@ -24,7 +24,11 @@ export const ListMarker = React.memo<ListMarkerProps>(
           <View style={styles.iconCircle}>
             <Text style={styles.emoji}>📋</Text>
           </View>
-          <Text style={styles.titleLabel} numberOfLines={1}>
+          <Text
+            className="font-thin"
+            style={styles.titleLabel}
+            numberOfLines={1}
+          >
             {title}
           </Text>
         </Pressable>
@@ -52,12 +56,10 @@ const styles = StyleSheet.create({
   titleLabel: {
     marginTop: 2,
     fontSize: 10,
-    fontWeight: "100",
     color: colors.hex.white,
     textShadowColor: colors.hex.purple800,
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 4,
     textAlign: "center" as const,
-    fontFamily: Platform.OS === "ios" ? "HelveticaNeue" : undefined,
   },
 });

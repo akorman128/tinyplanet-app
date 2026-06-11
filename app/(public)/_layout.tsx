@@ -12,7 +12,7 @@ export default function PublicLayout() {
       <Stack.Screen
         name="welcome"
         options={{
-          title: "Tiny Planet",
+          headerShown: false,
           headerTransparent: true,
         }}
       />

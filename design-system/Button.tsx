@@ -12,8 +12,8 @@ interface ButtonProps extends TouchableOpacityProps {
 }
 
 const variantStyles = {
-  primary: "bg-purple-600 active:bg-purple-700",
-  secondary: "bg-white border-2 border-purple-600 active:bg-gray-50",
+  primary: "bg-black active:bg-gray-800",
+  secondary: "bg-gray-300 active:bg-gray-400",
 };
 
 const disabledVariantStyles = {
@@ -23,7 +23,7 @@ const disabledVariantStyles = {
 
 const textStyles = {
   primary: "text-white",
-  secondary: "text-purple-600",
+  secondary: "text-black",
 };
 
 const disabledTextStyles = {
