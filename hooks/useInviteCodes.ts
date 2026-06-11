@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-query";
 
 import { useProfileStore } from "@/stores/profileStore";
+import { useRequireProfile } from "./useRequireProfile";
 import { useSupabase } from "./useSupabase";
 import { queryKeys } from "@/lib/queryKeys";
 import { InviteCode, InviteCodeStatus } from "../types/invite_code";
@@ -231,7 +232,7 @@ export const useGetInviteCodes = (
 
 export const useGetInviteCountThisMonth = (): UseQueryResult<number> => {
   const { supabase } = useSupabase();
-  const { profileState } = useProfileStore();
+  const profile = useRequireProfile();
 
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -248,13 +249,12 @@ export const useGetInviteCountThisMonth = (): UseQueryResult<number> => {
     queryKey: queryKeys.inviteCodes.monthlyCount,
     queryFn: async () => {
       const { data } = await fetchInviteCodes(supabase, {
-        userId: profileState!.id,
+        userId: profile.id,
         startDate: startOfMonth,
         endDate: endOfMonth,
       });
       return data.length;
     },
-    enabled: !!profileState,
   });
 };
 
