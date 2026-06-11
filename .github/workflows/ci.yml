@@ -25,10 +25,34 @@ jobs:
       - name: Lint
         run: npx eslint .
 
-      # NOTE: The RPC tests under __tests__/rpc/ require a live Supabase
-      # (SUPABASE_URL / SUPABASE_ANON_KEY / SUPABASE_SERVICE_ROLE_KEY). To run
-      # them in CI, add a `supabase start` service step and export those env
-      # vars before this step. Without them, these tests skip themselves (see
-      # the skip guard in the test files), so the default `vitest run` is safe.
-      - name: Test
-        run: npx vitest run
+      # Blocking gate: the mock-based unit suites (no external services).
+      # The __tests__/rpc/ suites are intentionally excluded here because they
+      # construct a real Supabase client at import time and require a live DB
+      # (SUPABASE_URL / SUPABASE_ANON_KEY / SUPABASE_SERVICE_ROLE_KEY) — see the
+      # optional rpc-tests job below to run them against a local Supabase.
+      - name: Test (unit / mocked)
+        run: npx vitest run __tests__/hooks __tests__/utils
+
+  # Optional DB-backed integration tests (RPC + the negative-authz suite).
+  # Disabled by default: enable by removing `if: false` once a local Supabase
+  # is wired up. Requires Docker (available on ubuntu-latest) and the project's
+  # migrations to apply cleanly.
+  rpc-tests:
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - name: Start local Supabase
+        run: npx supabase start
+      - name: Export Supabase env
+        run: |
+          echo "SUPABASE_URL=$(npx supabase status -o env | grep API_URL | cut -d= -f2)" >> "$GITHUB_ENV"
+          echo "SUPABASE_ANON_KEY=$(npx supabase status -o env | grep ANON_KEY | cut -d= -f2)" >> "$GITHUB_ENV"
+          echo "SUPABASE_SERVICE_ROLE_KEY=$(npx supabase status -o env | grep SERVICE_ROLE_KEY | cut -d= -f2)" >> "$GITHUB_ENV"
+      - name: RPC + authz tests
+        run: npx vitest run __tests__/rpc
