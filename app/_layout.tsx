@@ -19,10 +19,15 @@ import { initializeMapbox } from "@/utils/mapboxConfig";
 import { Button } from "@/design-system/Button";
 import { SectionTitle, Body, ScreenshotWarningModal } from "@/design-system";
 import { useScreenshotDetection } from "@/hooks/useScreenshotDetection";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { initMonitoring } from "@/lib/monitoring";
 import "../global.css";
 
 // Initialize Mapbox once at app startup
 initializeMapbox();
+
+// Initialize crash/error reporting once at app startup
+initMonitoring();
 
 // Configure foreground notification behavior (must be at module level)
 Notifications.setNotificationHandler({
@@ -55,13 +60,15 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   return (
-    <SupabaseProvider>
-      <QueryProvider>
-        <LocationPermissionProvider>
-          <RootNavigator />
-        </LocationPermissionProvider>
-      </QueryProvider>
-    </SupabaseProvider>
+    <ErrorBoundary>
+      <SupabaseProvider>
+        <QueryProvider>
+          <LocationPermissionProvider>
+            <RootNavigator />
+          </LocationPermissionProvider>
+        </QueryProvider>
+      </SupabaseProvider>
+    </ErrorBoundary>
   );
 }
 
