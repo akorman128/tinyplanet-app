@@ -1,22 +1,13 @@
 import React, { useState } from "react";
-import {
-  View,
-  Pressable,
-  TouchableOpacity,
-  Platform,
-  Alert,
-} from "react-native";
+import { View, Pressable, Platform, Alert } from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { colors, Input, Button, Body, TabBar, Text } from "@/design-system";
-import {
-  LocationSearchInput,
-  LocationSearchValue,
-} from "@/components/LocationSearchInput";
+import { colors, Input, Button, TabBar, Text } from "@/design-system";
+import { LocationSearchInput } from "@/components/LocationSearchInput";
 import { useProfileStore } from "@/stores/profileStore";
 import { useUpdateProfile } from "@/hooks/useProfile";
 import { parsePostGISPoint } from "@/utils/postgis";
@@ -41,7 +32,6 @@ const editProfileSchema = z.object({
     .nullable()
     .refine((val) => val !== null, { message: "Hometown is required" }),
   website: z.string().trim().optional(),
-  avatarUrl: z.string().trim().optional(),
   instagram: z.string().trim().optional(),
   x: z.string().trim().optional(),
   letterboxd: z.string().trim().optional(),
@@ -82,7 +72,6 @@ export default function EditProfileScreen() {
         return null;
       })(),
       website: profileState?.website || "",
-      avatarUrl: profileState?.avatar_url || "",
       instagram: profileState?.instagram || "",
       x: profileState?.x || "",
       letterboxd: profileState?.letterboxd || "",
@@ -101,7 +90,6 @@ export default function EditProfileScreen() {
           hometown: hometown.name,
           hometown_location: `POINT(${hometown.longitude} ${hometown.latitude})`,
           website: data.website?.trim() || "",
-          avatar_url: data.avatarUrl?.trim() || "",
           instagram: data.instagram?.trim() || "",
           x: data.x?.trim() || "",
           letterboxd: data.letterboxd?.trim() || "",
@@ -155,7 +143,27 @@ export default function EditProfileScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: "Edit Profile" }} />
+      <Stack.Screen
+        options={{
+          title: "Edit Profile",
+          headerRight: () => (
+            <Pressable
+              onPress={handleSubmit(onSubmit)}
+              disabled={!isValid || updateProfile.isPending}
+              className={
+                !isValid || updateProfile.isPending ? "opacity-50" : ""
+              }
+            >
+              <Text
+                className="text-base font-semibold"
+                style={{ color: colors.hex.purple600 }}
+              >
+                {updateProfile.isPending ? "Saving..." : "Save"}
+              </Text>
+            </Pressable>
+          ),
+        }}
+      />
       <View className="flex-1 bg-cream">
         {/* Tabs */}
         <TabBar
@@ -201,37 +209,16 @@ export default function EditProfileScreen() {
                   name="birthday"
                   render={({ field: { value, onChange } }) => (
                     <>
-                      <View className="w-full">
-                        <Body className="text-sm font-semibold text-purple-900 mb-2">
-                          Birthday
-                        </Body>
-                        <TouchableOpacity
-                          onPress={() => setShowDatePicker(true)}
-                        >
-                          <View
-                            className={`py-4 px-4 rounded-xl border-2 bg-white ${
-                              errors.birthday
-                                ? "border-red-500"
-                                : "border-gray-300"
-                            }`}
-                          >
-                            <Text
-                              className={`text-base ${
-                                value ? "text-purple-900" : "text-gray-400"
-                              }`}
-                            >
-                              {value
-                                ? formatDate(value)
-                                : "Select your birthday"}
-                            </Text>
-                          </View>
-                        </TouchableOpacity>
-                        {errors.birthday && (
-                          <Text className="text-sm text-red-500 mt-1">
-                            {errors.birthday.message}
-                          </Text>
-                        )}
-                      </View>
+                      <Pressable onPress={() => setShowDatePicker(true)}>
+                        <Input
+                          label="Birthday"
+                          value={value ? formatDate(value) : ""}
+                          placeholder="Select your birthday"
+                          editable={false}
+                          pointerEvents="none"
+                          error={errors.birthday?.message}
+                        />
+                      </Pressable>
 
                       {showDatePicker && (
                         <View className="bg-white rounded-xl p-4 gap-4">
@@ -252,7 +239,7 @@ export default function EditProfileScreen() {
                               variant="secondary"
                               onPress={() => setShowDatePicker(false)}
                             >
-                              Save
+                              Done
                             </Button>
                           )}
                         </View>
@@ -272,26 +259,6 @@ export default function EditProfileScreen() {
                       value={value}
                       onChange={onChange}
                       error={errors.hometown?.message}
-                    />
-                  )}
-                />
-
-                {/* Avatar URL */}
-                <Controller
-                  control={control}
-                  name="avatarUrl"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <Input
-                      label="Avatar URL"
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      placeholder="https://example.com/avatar.jpg"
-                      autoCapitalize="none"
-                      autoComplete="url"
-                      textContentType="URL"
-                      keyboardType="url"
-                      error={errors.avatarUrl?.message}
                     />
                   )}
                 />
@@ -390,17 +357,6 @@ export default function EditProfileScreen() {
                 />
               </>
             )}
-
-            {/* Save Button */}
-            <View className="mt-3">
-              <Button
-                variant="primary"
-                onPress={handleSubmit(onSubmit)}
-                disabled={!isValid || updateProfile.isPending}
-              >
-                Save
-              </Button>
-            </View>
           </View>
         </KeyboardAwareScrollView>
       </View>
