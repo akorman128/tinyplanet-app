@@ -10,6 +10,7 @@ export default function TabsLayout() {
     >
       <NativeTabs.Trigger name="map">
         <NativeTabs.Trigger.Icon sf="globe" md="public" />
+        <NativeTabs.Trigger.Label hidden>Map</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="feed">
         <NativeTabs.Trigger.Icon
