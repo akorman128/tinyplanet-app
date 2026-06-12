@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     width: AVATAR_SIZE,
     height: AVATAR_SIZE,
     borderRadius: AVATAR_SIZE / 2,
-    backgroundColor: colors.hex.purple600,
+    backgroundColor: colors.black,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
