@@ -45,6 +45,10 @@ export function createMockSupabase() {
   const fromResponses = new Map<string, MockResponse>();
   const lastChains = new Map<string, ChainableMock>();
   const storageResponses = new Map<string, StorageMockResponse>();
+  const lastStorageChains = new Map<
+    string,
+    { upload: ReturnType<typeof vi.fn>; getPublicUrl: ReturnType<typeof vi.fn> }
+  >();
 
   const createChain = (resolvedValue: MockResponse): ChainableMock => {
     const chain: ChainableMock = {} as ChainableMock;
@@ -90,6 +94,10 @@ export function createMockSupabase() {
     getLastChain(table: string) {
       return lastChains.get(table);
     },
+    /** Get the last storage object created for a bucket, to assert upload args. */
+    getLastStorage(bucket: string) {
+      return lastStorageChains.get(bucket);
+    },
     rpc: vi.fn((fnName: string, _params?: Record<string, unknown>) => {
       const response = rpcResponses.get(fnName) ?? { data: null, error: null };
       return Promise.resolve(response);
@@ -123,6 +131,11 @@ export function createMockSupabase() {
     removeChannel: vi.fn(),
     storage: {
       from: vi.fn((bucket: string) => {
+        // Reuse one object per bucket so repeated storage.from(bucket) calls
+        // share stable mocks that tests can assert against.
+        const existing = lastStorageChains.get(bucket);
+        if (existing) return existing;
+
         const responses = storageResponses.get(bucket) ?? {
           upload: { data: { path: "test.jpg" }, error: null },
           getPublicUrl: {
@@ -131,10 +144,12 @@ export function createMockSupabase() {
             },
           },
         };
-        return {
+        const chain = {
           upload: vi.fn().mockResolvedValue(responses.upload),
           getPublicUrl: vi.fn().mockReturnValue(responses.getPublicUrl),
         };
+        lastStorageChains.set(bucket, chain);
+        return chain;
       }),
     },
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Image, Platform } from "react-native";
 import { Text } from "./Text";
 import { getInitials } from "@/utils";
@@ -43,6 +43,13 @@ export const Avatar = React.memo<AvatarProps>(
     const config = sizeConfig[size];
     const initials = getInitials(fullName);
     const [imageError, setImageError] = useState(false);
+
+    // Reset error state when the URL changes so a new avatar can load after a
+    // previous image failed. Bail out when already clear to avoid a wasted
+    // render on every mount/URL change (Avatar is rendered per map marker).
+    useEffect(() => {
+      setImageError((errored) => (errored ? false : errored));
+    }, [avatarUrl]);
 
     if (avatarUrl && !imageError) {
       return (
