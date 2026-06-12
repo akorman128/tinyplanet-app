@@ -80,3 +80,5 @@ export { ColorPicker } from "./ColorPicker";
 export type { ColorPickerProps } from "./ColorPicker";
 export { FontPreviewItem } from "./FontPreviewItem";
 export type { FontPreviewItemProps } from "./FontPreviewItem";
+export { VerticalToggle } from "./VerticalToggle";
+export type { VerticalToggleProps } from "./VerticalToggle";

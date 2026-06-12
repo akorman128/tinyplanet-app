@@ -1,69 +1,28 @@
 import React from "react";
 import { View, TouchableOpacity, Pressable, ScrollView } from "react-native";
-import Animated, {
-  FadeIn,
-  useAnimatedStyle,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { FadeIn } from "react-native-reanimated";
 import { useRouter } from "expo-router";
 import Svg, { Defs, LinearGradient, Stop, Rect } from "react-native-svg";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MapView } from "@/components/MapView";
-import { Avatar, Body, Caption, Icons, colors } from "@/design-system";
+import {
+  Avatar,
+  Body,
+  Caption,
+  Icons,
+  VerticalToggle,
+  colors,
+} from "@/design-system";
 import { useProfileStore } from "@/stores/profileStore";
-import { useMapStore } from "@/stores/mapStore";
+import { useMapStore, type MapFilter } from "@/stores/mapStore";
 
-// Vertical on/off toggle built from plain Views so the thumb stays centered
-// within its pill on every platform. A rotated native <Switch> cannot: its
-// intrinsic layout box differs per platform and is wider than the pill, so
-// flex-centering the rotated control leaves the thumb off-center.
-const TRACK_WIDTH = 24;
-const TRACK_HEIGHT = 48;
-const THUMB_SIZE = 18;
-const THUMB_GAP = 3;
-
-function VerticalToggle({
-  value,
-  onValueChange,
-}: {
-  value: boolean;
-  onValueChange: (next: boolean) => void;
-}) {
-  const thumbStyle = useAnimatedStyle(
-    () => ({
-      transform: [
-        {
-          translateY: withTiming(
-            value ? THUMB_GAP : TRACK_HEIGHT - THUMB_SIZE - THUMB_GAP,
-            { duration: 180 }
-          ),
-        },
-      ],
-    }),
-    [value]
-  );
-
-  return (
-    <Pressable
-      accessibilityRole="switch"
-      accessibilityState={{ checked: value }}
-      accessibilityLabel="Toggle connection lines"
-      onPress={() => onValueChange(!value)}
-      className="w-12 h-16 rounded-full bg-white/90 border border-gray-200 items-center justify-center"
-    >
-      <View
-        className={`items-center rounded-full ${value ? "bg-gray-800" : "bg-gray-300"}`}
-        style={{ width: TRACK_WIDTH, height: TRACK_HEIGHT }}
-      >
-        <Animated.View
-          className="bg-white rounded-full"
-          style={[{ width: THUMB_SIZE, height: THUMB_SIZE }, thumbStyle]}
-        />
-      </View>
-    </Pressable>
-  );
-}
+const MAP_FILTERS: readonly { key: MapFilter; label: string }[] = [
+  { key: "friends", label: "✨ Friends" },
+  { key: "travel_plans", label: "🚀 Travel Plans" },
+  { key: "hometown", label: "🏠 Hometowns" },
+  { key: "lists", label: "📋 Lists" },
+];
 
 export default function MapTab() {
   const router = useRouter();
@@ -145,28 +104,24 @@ export default function MapTab() {
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ gap: 8 }}
               >
-                {(["friends", "hometown", "lists"] as const).map((filter) => (
+                {MAP_FILTERS.map(({ key, label }) => (
                   <TouchableOpacity
-                    key={filter}
-                    className={`px-4 py-2 rounded-full shadow-lg ${
-                      mapFilter === filter
+                    key={key}
+                    className={`px-4 py-2 mb-1 rounded-full shadow-sm ${
+                      mapFilter === key
                         ? "bg-gray-800 border-gray-800"
                         : "bg-white/90 border-gray-200"
                     }`}
-                    onPress={() => setMapFilter(filter)}
+                    onPress={() => setMapFilter(key)}
                   >
                     <Caption
                       className={
-                        mapFilter === filter
+                        mapFilter === key
                           ? "font-semibold text-white"
                           : "font-medium text-gray-700"
                       }
                     >
-                      {filter === "friends"
-                        ? "✨ Friends"
-                        : filter === "hometown"
-                          ? "🏠 Hometowns"
-                          : "📋 Lists"}
+                      {label}
                     </Caption>
                   </TouchableOpacity>
                 ))}
@@ -184,11 +139,12 @@ export default function MapTab() {
           <VerticalToggle
             value={showConnectionLines}
             onValueChange={setShowConnectionLines}
+            accessibilityLabel="Toggle connection lines"
           />
 
           {/* Recenter on user location */}
           <TouchableOpacity
-            className="w-12 h-12 rounded-full bg-white/90 border border-gray-200 justify-center items-center"
+            className="w-12 h-12 rounded-full bg-white/90 border border-gray-200 shadow-sm justify-center items-center"
             onPress={requestRecenter}
             accessibilityLabel="Recenter on my location"
           >

@@ -194,8 +194,8 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
               />
             ))}
 
-          {/* Friends filter: Travel plan destination markers */}
-          {mapFilter === "friends" && travelPlanGeoJSON && (
+          {/* === Travel Plans filter: destination markers === */}
+          {mapFilter === "travel_plans" && travelPlanGeoJSON && (
             <TravelPlanMarker
               shape={travelPlanGeoJSON}
               onPress={handleMarkerPress}
