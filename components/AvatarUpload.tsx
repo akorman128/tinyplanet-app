@@ -47,11 +47,11 @@ export function AvatarUpload({ fullName, avatarUrl }: AvatarUploadProps) {
   return (
     <Pressable onPress={showOptions} disabled={isPending}>
       <Avatar fullName={fullName} avatarUrl={avatarUrl} size="large" />
-      <View className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-white items-center justify-center border-2 border-white">
+      <View className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-black items-center justify-center border-2 border-white">
         {isPending ? (
           <ActivityIndicator color="white" size="small" />
         ) : (
-          <Icons.edit size={14} color="black" />
+          <Icons.edit size={14} color="white" />
         )}
       </View>
     </Pressable>

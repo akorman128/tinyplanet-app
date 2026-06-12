@@ -90,7 +90,7 @@ export const Avatar = React.memo<AvatarProps>(
 
     return (
       <View
-        className={`${config.container} rounded-full bg-purple-600 justify-center items-center shadow-xl border-4 border-white`}
+        className={`${config.container} rounded-full bg-black justify-center items-center shadow-xl border-4 border-white`}
       >
         <Text className={`${config.fontSize} font-semibold text-white `}>
           {initials}
