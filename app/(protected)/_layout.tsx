@@ -1,3 +1,9 @@
+// global.css is imported here (a provider-free layout) rather than the root
+// app/_layout.tsx. Importing it in the provider-heavy root forces Metro's Fast
+// Refresh to re-execute the whole root module on every UI edit, which tore down
+// the Fabric view tree and blacked out the app until a full restart. Keeping it
+// in this minimal layout lets Fast Refresh patch surgically. See uniwind FAQ.
+import "../../global.css";
 import { Stack } from "expo-router";
 
 export default function ProtectedLayout() {
