@@ -1,16 +1,18 @@
-import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+  useEffect,
+} from "react";
 import { View, ActivityIndicator, LayoutChangeEvent } from "react-native";
-import Mapbox, {
-  Camera,
-  ShapeSource,
-  CircleLayer,
-  SymbolLayer,
-  LineLayer,
-  Images,
-} from "@rnmapbox/maps";
+import Mapbox, { Camera, Images } from "@rnmapbox/maps";
 import { MapMarker } from "./MapMarker";
 import { HometownMarker } from "./HometownMarker";
 import { ListMarker } from "./ListMarker";
+import { UserLocationMarker } from "./UserLocationMarker";
+import { ConnectionLines } from "./ConnectionLines";
+import { TravelPlanMarker } from "./TravelPlanMarker";
 import { colors, Text } from "@/design-system";
 import { useRouter } from "expo-router";
 import { useMapStore } from "@/stores/mapStore";
@@ -158,91 +160,23 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
           />
 
           {/* User location marker */}
-          {userLocation && (
-            <ShapeSource
-              id="user-location"
-              shape={{
-                type: "Feature",
-                geometry: {
-                  type: "Point",
-                  coordinates: userLocation,
-                },
-                properties: {
-                  name: "You",
-                },
-              }}
-            >
-              <CircleLayer
-                id="user-marker"
-                style={{
-                  circleRadius: 10,
-                  circleColor: "#53d769",
-                  circleOpacity: 0.85,
-                  circleStrokeWidth: 3,
-                  circleStrokeColor: colors.white,
-                }}
-              />
-              <CircleLayer
-                id="user-marker-center"
-                style={{
-                  circleRadius: 3,
-                  circleColor: colors.white,
-                }}
-              />
-              <SymbolLayer
-                id="user-label"
-                style={{
-                  textField: ["get", "name"],
-                  textSize: 12,
-                  textColor: colors.black,
-                  textHaloColor: colors.black,
-                  textHaloWidth: 0.5,
-                  textHaloBlur: 1,
-                  textOffset: [0, 1.5],
-                  textAnchor: "top",
-                  textFont: [
-                    "Roboto Medium",
-                    "Noto Sans Regular",
-                    "Arial Unicode MS Regular",
-                  ],
-                }}
-              />
-            </ShapeSource>
-          )}
+          {userLocation && <UserLocationMarker coordinate={userLocation} />}
 
           {/* === Friends filter: Connection lines User → Friends === */}
           {mapFilter === "friends" && userToFriendLinesGeoJSON && (
-            <ShapeSource
-              id="user-to-friend-lines"
+            <ConnectionLines
+              id="user-to-friend"
               shape={userToFriendLinesGeoJSON}
-            >
-              <LineLayer
-                id="user-to-friend-line-layer"
-                style={{
-                  lineColor: colors.black,
-                  lineWidth: 2,
-                  lineOpacity: 0.6,
-                }}
-              />
-            </ShapeSource>
+            />
           )}
 
           {/* Friends filter: Connection lines Friends → Mutuals */}
           {mapFilter === "friends" && friendToMutualLinesGeoJSON && (
-            <ShapeSource
-              id="friend-to-mutual-lines"
+            <ConnectionLines
+              id="friend-to-mutual"
               shape={friendToMutualLinesGeoJSON}
-            >
-              <LineLayer
-                id="friend-to-mutual-line-layer"
-                style={{
-                  lineColor: colors.black,
-                  lineWidth: 2,
-                  lineOpacity: 0.6,
-                  lineDasharray: [2, 2],
-                }}
-              />
-            </ShapeSource>
+              dashed
+            />
           )}
 
           {/* Friends filter: Friend and mutual avatar markers */}
@@ -262,51 +196,10 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
 
           {/* Friends filter: Travel plan destination markers */}
           {mapFilter === "friends" && travelPlanGeoJSON && (
-            <ShapeSource
-              id="travel-plan-destinations"
+            <TravelPlanMarker
               shape={travelPlanGeoJSON}
               onPress={handleMarkerPress}
-            >
-              <CircleLayer
-                id="travel-plan-marker-circles"
-                style={{
-                  circleRadius: 16,
-                  circleColor: colors.hex.white,
-                  circleOpacity: 0.9,
-                  circleStrokeWidth: 3,
-                  circleStrokeColor: colors.hex.white,
-                }}
-              />
-              <SymbolLayer
-                id="travel-plan-markers"
-                style={{
-                  iconImage: "rocketIcon",
-                  iconSize: 0.15,
-                  iconAllowOverlap: true,
-                  iconIgnorePlacement: true,
-                  iconOpacity: 1,
-                }}
-              />
-              <SymbolLayer
-                id="travel-plan-labels"
-                style={{
-                  textField: ["get", "title"],
-                  textSize: 12,
-                  textColor: colors.black,
-                  textHaloColor: colors.black,
-                  textHaloWidth: 8,
-                  textHaloBlur: 0,
-                  textOffset: [0, 2],
-                  textAnchor: "top",
-                  textFont: [
-                    "Roboto Medium",
-                    "Noto Sans Regular",
-                    "Arial Unicode MS Regular",
-                  ],
-                  textAllowOverlap: true,
-                }}
-              />
-            </ShapeSource>
+            />
           )}
 
           {/* === Hometown filter === */}
