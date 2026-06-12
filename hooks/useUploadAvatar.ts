@@ -43,12 +43,13 @@ export function useUploadAvatar() {
         { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
       );
 
-      // 3. Convert to blob
+      // 3. Read as ArrayBuffer — a RN Blob loses its bytes when supabase-js
+      // wraps it in FormData, producing an empty upload.
       const response = await fetch(manipulated.uri);
-      const blob = await response.blob();
+      const arrayBuffer = await response.arrayBuffer();
 
       // 4. Guard file size
-      if (blob.size > 2 * 1024 * 1024) {
+      if (arrayBuffer.byteLength > 2 * 1024 * 1024) {
         throw new Error("Image is too large. Please choose a smaller photo.");
       }
 
@@ -56,7 +57,7 @@ export function useUploadAvatar() {
       const filePath = `${userId}.jpg`;
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(filePath, blob, {
+        .upload(filePath, arrayBuffer, {
           contentType: "image/jpeg",
           upsert: true,
         });

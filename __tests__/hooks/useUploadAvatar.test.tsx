@@ -72,8 +72,7 @@ function setupHappyPath() {
   });
   mockManipulateAsync.mockResolvedValue({ uri: "file://resized.jpg" });
   mockFetch.mockResolvedValue({
-    blob: () =>
-      Promise.resolve(new Blob(["image-data"], { type: "image/jpeg" })),
+    arrayBuffer: () => Promise.resolve(new ArrayBuffer(10)),
   });
   global.fetch = mockFetch;
 
@@ -126,6 +125,13 @@ describe("useUploadAvatar", () => {
       { compress: 0.7, format: "jpeg" }
     );
     expect(mockSupabase.storage.from).toHaveBeenCalledWith("avatars");
+    // Must upload an ArrayBuffer, not a Blob — RN Blobs upload empty via supabase-js.
+    const avatarStorage = mockSupabase.getLastStorage("avatars");
+    expect(avatarStorage?.upload).toHaveBeenCalledWith(
+      "user-a.jpg",
+      expect.any(ArrayBuffer),
+      expect.objectContaining({ contentType: "image/jpeg", upsert: true })
+    );
     expect(mockUpdateProfileMutateAsync).toHaveBeenCalledWith({
       updateData: {
         avatar_url: expect.stringContaining(
@@ -180,7 +186,7 @@ describe("useUploadAvatar", () => {
     });
     mockManipulateAsync.mockResolvedValue({ uri: "file://resized.jpg" });
     mockFetch.mockResolvedValue({
-      blob: () => Promise.resolve(new Blob(["data"], { type: "image/jpeg" })),
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(10)),
     });
     global.fetch = mockFetch;
 
@@ -221,7 +227,7 @@ describe("useUploadAvatar", () => {
     });
     mockManipulateAsync.mockResolvedValue({ uri: "file://resized.jpg" });
     mockFetch.mockResolvedValue({
-      blob: () => Promise.resolve(new Blob(["data"], { type: "image/jpeg" })),
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(10)),
     });
     global.fetch = mockFetch;
 
