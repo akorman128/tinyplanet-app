@@ -192,7 +192,7 @@ export default function MapTab() {
             onPress={requestRecenter}
             accessibilityLabel="Recenter on my location"
           >
-            <Icons.pinOutline size={20} color={colors.hex.gray600} />
+            <Icons.profileActive size={20} color={colors.hex.gray600} />
           </TouchableOpacity>
         </View>
       </View>
