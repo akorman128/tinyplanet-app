@@ -148,7 +148,7 @@ export default function MapTab() {
                 {(["friends", "hometown", "lists"] as const).map((filter) => (
                   <TouchableOpacity
                     key={filter}
-                    className={`px-4 py-2 rounded-full border ${
+                    className={`px-4 py-2 rounded-full shadow-lg ${
                       mapFilter === filter
                         ? "bg-gray-800 border-gray-800"
                         : "bg-white/90 border-gray-200"
@@ -192,7 +192,7 @@ export default function MapTab() {
             onPress={requestRecenter}
             accessibilityLabel="Recenter on my location"
           >
-            <Icons.pinOutline size={20} color={colors.hex.gray600} />
+            <Icons.profileRegular size={20} color={colors.hex.gray600} />
           </TouchableOpacity>
         </View>
       </View>

@@ -54,6 +54,7 @@ export const colors = {
     gray900: "#111827", // gray-900 equivalent
     placeholder: "#9CA3AF", // gray-400 equivalent
     white: "#ffffff",
+    black: "#000000",
     cream: "#faf9f5",
 
     // Semantic colors

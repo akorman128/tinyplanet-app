@@ -56,10 +56,7 @@ const styles = StyleSheet.create({
   titleLabel: {
     marginTop: 2,
     fontSize: 10,
-    color: colors.hex.white,
-    textShadowColor: colors.hex.purple800,
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 4,
+    color: colors.hex.black,
     textAlign: "center" as const,
   },
 });
