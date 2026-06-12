@@ -69,7 +69,7 @@ export const Avatar = React.memo<AvatarProps>(
             width: config.pixels,
             height: config.pixels,
             borderRadius: config.pixels / 2,
-            backgroundColor: colors.black,
+            backgroundColor: colors.hex.gray600,
             justifyContent: "center",
             alignItems: "center",
           }}
@@ -79,7 +79,6 @@ export const Avatar = React.memo<AvatarProps>(
               fontSize: config.fontPixels,
               fontWeight: "600",
               color: colors.white,
-              fontFamily: Platform.OS === "ios" ? "HelveticaNeue" : undefined,
             }}
           >
             {initials}
@@ -90,7 +89,7 @@ export const Avatar = React.memo<AvatarProps>(
 
     return (
       <View
-        className={`${config.container} rounded-full bg-black justify-center items-center shadow-xl border-4 border-white`}
+        className={`${config.container} rounded-full bg-gray-800 justify-center items-center shadow-xl border-4 border-white`}
       >
         <Text className={`${config.fontSize} font-semibold text-white `}>
           {initials}

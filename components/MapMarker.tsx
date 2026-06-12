@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     width: AVATAR_SIZE,
     height: AVATAR_SIZE,
     borderRadius: AVATAR_SIZE / 2,
-    backgroundColor: colors.black,
+    backgroundColor: colors.hex.gray600,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
@@ -90,6 +90,7 @@ const styles = StyleSheet.create({
   nameLabel: {
     marginTop: 2,
     fontSize: 10,
+    fontWeight: "500",
     color: colors.hex.black,
     textAlign: "center" as const,
   },

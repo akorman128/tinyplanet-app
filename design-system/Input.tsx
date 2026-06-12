@@ -30,7 +30,7 @@ export function Input({
     props.value?.toString().length || props.defaultValue?.toString().length || 0
   );
   const baseStyles =
-    "font-sans py-3 px-4 rounded-xl bg-white text-base text-gray-900 leading-5";
+    "font-sans py-3 px-4 rounded-xl bg-white text-base text-gray-900 leading-5 shadow-xs";
   const clearPadding = clearable ? "pr-12" : "";
   const inputClass = `${baseStyles} ${clearPadding} ${className}`;
 
