@@ -206,17 +206,15 @@ export function LocationSearchInput({
 
   return (
     <View className="mb-4">
-      <Label className="mb-2">{label}</Label>
+      <Label className="mb-2 font-semibold">{label}</Label>
 
       <View className="relative">
         <TextInput
           value={query}
           onChangeText={handleChangeText}
           placeholder={placeholder}
-          className={`font-sans bg-white border ${
-            error ? "border-red-500" : "border-gray-300"
-          } rounded-lg px-4 py-3 text-base`}
-          placeholderTextColor={colors.hex.gray500}
+          className="font-sans py-3 px-4 rounded-xl bg-white text-base text-gray-900 leading-5"
+          placeholderTextColor={colors.hex.placeholder}
           autoCapitalize="words"
           autoCorrect={false}
         />
