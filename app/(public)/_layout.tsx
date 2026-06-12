@@ -1,3 +1,7 @@
+// global.css lives here (a provider-free layout) instead of the root layout so
+// Metro Fast Refresh can patch UI edits surgically instead of re-executing the
+// provider-heavy root and blacking out the app. See app/(protected)/_layout.tsx.
+import "../../global.css";
 import { Stack } from "expo-router";
 
 export default function PublicLayout() {

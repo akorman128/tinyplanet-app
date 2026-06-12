@@ -21,7 +21,6 @@ import { SectionTitle, Body, ScreenshotWarningModal } from "@/design-system";
 import { useScreenshotDetection } from "@/hooks/useScreenshotDetection";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { initMonitoring } from "@/lib/monitoring";
-import "../global.css";
 import { logger } from "@/utils/logger";
 
 // Initialize Mapbox once at app startup
