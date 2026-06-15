@@ -11,6 +11,11 @@ import type {
   TravelPlanMapLocation,
   TravelPlanWithCoordinates,
 } from "@/types/travelPlan";
+import type {
+  CreateHangOutput,
+  HangDetail,
+  HangMapLocation,
+} from "@/types/hang";
 
 /**
  * Typed boundary for Supabase RPC (Postgres function) calls.
@@ -151,6 +156,16 @@ export interface RpcReturns {
 
   // --- Intros (hooks/useIntros.ts) -- returns the new intro id as a string ---
   create_intro: string;
+
+  // --- Hangs (hooks/useHangs.ts) ---
+  /** Returns an array; caller reads [0]. */
+  create_hang_with_post: CreateHangOutput[];
+  /** Returns an array; caller reads [0]. */
+  update_hang_with_post: CreateHangOutput[];
+  delete_hang_with_post: unknown;
+  /** Returns an array; caller reads [0]. */
+  get_hang_detail: HangDetail[];
+  get_active_hang_locations: HangMapLocation[];
 }
 
 /** Name of an RPC that has an entry in {@link RpcReturns}. */

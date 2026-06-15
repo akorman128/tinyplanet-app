@@ -1,6 +1,11 @@
 import { create } from "zustand";
 
-export type MapFilter = "friends" | "travel_plans" | "hometown" | "lists";
+export type MapFilter =
+  | "friends"
+  | "travel_plans"
+  | "hangs"
+  | "hometown"
+  | "lists";
 
 interface MapState {
   showConnectionLines: boolean;

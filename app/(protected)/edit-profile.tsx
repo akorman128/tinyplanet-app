@@ -1,12 +1,18 @@
 import React, { useState } from "react";
-import { View, Pressable, Platform, Alert } from "react-native";
+import {
+  View,
+  Pressable,
+  Platform,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { colors, Input, Button, TabBar, Text } from "@/design-system";
+import { colors, Input, Button, TabBar, Icons } from "@/design-system";
 import { LocationSearchInput } from "@/components/LocationSearchInput";
 import { useProfileStore } from "@/stores/profileStore";
 import { useUpdateProfile } from "@/hooks/useProfile";
@@ -52,7 +58,7 @@ export default function EditProfileScreen() {
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isDirty },
     setValue,
   } = useForm<EditProfileForm>({
     resolver: zodResolver(editProfileSchema),
@@ -146,22 +152,28 @@ export default function EditProfileScreen() {
       <Stack.Screen
         options={{
           title: "Edit Profile",
-          headerRight: () => (
-            <Pressable
-              onPress={handleSubmit(onSubmit)}
-              disabled={!isValid || updateProfile.isPending}
-              className={
-                !isValid || updateProfile.isPending ? "opacity-50" : ""
-              }
-            >
-              <Text
-                className="text-base font-semibold"
-                style={{ color: colors.hex.purple600 }}
+          headerRight: () => {
+            const canSave = isDirty && isValid && !updateProfile.isPending;
+            return (
+              <Pressable
+                onPress={handleSubmit(onSubmit)}
+                disabled={!canSave}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                {updateProfile.isPending ? "Saving..." : "Save"}
-              </Text>
-            </Pressable>
-          ),
+                {updateProfile.isPending ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={colors.hex.purple600}
+                  />
+                ) : (
+                  <Icons.check
+                    size={24}
+                    color={canSave ? colors.hex.purple600 : colors.hex.gray300}
+                  />
+                )}
+              </Pressable>
+            );
+          },
         }}
       />
       <View className="flex-1 bg-cream">
@@ -259,6 +271,7 @@ export default function EditProfileScreen() {
                       value={value}
                       onChange={onChange}
                       error={errors.hometown?.message}
+                      inputClassName="shadow-sm"
                     />
                   )}
                 />

@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tiny Planet — Hangs · 3 design directions</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: #e8e8ea;
+    color: #111827;
+    font-family: "Helvetica Neue", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { display: flex; flex-direction: column; gap: 64px; padding: 48px 56px 96px; align-items: flex-start; }
+  /* Brief */
+  .brief { display: flex; flex-direction: column; gap: 20px; max-width: 1100px; }
+  .brief h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+  .brief p { font-size: 15px; line-height: 24px; color: #4b5563; margin: 0; max-width: 760px; }
+  .brief .kicker { font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #FF6B6B; }
+  .swatches { display: flex; flex-wrap: wrap; gap: 12px; }
+  .sw { display: flex; flex-direction: column; gap: 6px; width: 132px; }
+  .sw .chip { height: 44px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.06); }
+  .sw .nm { font-size: 12px; font-weight: 600; color: #111827; }
+  .sw .hx { font-size: 11px; color: #9ca3af; letter-spacing: 0.02em; }
+  .meta-row { display: flex; gap: 40px; flex-wrap: wrap; }
+  .meta-col { display: flex; flex-direction: column; gap: 6px; }
+  .meta-col .lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #9ca3af; }
+  .meta-col .val { font-size: 14px; color: #374151; line-height: 21px; }
+  /* Direction sections */
+  .dir { display: flex; flex-direction: column; gap: 28px; }
+  .dir-head { display: flex; flex-direction: column; gap: 8px; }
+  .dir-head .num { display: flex; align-items: baseline; gap: 14px; }
+  .dir-head h2 { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; margin: 0; }
+  .dir-head .idx { font-size: 26px; font-weight: 700; color: #FF6B6B; }
+  .dir-head p { font-size: 14px; color: #6b7280; margin: 0; max-width: 720px; line-height: 21px; }
+  .row { display: flex; gap: 44px; align-items: flex-start; flex-wrap: wrap; }
+  .frame { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
+  .cap { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #6b7280; }
+  .divider { height: 1px; width: 1100px; max-width: 100%; background: rgba(0,0,0,0.08); }
+  .note { font-size: 12px; color: #9ca3af; max-width: 360px; line-height: 18px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============================ BRIEF / LEGEND ============================ -->
+  <section class="brief">
+    <div class="kicker">Tiny Planet · New social object</div>
+    <h1>Hangs — three design directions</h1>
+    <p>
+      A <strong>Hang</strong> is a lightweight, real-world meetup a user creates and invites friends &amp; mutuals to.
+      It lives in the feed, drops a pin on the map, and lets people RSVP “Going”. Below: the three surfaces — the
+      <strong>map marker</strong>, the <strong>feed card</strong>, and the <strong>detail view</strong> — each rendered in three
+      distinct visual directions. Same signature accent across all three so the directions differ in style, not color.
+    </p>
+
+    <div class="meta-row">
+      <div class="meta-col">
+        <span class="lbl">Mood</span>
+        <span class="val"><strong>Golden hour</strong> — coral is the setting sun over a warm city,<br/>not the obvious brand-purple route.</span>
+      </div>
+      <div class="meta-col">
+        <span class="lbl">Type</span>
+        <span class="val">Helvetica Neue / system-ui · 700 display, 600 label, 400 body<br/>24 / 18 / 16 / 14 / 13 px scale</span>
+      </div>
+      <div class="meta-col">
+        <span class="lbl">Direction</span>
+        <span class="val">① Quiet · minimal &amp; type-led<br/>② Rally · bold &amp; social<br/>③ Scene · media-forward</span>
+      </div>
+    </div>
+
+    <div class="swatches">
+      <div class="sw"><div class="chip" style="background:#FF6B6B;"></div><span class="nm">Hang / coral</span><span class="hx">#FF6B6B</span></div>
+      <div class="sw"><div class="chip" style="background:#E8475F;"></div><span class="nm">Coral pressed</span><span class="hx">#E8475F</span></div>
+      <div class="sw"><div class="chip" style="background:#FFEDEC;"></div><span class="nm">Coral tint</span><span class="hx">#FFEDEC</span></div>
+      <div class="sw"><div class="chip" style="background:#6b61f3;"></div><span class="nm">Brand purple</span><span class="hx">#6b61f3</span></div>
+      <div class="sw"><div class="chip" style="background:#faf9f5;"></div><span class="nm">Cream ground</span><span class="hx">#faf9f5</span></div>
+      <div class="sw"><div class="chip" style="background:#111827;"></div><span class="nm">Ink / avatars</span><span class="hx">#111827</span></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <div class="dir">
+    <div class="dir-head">
+      <div class="num"><span class="idx">①</span><h2>Quiet</h2></div>
+      <p>Minimal &amp; type-led. White surfaces, hairline borders, generous whitespace. Coral appears only where it earns attention — the Hang tag and the RSVP action. Closest to the existing PostCard, refined.</p>
+    </div>
+    <div class="row">
+      <div class="frame">
+        <!-- PAPER ARTBOARD · Quiet / Marker -->
+        <div layer-name="Quiet / Marker" style="position:relative;width:280px;height:300px;border-radius:18px;overflow:hidden;background:#eceae4;box-shadow:0 10px 30px rgba(0,0,0,0.14);">
+          <div style="position:absolute;top:-30px;right:-30px;width:170px;height:140px;background:#d6e4ea;border-radius:24px;transform:rotate(12deg);"></div>
+          <div style="position:absolute;bottom:-40px;left:-30px;width:170px;height:160px;background:#dce7d5;border-radius:28px;transform:rotate(-8deg);"></div>
+          <div style="position:absolute;top:62px;left:-20px;width:240px;height:11px;background:rgba(255,255,255,0.7);transform:rotate(28deg);"></div>
+          <div style="position:absolute;top:152px;left:0;width:280px;height:14px;background:rgba(255,255,255,0.85);"></div>
+          <div style="position:absolute;top:0;left:120px;width:13px;height:300px;background:rgba(255,255,255,0.85);"></div>
+          <!-- preview callout -->
+          <div style="position:absolute;left:35px;top:38px;width:210px;background:#ffffff;border:1px solid #ececec;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,0.14);padding:12px 14px;display:flex;flex-direction:column;gap:7px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:10px;font-weight:600;letter-spacing:0.04em;color:#FF6B6B;background:#ffedec;padding:3px 8px;border-radius:9999px;">HANG</span>
+              <span style="font-size:11px;color:#9ca3af;">7 going</span>
+            </div>
+            <span style="font-size:14px;font-weight:600;color:#111827;">Sunset cowork</span>
+            <div style="display:flex;align-items:center;gap:6px;color:#FF6B6B;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              <span style="font-size:12px;color:#6b7280;">Today · 5:00 PM</span>
+            </div>
+            <div style="position:absolute;left:96px;bottom:-5px;width:10px;height:10px;background:#ffffff;border-right:1px solid #ececec;border-bottom:1px solid #ececec;transform:rotate(45deg);"></div>
+          </div>
+          <!-- pin -->
+          <div style="position:absolute;left:115px;top:150px;width:50px;height:50px;border-radius:9999px;background:#ffffff;border:2px solid #FF6B6B;box-shadow:0 6px 16px rgba(0,0,0,0.20);display:flex;align-items:center;justify-content:center;">
+            <div style="width:36px;height:36px;border-radius:9999px;background:#111827;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;">MC</div>
+            <div style="position:absolute;right:-2px;bottom:-2px;width:16px;height:16px;border-radius:9999px;background:#FF6B6B;border:2px solid #fff;"></div>
+          </div>
+        </div>
+        <span class="cap">Map marker · tap → preview</span>
+      </div>
+      <div class="frame">
+        <!-- PAPER ARTBOARD · Quiet / Card -->
+        <div layer-name="Quiet / Card" style="width:422px;background:#faf9f5;border-radius:18px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,0.10);">
+          <div style="background:#ffffff;border:1px solid #ececec;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:13px;">
+            <div style="display:flex;align-items:flex-start;gap:11px;">
+              <div style="width:40px;height:40px;border-radius:9999px;background:#111827;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0;">MC</div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:3px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:15px;font-weight:600;color:#111827;">Maya Chen</span>
+                  <span style="font-size:10px;font-weight:600;letter-spacing:0.04em;color:#FF6B6B;background:#ffedec;padding:2px 8px;border-radius:9999px;">HANG</span>
+                </div>
+                <span style="font-size:12px;color:#9ca3af;">invited you · 2h ago</span>
+              </div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#c4c7cc"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>
+            </div>
+            <span style="font-size:17px;font-weight:600;color:#111827;line-height:23px;">Sunset cowork session</span>
+            <span style="font-size:14px;color:#4b5563;line-height:21px;">Bringing laptops and iced coffee to the south end of Dolores. Come work for a couple hours, then we’ll catch golden hour together. Bail whenever.</span>
+            <div style="display:flex;align-items:center;gap:7px;color:#9ca3af;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+              <span style="font-size:13px;color:#6b7280;">Dolores Park, SF</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="position:relative;width:56px;height:24px;flex-shrink:0;">
+                <div style="position:absolute;left:0;top:0;width:24px;height:24px;border-radius:9999px;background:#111827;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;">MC</div>
+                <div style="position:absolute;left:16px;top:0;width:24px;height:24px;border-radius:9999px;background:#111827;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;">JL</div>
+                <div style="position:absolute;left:32px;top:0;width:24px;height:24px;border-radius:9999px;background:#111827;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;">AR</div>
+              </div>
+              <span style="font-size:13px;color:#374151;font-weight:500;">7 going</span>
+            </div>
+            <div style="height:1px;background:#f0f0f0;"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div style="display:flex;align-items:center;gap:7px;border:1.5px solid #FF6B6B;color:#FF6B6B;border-radius:11px;padding:9px 18px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                <span style="font-size:14px;font-weight:600;">Going</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:16px;color:#9ca3af;">
+                <div style="display:flex;align-items:center;gap:5px;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.6-7-9.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7 3.5C19 15.4 12 20 12 20Z"/></svg><span style="font-size:13px;">12</span></div>
+                <div style="display:flex;align-items:center;gap:5px;"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12Z"/></svg><span style="font-size:13px;">3</span></div>
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10a1 1 0 0 1 1 1v15l-6-3.5L6 20V5a1 1 0 0 1 1-1Z"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        <span class="cap">Feed card · not-yet-going state</span>
+        <span class="note">RSVP active → the button fills coral with a check; “7 going” ticks to “8 going”.</span>
+      </div>
+      <div class="frame">
+        <!-- PAPER ARTBOARD · Quiet / Detail -->
+        <div layer-name="Quiet / Detail" style="width:390px;min-height:844px;background:#ffffff;display:flex;flex-direction:column;overflow:hidden;border-radius:22px;box-shadow:0 14px 50px rgba(0,0,0,0.18);">
+          <div style="height:46px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 22px;">
+            <span style="font-size:14px;font-weight:600;color:#111827;">9:41</span>
+            <div style="display:flex;align-items:center;gap:6px;color:#111827;">
+              <svg width="17" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="1.5" width="3" height="10.5" rx="1"/><rect x="15" y="1.5" width="3" height="10.5" rx="1" opacity="0.35"/></svg>
+              <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1 4.5a10 10 0 0 1 14 0"/><path d="M3.5 7a6.5 6.5 0 0 1 9 0"/><path d="M6 9.4a3 3 0 0 1 4 0"/></svg>
+              <div style="width:22px;height:11px;border:1px solid #111827;border-radius:3px;display:flex;align-items:center;padding:1px;"><div style="width:14px;height:7px;background:#111827;border-radius:1px;"></div></div>
+            </div>
+          </div>
+          <!-- hero map -->
+          <div style="position:relative;width:390px;height:190px;background:#eceae4;overflow:hidden;flex-shrink:0;">
+            <div style="position:absolute;top:-30px;right:-20px;width:200px;height:150px;background:#d6e4ea;border-radius:26px;transform:rotate(10deg);"></div>
+            <div style="position:absolute;bottom:-50px;left:-30px;width:210px;height:170px;background:#dce7d5;border-radius:30px;transform:rotate(-7deg);"></div>
+            <div style="position:absolute;top:96px;left:0;width:390px;height:16px;background:rgba(255,255,255,0.85);"></div>
+            <div style="position:absolute;top:0;left:182px;width:14px;height:190px;background:rgba(255,255,255,0.85);"></div>
+            <div style="position:absolute;left:172px;top:64px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;">
+              <svg width="46" height="46" viewBox="0 0 24 24" fill="#FF6B6B" stroke="#fff" stroke-width="1.3" style="filter:drop-shadow(0 6px 10px rgba(0,0,0,0.28));"><path d="M12 22s7-5.6 7-12a7 7 0 1 0-14 0c0 6.4 7 12 7 12Z"/><circle cx="12" cy="10" r="2.6" fill="#fff" stroke="none"/></svg>
+            </div>
+            <div style="position:absolute;left:16px;top:14px;width:38px;height:38px;border-radius:9999px;background:rgba(255,255,255,0.92);box-shadow:0 3px 10px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+            </div>
+            <div style="position:absolute;right:16px;top:14px;width:38px;height:38px;border-radius:9999px;background:rgba(255,255,255,0.92);box-shadow:0 3px 10px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#111827"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>
+            </div>
+          </div>
+          <!-- content -->
+          <div style="flex:1;display:flex;flex-direction:column;gap:16px;padding:22px 20px 0;">
+            <div style="display:flex;flex-direction:column;gap:9px;">
+              <span style="font-size:24px;font-weight:700;color:#111827;line-height:30px;letter-spacing:-0.01em;">Sunset cowork session</span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:10px;font-weight:600;letter-spacing:0.04em;color:#FF6B6B;background:#ffedec;padding:3px 9px;border-radius:9999px;">HANG</span>
+                <div style="width:22px;height:22px;border-radius:9999px;background:#111827;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;">MC</div>
+                <span style="font-size:13px;color:#6b7280;">Hosted by Maya Chen</span>
+              </div>
+            </div>
+            <div style="height:1px;background:#f0f0f0;"></div>
+            <div style="display:flex;align-items:center;gap:13px;">
+              <div style="width:22px;flex-shrink:0;display:flex;justify-content:center;color:#9ca3af;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 3v3M16 3v3"/></svg>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px;">
+                <span style="font-size:15px;font-weight:500;color:#111827;">Thursday, June 12</span>
+                <span style="font-size:13px;color:#6b7280;">5:00 – 7:00 PM · ends in 2h</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:13px;">
+              <div style="width:22px;flex-shrink:0;display:flex;justify-content:center;color:#9ca3af;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px;">
+                <span style="font-size:15px;font-weight:500;color:#111827;">Dolores Park</span>
+                <span style="font-size:13px;color:#6b7280;">Dolores St &amp; 19th, San Francisco</span>
+              </div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c4c7cc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+            </div>
+            <div style="height:1px;background:#f0f0f0;"></div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <span style="font-size:12px;font-weight:600;letter-spacing:0.1em;color:#9ca3af;">GOING · 7</span>
+                <span style="font-size:13px;font-weight:500;color:#FF6B6B;">See all</span>
+              </div>
+              <div style="position:relative;width:128px;height:30px;flex-shrink:0;">
+                <div style="position:absolute;left:0;width:30px;height:30px;border-radius:9999px;background:#111827;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;">MC</div>
+                <div style="position:absolute;left:21px;width:30px;height:30px;border-radius:9999px;background:#111827;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;">JL</div>
+                <div style="position:absolute;left:42px;width:30px;height:30px;border-radius:9999px;background:#111827;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;">AR</div>
+                <div style="position:absolute;left:63px;width:30px;height:30px;border-radius:9999px;background:#111827;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;">TM</div>
+                <div style="position:absolute;left:84px;width:30px;height:30px;border-radius:9999px;background:#111827;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;">SK</div>
+                <div style="position:absolute;left:105px;width:30px;height:30px;border-radius:9999px;background:#f0eef0;border:2px solid #fff;color:#6b7280;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;">+2</div>
+              </div>
+            </div>
+            <div style="height:1px;background:#f0f0f0;"></div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <span style="font-size:12px;font-weight:600;letter-spacing:0.1em;color:#9ca3af;">ABOUT</span>
+              <span style="font-size:14px;color:#4b5563;line-height:21px;">Bringing laptops and iced coffee to the south end of Dolores. Come work for a couple hours, then we’ll catch golden hour together. Bail whenever.</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:9px;border:1.5px solid #e5e7eb;border-radius:12px;height:48px;color:#111827;">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 3v3M16 3v3M12 13v4M10 15h4"/></svg>
+              <span style="font-size:15px;font-weight:600;">Add to Calendar</span>
+            </div>
+          </div>
+          <!-- action bar -->
+          <div style="border-top:1px solid #f0f0f0;padding:14px 20px 24px;background:#fff;display:flex;flex-direction:column;">
+            <div style="display:flex;align-items:center;justify-content:center;gap:9px;height:52px;background:#FF6B6B;border-radius:13px;box-shadow:0 8px 20px rgba(255,107,107,0.4);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              <span style="font-size:16px;font-weight:700;color:#fff;">I’m Going</span>
+            </div>
+          </div>
+        </div>
+        <span class="cap">Detail view · invitee</span>
+        <span class="note">Host view swaps the RSVP bar for Edit · Delete and adds them to the header.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="dir">
+    <div class="dir-head">
+      <div class="num"><span class="idx">②</span><h2>Rally</h2></div>
+      <p>Bold &amp; social. Coral-tinted surfaces, heavier weights, rounded-2xl shapes, sticker tags and big filled CTAs. Built to make “Going” feel like one tap and to pop on a busy feed.</p>
+    </div>
+    <div class="row">
+      <div class="frame">
+        <!-- PAPER ARTBOARD · Rally / Marker -->
+        <div layer-name="Rally / Marker" style="position:relative;width:280px;height:300px;border-radius:18px;overflow:hidden;background:#eceae4;box-shadow:0 10px 30px rgba(0,0,0,0.14);">
+          <div style="position:absolute;top:-30px;right:-30px;width:170px;height:140px;background:#d6e4ea;border-radius:24px;transform:rotate(12deg);"></div>
+          <div style="position:absolute;bottom:-40px;left:-30px;width:170px;height:160px;background:#dce7d5;border-radius:28px;transform:rotate(-8deg);"></div>
+          <div style="position:absolute;top:62px;left:-20px;width:240px;height:11px;background:rgba(255,255,255,0.7);transform:rotate(28deg);"></div>
+          <div style="position:absolute;top:152px;left:0;width:280px;height:14px;background:rgba(255,255,255,0.85);"></div>
+          <div style="position:absolute;top:0;left:120px;width:13px;height:300px;background:rgba(255,255,255,0.85);"></div>
+          <!-- coral-tint preview callout -->
+          <div style="position:absolute;left:28px;top:40px;width:224px;background:#ffedec;border:1px solid #ffd3cf;border-radius:16px;box-shadow:0 10px 26px rgba(232,71,95,0.22);padding:13px 14px;display:flex;flex-direction:column;gap:9px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:10px;font-weight:700;letter-spacing:0.05em;color:#fff;background:#FF6B6B;padding:3px 9px;border-radius:7px;">HANG</span>
+              <span style="font-size:11px;font-weight:600;color:#c0566a;">7 going</span>
+            </div>
+            <span style="font-size:15px;font-weight:700;color:#1a1320;">Sunset cowork</span>
+            <div style="display:flex;align-items:center;justify-content:center;gap:6px;background:#FF6B6B;border-radius:10px;height:34px;box-shadow:0 5px 12px rgba(255,107,107,0.45);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              <span style="font-size:13px;font-weight:700;color:#fff;">Going</span>
+            </div>
+            <div style="position:absolute;left:50%;bottom:-5px;width:10px;height:10px;background:#ffedec;border-right:1px solid #ffd3cf;border-bottom:1px solid #ffd3cf;transform:translateX(-50%) rotate(45deg);"></div>
+          </div>
+          <!-- bold pill marker -->
+          <div style="position:absolute;left:0;top:170px;width:280px;display:flex;justify-content:center;">
+            <div style="position:relative;display:flex;align-items:center;gap:9px;background:#FF6B6B;border-radius:9999px;padding:6px 18px 6px 6px;box-shadow:0 8px 20px rgba(255,107,107,0.55);">
+              <div style="width:30px;height:30px;border-radius:9999px;background:#111827;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;">MC</div>
+              <span style="font-size:14px;font-weight:700;color:#fff;letter-spacing:0.01em;">Hang · 7</span>
+              <div style="position:absolute;left:50%;bottom:-5px;width:12px;height:12px;background:#FF6B6B;transform:translateX(-50%) rotate(45deg);"></div>
+            </div>
+          </div>
+        </div>
+        <span class="cap">Map marker · bold pill</span>
+      </div>
+      <div class="frame">
+        <!-- PAPER ARTBOARD · Rally / Card -->
+        <div layer-name="Rally / Card" style="width:422px;background:#faf9f5;border-radius:18px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,0.10);">
+          <div style="background:#ffedec;border:1px solid #ffd8d4;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:14px;">
+            <div style="display:flex;align-items:flex-start;gap:12px;">
+              <div style="width:46px;height:46px;border-radius:9999px;background:#111827;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;flex-shrink:0;">MC</div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:3px;">
+                <span style="font-size:16px;font-weight:700;color:#1a1320;">Maya Chen</span>
+                <span style="font-size:12px;font-weight:500;color:#c0566a;">wants to hang · 2h ago</span>
+              </div>
+              <span style="font-size:11px;font-weight:700;letter-spacing:0.05em;color:#fff;background:#FF6B6B;padding:5px 11px;border-radius:8px;transform:rotate(-3deg);box-shadow:0 4px 10px rgba(255,107,107,0.45);">HANG</span>
+            </div>
+            <span style="font-size:20px;font-weight:700;color:#1a1320;line-height:26px;letter-spacing:-0.01em;">Sunset cowork session</span>
+            <div style="display:flex;gap:9px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:6px;background:#fff;border-radius:9999px;padding:7px 13px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF6B6B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                <span style="font-size:13px;font-weight:600;color:#4a3b3f;">Today · 5:00 PM</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;background:#fff;border-radius:9999px;padding:7px 13px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF6B6B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                <span style="font-size:13px;font-weight:600;color:#4a3b3f;">Dolores Park</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="position:relative;width:60px;height:28px;flex-shrink:0;">
+                <div style="position:absolute;left:0;width:28px;height:28px;border-radius:9999px;background:#111827;border:2px solid #ffedec;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;">MC</div>
+                <div style="position:absolute;left:18px;width:28px;height:28px;border-radius:9999px;background:#111827;border:2px solid #ffedec;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;">JL</div>
+                <div style="position:absolute;left:36px;width:28px;height:28px;border-radius:9999px;background:#111827;border:2px solid #ffedec;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;">AR</div>
+              </div>
+              <span style="font-size:14px;font-weight:700;color:#1a1320;">7 going</span>
+              <div style="flex:1;"></div>
+              <div style="display:flex;align-items:center;gap:13px;color:#cf9aa1;">
+                <div style="display:flex;align-items:center;gap:5px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.6-7-9.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7 3.5C19 15.4 12 20 12 20Z"/></svg><span style="font-size:13px;font-weight:600;">12</span></div>
+                <div style="display:flex;align-items:center;gap:5px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12Z"/></svg><span style="font-size:13px;font-weight:600;">3</span></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:9px;height:50px;background:#FF6B6B;border-radius:15px;box-shadow:0 8px 20px rgba(255,107,107,0.45);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              <span style="font-size:16px;font-weight:700;color:#fff;">I’m Going</span>
+            </div>
+          </div>
+        </div>
+        <span class="cap">Feed card · coral-tint</span>
+      </div>
+      <div class="frame">
+        <!-- PAPER ARTBOARD · Rally / Detail -->
+        <div layer-name="Rally / Detail" style="width:390px;min-height:844px;background:#ffffff;display:flex;flex-direction:column;overflow:hidden;border-radius:22px;box-shadow:0 14px 50px rgba(0,0,0,0.18);">
+          <!-- coral hero -->
+          <div style="background:#FF6B6B;display:flex;flex-direction:column;padding:0 22px 26px;flex-shrink:0;">
+            <div style="height:46px;display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-size:14px;font-weight:600;color:#fff;">9:41</span>
+              <div style="display:flex;align-items:center;gap:6px;color:#fff;">
+                <svg width="17" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="1.5" width="3" height="10.5" rx="1"/><rect x="15" y="1.5" width="3" height="10.5" rx="1"/></svg>
+                <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1 4.5a10 10 0 0 1 14 0"/><path d="M3.5 7a6.5 6.5 0 0 1 9 0"/><path d="M6 9.4a3 3 0 0 1 4 0"/></svg>
+                <div style="width:22px;height:11px;border:1px solid #fff;border-radius:3px;display:flex;align-items:center;padding:1px;"><div style="width:14px;height:7px;background:#fff;border-radius:1px;"></div></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding-top:6px;">
+              <div style="width:40px;height:40px;border-radius:9999px;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+              </div>
+              <div style="width:40px;height:40px;border-radius:9999px;background:rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:14px;padding-top:22px;">
+              <span style="font-size:11px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.85);">HANG · TODAY</span>
+              <span style="font-size:28px;font-weight:700;color:#fff;line-height:33px;letter-spacing:-0.01em;">Sunset cowork session</span>
+              <div style="display:flex;align-items:center;gap:9px;">
+                <div style="width:28px;height:28px;border-radius:9999px;background:#111827;border:2px solid rgba(255,255,255,0.7);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;">MC</div>
+                <span style="font-size:14px;color:#fff;">Hosted by <strong style="font-weight:700;">Maya Chen</strong></span>
+              </div>
+            </div>
+          </div>
+          <!-- content -->
+          <div style="flex:1;display:flex;flex-direction:column;gap:18px;padding:22px 20px 0;">
+            <div style="display:flex;align-items:center;gap:14px;background:#ffedec;border-radius:16px;padding:14px 16px;">
+              <div style="width:42px;height:42px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;color:#FF6B6B;flex-shrink:0;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 3v3M16 3v3"/></svg>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px;">
+                <span style="font-size:15px;font-weight:700;color:#1a1320;">Thursday, June 12</span>
+                <span style="font-size:13px;color:#b0707c;">5:00 – 7:00 PM · ends in 2h</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;background:#ffedec;border-radius:16px;padding:14px 16px;">
+              <div style="width:42px;height:42px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;color:#FF6B6B;flex-shrink:0;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px;">
+                <span style="font-size:15px;font-weight:700;color:#1a1320;">Dolores Park</span>
+                <span style="font-size:13px;color:#b0707c;">Dolores St &amp; 19th, San Francisco</span>
+              </div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6B6B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <span style="font-size:15px;font-weight:700;color:#1a1320;">Going · 7</span>
+                <span style="font-size:13px;font-weight:600;color:#FF6B6B;">See all</span>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                <div style="display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #ececec;border-radius:9999px;padding:4px 13px 4px 4px;"><div style="width:24px;height:24px;border-radius:9999px;background:#111827;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;">MC</div><span style="font-size:13px;font-weight:600;color:#374151;">Maya</span></div>
+                <div style="display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #ececec;border-radius:9999px;padding:4px 13px 4px 4px;"><div style="width:24px;height:24px;border-radius:9999px;background:#111827;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;">JL</div><span style="font-size:13px;font-weight:600;color:#374151;">Jordan</span></div>
+                <div style="display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #ececec;border-radius:9999px;padding:4px 13px 4px 4px;"><div style="width:24px;height:24px;border-radius:9999px;background:#111827;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;">AR</div><span style="font-size:13px;font-weight:600;color:#374151;">Aisha</span></div>
+                <div style="display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #ececec;border-radius:9999px;padding:4px 13px 4px 4px;"><div style="width:24px;height:24px;border-radius:9999px;background:#111827;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;">TM</div><span style="font-size:13px;font-weight:600;color:#374151;">Theo</span></div>
+                <div style="display:flex;align-items:center;gap:7px;background:#f5f3f4;border-radius:9999px;padding:7px 14px;"><span style="font-size:13px;font-weight:600;color:#9b8a8f;">+3 more</span></div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <span style="font-size:15px;font-weight:700;color:#1a1320;">About</span>
+              <span style="font-size:14px;color:#4b5563;line-height:21px;">Bringing laptops and iced coffee to the south end of Dolores. Come work for a couple hours, then we’ll catch golden hour together. Bail whenever.</span>
+            </div>
+            <div style="display:flex;gap:12px;">
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;background:#ffedec;border-radius:16px;padding:16px 10px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B6B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 3v3M16 3v3M12 13v4M10 15h4"/></svg>
+                <span style="font-size:13px;font-weight:600;color:#1a1320;">Add to Calendar</span>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;background:#ffedec;border-radius:16px;padding:16px 10px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF6B6B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19l-6-2.5V5L9 7.5m0 11.5 6-2.5M9 19V7.5m6 9L21 19V7.5L15 5m0 11.5V5M9 7.5 15 5"/></svg>
+                <span style="font-size:13px;font-weight:600;color:#1a1320;">Open in Maps</span>
+              </div>
+            </div>
+          </div>
+          <!-- action bar -->
+          <div style="padding:14px 20px 24px;background:#fff;display:flex;flex-direction:column;">
+            <div style="display:flex;align-items:center;justify-content:center;gap:10px;height:54px;background:#FF6B6B;border-radius:16px;box-shadow:0 10px 24px rgba(255,107,107,0.45);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              <span style="font-size:17px;font-weight:700;color:#fff;">I’m Going</span>
+            </div>
+          </div>
+        </div>
+        <span class="cap">Detail view · coral hero</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="dir">
+    <div class="dir-head">
+      <div class="num"><span class="idx">③</span><h2>Scene</h2></div>
+      <p>Media-forward &amp; premium. Every surface leads with a snapshot of the place — a mini-map banner with a legibility gradient — content layered below. Depth via soft shadows. Coral is reserved for the action.</p>
+    </div>
+    <div class="row">
+      <div class="frame">
+        <!-- PAPER ARTBOARD · Scene / Marker -->
+        <div layer-name="Scene / Marker" style="position:relative;width:280px;height:300px;border-radius:18px;overflow:hidden;background:#eceae4;box-shadow:0 10px 30px rgba(0,0,0,0.14);">
+          <div style="position:absolute;top:-30px;right:-30px;width:170px;height:140px;background:#d6e4ea;border-radius:24px;transform:rotate(12deg);"></div>
+          <div style="position:absolute;bottom:-40px;left:-30px;width:170px;height:160px;background:#dce7d5;border-radius:28px;transform:rotate(-8deg);"></div>
+          <div style="position:absolute;top:62px;left:-20px;width:240px;height:11px;background:rgba(255,255,255,0.7);transform:rotate(28deg);"></div>
+          <div style="position:absolute;top:152px;left:0;width:280px;height:14px;background:rgba(255,255,255,0.85);"></div>
+          <div style="position:absolute;top:0;left:120px;width:13px;height:300px;background:rgba(255,255,255,0.85);"></div>
+          <!-- premium preview callout with map banner -->
+          <div style="position:absolute;left:30px;top:30px;width:220px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,0.22);">
+            <div style="position:relative;width:220px;height:86px;background:#e2e8e0;overflow:hidden;">
+              <div style="position:absolute;top:-14px;right:-10px;width:120px;height:80px;background:#cfe0e6;border-radius:16px;transform:rotate(10deg);"></div>
+              <div style="position:absolute;bottom:-20px;left:-12px;width:120px;height:80px;background:#d3e2cb;border-radius:18px;transform:rotate(-8deg);"></div>
+              <div style="position:absolute;top:44px;left:0;width:220px;height:9px;background:rgba(255,255,255,0.85);"></div>
+              <div style="position:absolute;top:0;left:0;width:220px;height:86px;background:linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(0,0,0,0.5) 100%);"></div>
+              <span style="position:absolute;left:10px;top:10px;font-size:9px;font-weight:700;letter-spacing:0.06em;color:#fff;background:rgba(0,0,0,0.32);padding:3px 8px;border-radius:9999px;">HANG</span>
+              <span style="position:absolute;left:11px;bottom:9px;font-size:11px;font-weight:600;color:#fff;">Today · 5:00 PM</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 13px;">
+              <div style="display:flex;flex-direction:column;gap:2px;">
+                <span style="font-size:14px;font-weight:700;color:#1a1320;">Sunset cowork</span>
+                <span style="font-size:11px;color:#9ca3af;">7 going</span>
+              </div>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF6B6B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+            </div>
+          </div>
+          <!-- media pin -->
+          <div style="position:absolute;left:0;top:158px;width:280px;display:flex;flex-direction:column;align-items:center;gap:7px;">
+            <div style="position:relative;width:54px;height:54px;border-radius:16px;overflow:hidden;border:3px solid #fff;box-shadow:0 8px 18px rgba(0,0,0,0.30);background:#e2e8e0;">
+              <div style="position:absolute;bottom:-10px;left:-8px;width:46px;height:40px;background:#d3e2cb;border-radius:12px;transform:rotate(-8deg);"></div>
+              <div style="position:absolute;top:-8px;right:-8px;width:40px;height:34px;background:#cfe0e6;border-radius:12px;"></div>
+              <div style="position:absolute;left:0;top:0;width:54px;height:54px;display:flex;align-items:center;justify-content:center;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="#FF6B6B" stroke="#fff" stroke-width="1.4" style="filter:drop-shadow(0 2px 3px rgba(0,0,0,0.35));"><path d="M12 22s7-5.6 7-12a7 7 0 1 0-14 0c0 6.4 7 12 7 12Z"/><circle cx="12" cy="10" r="2.4" fill="#fff" stroke="none"/></svg>
+              </div>
+            </div>
+            <span style="font-size:11px;font-weight:600;color:#1a1320;background:#fff;padding:4px 10px;border-radius:9999px;box-shadow:0 3px 8px rgba(0,0,0,0.16);">Sunset cowork</span>
+          </div>
+        </div>
+        <span class="cap">Map marker · media pin</span>
+      </div>
+      <div class="frame">
+        <!-- PAPER ARTBOARD · Scene / Card -->
+        <div layer-name="Scene / Card" style="width:422px;background:#faf9f5;border-radius:18px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,0.10);">
+          <div style="background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <!-- map banner -->
+            <div style="position:relative;width:390px;height:152px;background:#e2e8e0;overflow:hidden;">
+              <div style="position:absolute;top:-24px;right:-20px;width:220px;height:130px;background:#cfe0e6;border-radius:22px;transform:rotate(9deg);"></div>
+              <div style="position:absolute;bottom:-34px;left:-24px;width:230px;height:140px;background:#d3e2cb;border-radius:26px;transform:rotate(-7deg);"></div>
+              <div style="position:absolute;top:78px;left:0;width:390px;height:13px;background:rgba(255,255,255,0.85);"></div>
+              <div style="position:absolute;top:0;left:188px;width:12px;height:152px;background:rgba(255,255,255,0.8);"></div>
+              <div style="position:absolute;left:174px;top:44px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
+                <svg width="38" height="38" viewBox="0 0 24 24" fill="#FF6B6B" stroke="#fff" stroke-width="1.4" style="filter:drop-shadow(0 5px 8px rgba(0,0,0,0.3));"><path d="M12 22s7-5.6 7-12a7 7 0 1 0-14 0c0 6.4 7 12 7 12Z"/><circle cx="12" cy="10" r="2.6" fill="#fff" stroke="none"/></svg>
+              </div>
+              <div style="position:absolute;top:0;left:0;width:390px;height:152px;background:linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,0.5) 100%);"></div>
+              <span style="position:absolute;left:14px;top:13px;font-size:10px;font-weight:700;letter-spacing:0.06em;color:#fff;background:rgba(0,0,0,0.34);padding:4px 10px;border-radius:9999px;backdrop-filter:blur(4px);">HANG</span>
+              <div style="position:absolute;left:14px;bottom:12px;display:flex;align-items:center;gap:7px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                <span style="font-size:13px;font-weight:600;color:#fff;">Today · 5:00 PM</span>
+              </div>
+              <span style="position:absolute;right:14px;bottom:12px;font-size:12px;font-weight:500;color:rgba(255,255,255,0.92);">Dolores Park</span>
+            </div>
+            <!-- content -->
+            <div style="padding:16px;display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;align-items:center;gap:11px;">
+                <div style="width:40px;height:40px;border-radius:9999px;background:#111827;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0;">MC</div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:2px;">
+                  <span style="font-size:15px;font-weight:600;color:#111827;">Maya Chen</span>
+                  <span style="font-size:12px;color:#9ca3af;">invited you · 2h ago</span>
+                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#c4c7cc"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>
+              </div>
+              <span style="font-size:18px;font-weight:700;color:#111827;line-height:24px;letter-spacing:-0.01em;">Sunset cowork session</span>
+              <span style="font-size:14px;color:#4b5563;line-height:21px;">Laptops and iced coffee at the south end, then golden hour together.</span>
+              <div style="display:flex;align-items:center;gap:10px;padding-top:2px;">
+                <div style="position:relative;width:56px;height:26px;flex-shrink:0;">
+                  <div style="position:absolute;left:0;width:26px;height:26px;border-radius:9999px;background:#111827;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;">MC</div>
+                  <div style="position:absolute;left:17px;width:26px;height:26px;border-radius:9999px;background:#111827;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;">JL</div>
+                  <div style="position:absolute;left:34px;width:26px;height:26px;border-radius:9999px;background:#111827;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;">AR</div>
+                </div>
+                <span style="font-size:13px;font-weight:500;color:#374151;">7 going</span>
+                <div style="flex:1;"></div>
+                <span style="font-size:13px;color:#9ca3af;">12 likes</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:center;gap:9px;height:48px;background:#FF6B6B;border-radius:14px;box-shadow:0 8px 20px rgba(255,107,107,0.4);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                <span style="font-size:15px;font-weight:700;color:#fff;">I’m Going</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <span class="cap">Feed card · map banner</span>
+      </div>
+      <div class="frame">
+        <!-- PAPER ARTBOARD · Scene / Detail -->
+        <div layer-name="Scene / Detail" style="width:390px;min-height:844px;background:#ffffff;display:flex;flex-direction:column;overflow:hidden;border-radius:22px;box-shadow:0 14px 50px rgba(0,0,0,0.18);">
+          <!-- hero map -->
+          <div style="position:relative;width:390px;height:308px;background:#e2e8e0;overflow:hidden;flex-shrink:0;">
+            <div style="position:absolute;top:-30px;right:-30px;width:250px;height:180px;background:#cfe0e6;border-radius:28px;transform:rotate(9deg);"></div>
+            <div style="position:absolute;bottom:-40px;left:-30px;width:250px;height:190px;background:#d3e2cb;border-radius:30px;transform:rotate(-7deg);"></div>
+            <div style="position:absolute;top:120px;left:0;width:390px;height:15px;background:rgba(255,255,255,0.85);"></div>
+            <div style="position:absolute;top:0;left:188px;width:13px;height:308px;background:rgba(255,255,255,0.8);"></div>
+            <div style="position:absolute;left:172px;top:74px;width:46px;height:46px;display:flex;align-items:center;justify-content:center;">
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="#FF6B6B" stroke="#fff" stroke-width="1.3" style="filter:drop-shadow(0 6px 10px rgba(0,0,0,0.3));"><path d="M12 22s7-5.6 7-12a7 7 0 1 0-14 0c0 6.4 7 12 7 12Z"/><circle cx="12" cy="10" r="2.6" fill="#fff" stroke="none"/></svg>
+            </div>
+            <div style="position:absolute;top:0;left:0;width:390px;height:308px;background:linear-gradient(180deg, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.62) 100%);"></div>
+            <!-- status bar -->
+            <div style="position:absolute;top:0;left:0;width:390px;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;">
+              <span style="font-size:14px;font-weight:600;color:#fff;">9:41</span>
+              <div style="display:flex;align-items:center;gap:6px;color:#fff;">
+                <svg width="17" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="1.5" width="3" height="10.5" rx="1"/><rect x="15" y="1.5" width="3" height="10.5" rx="1"/></svg>
+                <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1 4.5a10 10 0 0 1 14 0"/><path d="M3.5 7a6.5 6.5 0 0 1 9 0"/><path d="M6 9.4a3 3 0 0 1 4 0"/></svg>
+                <div style="width:22px;height:11px;border:1px solid #fff;border-radius:3px;display:flex;align-items:center;padding:1px;"><div style="width:14px;height:7px;background:#fff;border-radius:1px;"></div></div>
+              </div>
+            </div>
+            <!-- floating buttons -->
+            <div style="position:absolute;left:16px;top:54px;width:40px;height:40px;border-radius:9999px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>
+            </div>
+            <div style="position:absolute;right:16px;top:54px;width:40px;height:40px;border-radius:9999px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>
+            </div>
+            <!-- hero text -->
+            <div style="position:absolute;left:0;right:0;bottom:38px;padding:0 22px;display:flex;flex-direction:column;gap:11px;">
+              <span style="font-size:11px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.9);">HANG · TODAY</span>
+              <span style="font-size:27px;font-weight:700;color:#fff;line-height:32px;letter-spacing:-0.01em;">Sunset cowork session</span>
+              <div style="display:flex;align-items:center;gap:9px;">
+                <div style="width:26px;height:26px;border-radius:9999px;background:#111827;border:2px solid rgba(255,255,255,0.8);color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;">MC</div>
+                <span style="font-size:14px;color:#fff;">Hosted by <strong style="font-weight:700;">Maya Chen</strong></span>
+              </div>
+            </div>
+          </div>
+          <!-- content sheet -->
+          <div style="flex:1;position:relative;top:-22px;background:#fff;border-top-left-radius:24px;border-top-right-radius:24px;padding:24px 20px 0;display:flex;flex-direction:column;gap:18px;">
+            <div style="display:flex;align-items:center;gap:13px;">
+              <div style="width:22px;flex-shrink:0;display:flex;justify-content:center;color:#FF6B6B;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 3v3M16 3v3"/></svg>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px;">
+                <span style="font-size:15px;font-weight:600;color:#111827;">Thursday, June 12</span>
+                <span style="font-size:13px;color:#6b7280;">5:00 – 7:00 PM · ends in 2h</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:13px;">
+              <div style="width:22px;flex-shrink:0;display:flex;justify-content:center;color:#FF6B6B;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px;">
+                <span style="font-size:15px;font-weight:600;color:#111827;">Dolores Park</span>
+                <span style="font-size:13px;color:#6b7280;">Dolores St &amp; 19th, San Francisco</span>
+              </div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c4c7cc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+            </div>
+            <div style="height:1px;background:#f0f0f0;"></div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <span style="font-size:15px;font-weight:600;color:#111827;">Going · 7</span>
+                <span style="font-size:13px;font-weight:500;color:#FF6B6B;">See all</span>
+              </div>
+              <div style="position:relative;width:128px;height:30px;flex-shrink:0;">
+                <div style="position:absolute;left:0;width:30px;height:30px;border-radius:9999px;background:#111827;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;">MC</div>
+                <div style="position:absolute;left:21px;width:30px;height:30px;border-radius:9999px;background:#111827;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;">JL</div>
+                <div style="position:absolute;left:42px;width:30px;height:30px;border-radius:9999px;background:#111827;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;">AR</div>
+                <div style="position:absolute;left:63px;width:30px;height:30px;border-radius:9999px;background:#111827;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;">TM</div>
+                <div style="position:absolute;left:84px;width:30px;height:30px;border-radius:9999px;background:#111827;border:2px solid #fff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;">SK</div>
+                <div style="position:absolute;left:105px;width:30px;height:30px;border-radius:9999px;background:#f0eef0;border:2px solid #fff;color:#6b7280;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;">+2</div>
+              </div>
+            </div>
+            <div style="height:1px;background:#f0f0f0;"></div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <span style="font-size:15px;font-weight:600;color:#111827;">About</span>
+              <span style="font-size:14px;color:#4b5563;line-height:21px;">Bringing laptops and iced coffee to the south end of Dolores. Come work for a couple hours, then we’ll catch golden hour together. Bail whenever.</span>
+            </div>
+            <div style="display:flex;gap:12px;">
+              <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid #e5e7eb;border-radius:13px;height:48px;color:#111827;">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#FF6B6B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 3v3M16 3v3M12 13v4M10 15h4"/></svg>
+                <span style="font-size:14px;font-weight:600;">Calendar</span>
+              </div>
+              <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid #e5e7eb;border-radius:13px;height:48px;color:#111827;">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#FF6B6B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19l-6-2.5V5L9 7.5m0 11.5 6-2.5M9 19V7.5m6 9L21 19V7.5L15 5m0 11.5V5M9 7.5 15 5"/></svg>
+                <span style="font-size:14px;font-weight:600;">Maps</span>
+              </div>
+            </div>
+          </div>
+          <!-- action bar -->
+          <div style="border-top:1px solid #f0f0f0;padding:14px 20px 24px;background:#fff;display:flex;flex-direction:column;">
+            <div style="display:flex;align-items:center;justify-content:center;gap:9px;height:52px;background:#FF6B6B;border-radius:13px;box-shadow:0 8px 20px rgba(255,107,107,0.4);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              <span style="font-size:16px;font-weight:700;color:#fff;">I’m Going</span>
+            </div>
+          </div>
+        </div>
+        <span class="cap">Detail view · map hero</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

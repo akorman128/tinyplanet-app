@@ -23,8 +23,15 @@ export function usePushNotifications() {
     // Handle notification taps → navigate to chat
     responseListenerRef.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        const friendId = response.notification.request.content.data
-          ?.friendId as string | undefined;
+        const data = response.notification.request.content.data ?? {};
+
+        const hangId = data?.hangId as string | undefined;
+        if (hangId) {
+          router.push({ pathname: "/hang/[hangId]", params: { hangId } });
+          return;
+        }
+
+        const friendId = data?.friendId as string | undefined;
         if (friendId) {
           router.push(`/chat/${friendId}`);
         }

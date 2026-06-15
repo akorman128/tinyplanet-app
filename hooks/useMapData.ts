@@ -3,6 +3,7 @@ import {
   useGetFriendHometownLocations,
 } from "./useFriends";
 import { useGetTravelPlanLocations } from "./useTravelPlan";
+import { useGetHangLocations } from "./useHangs";
 import { useGetListLocations } from "./useLists";
 import { useLocation } from "./useLocation";
 import { useEffect } from "react";
@@ -11,6 +12,7 @@ export const useMapData = () => {
   const friendLocations = useGetFriendLocations();
   const hometownLocations = useGetFriendHometownLocations();
   const travelPlanLocations = useGetTravelPlanLocations();
+  const hangLocations = useGetHangLocations();
   const listLocations = useGetListLocations();
   const {
     location: userLocationObj,
@@ -38,18 +40,21 @@ export const useMapData = () => {
     friendLocations: friendLocations.data ?? null,
     hometownLocations: hometownLocations.data ?? null,
     travelPlanLocations: travelPlanLocations.data?.data ?? [],
+    hangLocations: hangLocations.data?.data ?? [],
     listLocations: listLocations.data ?? [],
     userLocation,
     loading:
       friendLocations.isLoading ||
       hometownLocations.isLoading ||
       travelPlanLocations.isLoading ||
+      hangLocations.isLoading ||
       listLocations.isLoading,
     error:
       (
         friendLocations.error ||
         hometownLocations.error ||
         travelPlanLocations.error ||
+        hangLocations.error ||
         listLocations.error
       )?.message ?? null,
   };

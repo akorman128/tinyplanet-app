@@ -67,6 +67,15 @@ export const queryKeys = {
     locations: ["travelPlans", "locations"] as const,
   },
 
+  // Hangs
+  hangs: {
+    all: ["hangs"] as const,
+    detail: (hangId: string) => ["hangs", "detail", hangId] as const,
+    byUser: (userId: string) => ["hangs", "user", userId] as const,
+    locations: ["hangs", "locations"] as const,
+    attendees: (hangId: string) => ["hangs", "attendees", hangId] as const,
+  },
+
   // Vibes
   vibes: {
     all: ["vibes"] as const,

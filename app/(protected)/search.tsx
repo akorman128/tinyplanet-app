@@ -83,7 +83,7 @@ export default function SearchScreen() {
         ) : searchResults.length === 0 ? (
           <View className="flex-1 justify-center items-center px-6">
             <Body className="text-base text-gray-400 text-center">
-              {searchQuery.trim() ? "No results" : "Search your planet by name"}
+              {searchQuery.trim() ? "No results" : "Search for friends by name"}
             </Body>
           </View>
         ) : (
