@@ -290,7 +290,16 @@ export const useGetList = (listId?: string): UseQueryResult<GetListOutput> => {
         throw new Error(
           `Failed to fetch places for list ${listId}: ${placesError.message}`
         );
-      return { data: { ...list, places: (placesData || []) as ListPlace[] } };
+      return {
+        data: {
+          ...list,
+          location:
+            typeof list.location === "string"
+              ? parsePostGISPoint(list.location)
+              : null,
+          places: (placesData || []) as ListPlace[],
+        },
+      };
     },
     enabled: !!listId,
   });
