@@ -6,12 +6,11 @@ import { Avatar } from "./Avatar";
 import { Icons } from "./Icons";
 import { colors } from "./colors";
 import { ListChip } from "./ListChip";
+import { PostActions } from "./PostActions";
 import { PostWithAuthor } from "@/types/post";
-import { useLikePost, useUnlikePost } from "@/hooks/useLikes";
-import { useSavePost, useUnsavePost } from "@/hooks/useSavedPosts";
 import { useDeletePost } from "@/hooks/usePosts";
 import { useSupabase } from "@/hooks/useSupabase";
-import { formatTimeAgo, hapticLight } from "@/utils";
+import { formatTimeAgo } from "@/utils";
 import { logger } from "@/utils/logger";
 
 interface PostCardProps {
@@ -31,66 +30,7 @@ export function PostCard({
 }: PostCardProps) {
   const router = useRouter();
   const { session } = useSupabase();
-  const likePost = useLikePost();
-  const unlikePost = useUnlikePost();
-  const savePost = useSavePost();
-  const unsavePost = useUnsavePost();
   const deletePostMutation = useDeletePost();
-  const isLiking = likePost.isPending || unlikePost.isPending;
-  const isSaving = savePost.isPending || unsavePost.isPending;
-
-  const handleLikeToggle = async () => {
-    if (isLiking) return;
-    hapticLight();
-
-    const wasLiked = post.liked_by_user;
-
-    // Optimistic update
-    onLike(post.id, {
-      liked_by_user: !wasLiked,
-      like_count: wasLiked ? post.like_count - 1 : post.like_count + 1,
-    });
-
-    try {
-      if (wasLiked) {
-        await unlikePost.mutateAsync(post.id);
-      } else {
-        await likePost.mutateAsync(post.id);
-      }
-    } catch (err) {
-      logger.error("Error toggling like:", err);
-    }
-  };
-
-  const handleSaveToggle = async () => {
-    if (isSaving) return;
-    hapticLight();
-
-    const wasSaved = post.saved_by_user;
-
-    // Optimistic update
-    onSave(post.id, {
-      saved_by_user: !wasSaved,
-    });
-
-    try {
-      if (wasSaved) {
-        await unsavePost.mutateAsync(post.id);
-      } else {
-        await savePost.mutateAsync(post.id);
-      }
-    } catch (err) {
-      logger.error("Error toggling save:", err);
-      // Revert optimistic update on error
-      onSave(post.id, {
-        saved_by_user: wasSaved,
-      });
-    }
-  };
-
-  const handleComment = () => {
-    onOpenComments(post.id, post.comment_count);
-  };
 
   const handleOptions = () => {
     const isOwnPost = session?.user?.id === post.author.id;
@@ -204,63 +144,22 @@ export function PostCard({
           </View>
         )}
 
-        {/* Actions row */}
-        <View className="flex-row items-center gap-4">
-          {/* Visibility indicator */}
-          {visibilityIcon && (
-            <View className="flex-row items-center">
-              {visibilityIcon}
-              <Text className="text-xs text-gray-500 ml-1 capitalize">
-                {post.visibility}
-              </Text>
-            </View>
-          )}
-          {/* Like */}
-          <Pressable
-            className="flex-row items-center"
-            onPress={handleLikeToggle}
-            disabled={isLiking}
-          >
-            <Icons.heartOutline
-              size={20}
-              color={post.liked_by_user ? colors.hex.error : colors.hex.gray500}
-            />
-            {post.like_count > 0 && (
-              <Text
-                className={`text-sm ml-1 ${
-                  post.liked_by_user ? "text-red-500" : "text-gray-500"
-                }`}
-              >
-                {post.like_count}
-              </Text>
-            )}
-          </Pressable>
-
-          {/* Comment */}
-          <Pressable className="flex-row items-center" onPress={handleComment}>
-            <Icons.comment size={20} color={colors.hex.gray500} />
-            {post.comment_count > 0 && (
-              <Text className="text-sm text-gray-500 ml-1">
-                {post.comment_count}
-              </Text>
-            )}
-          </Pressable>
-
-          {/* Save/Bookmark */}
-          <Pressable
-            className="flex-row items-center"
-            onPress={handleSaveToggle}
-            disabled={isSaving}
-          >
-            <Icons.bookmark
-              size={20}
-              color={
-                post.saved_by_user ? colors.hex.purple600 : colors.hex.gray500
-              }
-              fill={post.saved_by_user ? colors.hex.purple600 : "none"}
-            />
-          </Pressable>
-        </View>
+        <PostActions
+          post={post}
+          onLike={onLike}
+          onSave={onSave}
+          onOpenComments={onOpenComments}
+          leading={
+            visibilityIcon ? (
+              <View className="flex-row items-center">
+                {visibilityIcon}
+                <Text className="text-xs text-gray-500 ml-1 capitalize">
+                  {post.visibility}
+                </Text>
+              </View>
+            ) : undefined
+          }
+        />
       </View>
     </Pressable>
   );

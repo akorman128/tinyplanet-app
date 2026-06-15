@@ -42,19 +42,11 @@ export const HangMarker = React.memo<HangMarkerProps>(
         <View style={styles.container}>
           {selected && (
             <Pressable style={styles.callout} onPress={openDetail}>
-              <View style={styles.calloutHeader}>
-                <View style={styles.hangPill}>
-                  <Text style={styles.hangPillText}>HANG</Text>
-                </View>
-                <Text style={styles.goingText}>
-                  {hang.attendee_count} going
-                </Text>
-              </View>
               <Text style={styles.title} numberOfLines={1}>
                 {hang.title}
               </Text>
               <View style={styles.timeRow}>
-                <Icons.clock size={12} color={colors.hex.coral} />
+                <Icons.clock size={12} />
                 <Text style={styles.timeText}>
                   {formatHangWhen(hang.starts_at)}
                 </Text>
@@ -161,22 +153,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 6,
-  },
-  hangPill: {
-    backgroundColor: colors.hex.coralTint,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 9999,
-  },
-  hangPillText: {
-    fontSize: 10,
-    fontWeight: "700",
-    letterSpacing: 0.6,
-    color: colors.hex.coral,
-  },
-  goingText: {
-    fontSize: 12,
-    color: colors.hex.gray500,
   },
   title: {
     fontSize: 14,
