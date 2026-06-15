@@ -11,6 +11,7 @@ import { useQueryClient, InfiniteData } from "@tanstack/react-query";
 import { useGetFeed } from "@/hooks/useFeed";
 import { PostCard } from "../design-system/PostCard";
 import { TravelPlanCard } from "../design-system/TravelPlanCard";
+import { HangCard } from "../design-system/HangCard";
 import { EmptyState, LoadingState, ErrorState, colors } from "@/design-system";
 import { PostWithAuthor } from "@/types/post";
 import { useCommentCountStore } from "@/stores/commentCountStore";
@@ -108,7 +109,15 @@ export function FeedView() {
     <FlatList
       data={posts}
       renderItem={({ item }) =>
-        isTravelPlanPost(item) ? (
+        item.hang ? (
+          <HangCard
+            post={item}
+            onLike={noop}
+            onSave={noop}
+            onDelete={noop}
+            onOpenComments={handleOpenComments}
+          />
+        ) : isTravelPlanPost(item) ? (
           <TravelPlanCard
             post={item}
             onLike={noop}

@@ -1,7 +1,7 @@
 import { TouchableOpacity, TouchableOpacityProps } from "react-native";
 import { Text } from "./Text";
 
-type ButtonVariant = "primary" | "secondary";
+type ButtonVariant = "primary" | "secondary" | "coral";
 type ButtonSize = "sm" | "md" | "lg";
 
 interface ButtonProps extends TouchableOpacityProps {
@@ -14,21 +14,25 @@ interface ButtonProps extends TouchableOpacityProps {
 const variantStyles = {
   primary: "bg-black active:bg-gray-800",
   secondary: "bg-gray-300 active:bg-gray-400",
+  coral: "bg-coral active:bg-coral-pressed",
 };
 
 const disabledVariantStyles = {
   primary: "bg-gray-300",
   secondary: "bg-gray-100 border-2 border-gray-300",
+  coral: "bg-gray-300",
 };
 
 const textStyles = {
   primary: "text-white",
   secondary: "text-black",
+  coral: "text-white",
 };
 
 const disabledTextStyles = {
   primary: "text-gray-500",
   secondary: "text-gray-400",
+  coral: "text-gray-500",
 };
 
 const sizeStyles = {

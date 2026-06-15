@@ -57,6 +57,12 @@ export const colors = {
     black: "#000000",
     cream: "#faf9f5",
 
+    // Hang accent ramp (coral)
+    coral: "#ff6b6b", // Hang primary CTA, pin ring/dot, accent icons
+    coralPressed: "#e8475f", // Active/pressed CTA state
+    coralTint: "#ffedec", // "Hang" badge background, soft surfaces
+    coralShadow: "rgba(255,107,107,0.4)", // Drop shadow under filled coral button
+
     // Semantic colors
     error: "#ef4444", // red-500 equivalent
   },

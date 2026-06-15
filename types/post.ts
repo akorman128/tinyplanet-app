@@ -1,3 +1,5 @@
+import type { HangFeedEmbed } from "./hang";
+
 export type PostVisibility = "friends" | "mutuals" | "public";
 
 export interface AttachedList {
@@ -31,6 +33,8 @@ export interface PostWithAuthor extends Post {
   liked_by_user: boolean;
   saved_by_user: boolean;
   attached_list: AttachedList | null;
+  // Present when the post is the carrier for a Hang (see get_feed_posts)
+  hang?: HangFeedEmbed | null;
 }
 
 export interface CreatePostInput {

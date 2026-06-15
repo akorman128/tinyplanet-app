@@ -10,6 +10,11 @@
   /* Background */
   --color-cream: #faf9f5;
 
+  /* Hang accent ramp (coral) — distinct from Travel-Plans orange and brand purple */
+  --color-coral: #ff6b6b;
+  --color-coral-pressed: #e8475f;
+  --color-coral-tint: #ffedec;
+
   /* Extended purple scale — light → dark, brand anchored at 600 */
   --color-purple-50: #f7f6fe;
   --color-purple-100: #efedfe;

@@ -65,6 +65,15 @@ export default {
       ],
       "expo-notifications",
       [
+        "expo-calendar",
+        {
+          calendarPermission:
+            "Tiny Planet uses your calendar to add Hangs you're going to.",
+          remindersPermission:
+            "Tiny Planet uses reminders to help you keep track of Hangs.",
+        },
+      ],
+      [
         "expo-splash-screen",
         {
           image: "./assets/splash-icon.png",

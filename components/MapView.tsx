@@ -13,6 +13,7 @@ import { ListMarker } from "./ListMarker";
 import { UserLocationMarker } from "./UserLocationMarker";
 import { ConnectionLines } from "./ConnectionLines";
 import { TravelPlanMarker } from "./TravelPlanMarker";
+import { HangMarker } from "./HangMarker";
 import { colors, Text } from "@/design-system";
 import { useRouter } from "expo-router";
 import { useMapStore } from "@/stores/mapStore";
@@ -33,6 +34,7 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
     friendLocations,
     hometownLocations,
     travelPlanLocations,
+    hangLocations,
     listLocations,
     userLocation,
     loading,
@@ -119,6 +121,13 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
     [router]
   );
 
+  const handleHangMarkerPress = useCallback(
+    (hangId: string) => {
+      router.push({ pathname: "/hang/[hangId]", params: { hangId } });
+    },
+    [router]
+  );
+
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-cream">
@@ -201,6 +210,16 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
               onPress={handleMarkerPress}
             />
           )}
+
+          {/* === Hangs filter: quiet host-avatar pins === */}
+          {mapFilter === "hangs" &&
+            hangLocations.map((hang) => (
+              <HangMarker
+                key={`hang-${hang.id}`}
+                hang={hang}
+                onOpenDetail={handleHangMarkerPress}
+              />
+            ))}
 
           {/* === Hometown filter === */}
           {mapFilter === "hometown" &&

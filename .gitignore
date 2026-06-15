@@ -51,3 +51,6 @@ android/
 
 # Claude Code personal memory (plans are committed; memory stays local)
 .claude/memory/
+
+# Claude Code linked worktrees (live git worktrees, never committed)
+.claude/worktrees/

@@ -20,6 +20,7 @@ import { useMapStore, type MapFilter } from "@/stores/mapStore";
 const MAP_FILTERS: readonly { key: MapFilter; label: string }[] = [
   { key: "friends", label: "✨ Friends" },
   { key: "travel_plans", label: "🚀 Travel Plans" },
+  { key: "hangs", label: "🎉 Hangs" },
   { key: "hometown", label: "🏠 Hometowns" },
   { key: "lists", label: "📋 Lists" },
 ];

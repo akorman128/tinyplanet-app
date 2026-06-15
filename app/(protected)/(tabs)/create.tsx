@@ -36,6 +36,7 @@ const MENU_ITEMS = [
     emoji: "\ud83d\udc8c",
     route: "/create-post" as const,
   },
+  { label: "Hang", emoji: "\ud83c\udf89", route: "/create-hang" as const },
   { label: "Intro", emoji: "\ud83e\udd1d", route: "/create-intro" as const },
 ];
 
