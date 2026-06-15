@@ -32,7 +32,7 @@ import { logger } from "@/utils/logger";
 
 type TabId = "requests" | "invite";
 
-const TABS: Tab[] = [
+const TABS: Tab<TabId>[] = [
   { id: "requests", label: "Requests" },
   { id: "invite", label: "Invite" },
 ];
@@ -260,11 +260,7 @@ export default function FriendsScreen() {
     <>
       <Stack.Screen options={{ title: "Friends" }} />
       <View className="flex-1 bg-cream">
-        <TabBar
-          tabs={TABS}
-          activeTab={activeTab}
-          onTabChange={(tabId) => setActiveTab(tabId as TabId)}
-        />
+        <TabBar tabs={TABS} activeTab={activeTab} onTabChange={setActiveTab} />
 
         {activeTab === "requests" && renderRequestsTab()}
         {activeTab === "invite" && renderInviteTab()}
