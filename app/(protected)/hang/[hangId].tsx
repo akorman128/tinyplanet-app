@@ -29,11 +29,7 @@ import {
 } from "@/hooks/useHangs";
 import { queryKeys } from "@/lib/queryKeys";
 import { buildStaticMapUrl } from "@/utils/mapSnapshot";
-import {
-  formatHangWhen,
-  formatHangDateLong,
-  formatHangTimeRange,
-} from "@/utils/hangTime";
+import { formatHangWhen, formatHangDateLong } from "@/utils/hangTime";
 import { addHangToCalendar } from "@/utils/addToCalendar";
 import { logger } from "@/utils/logger";
 import { HangDetail } from "@/types/hang";
@@ -229,7 +225,7 @@ function HangDetailContent({
           </View>
 
           {/* Title + host overlay */}
-          <View className="absolute left-5 right-5 bottom-5">
+          <View className="absolute left-5 right-5 bottom-8">
             <Text className="text-xs font-bold tracking-widest text-white/90 mb-1">
               HANG · {eyebrowDay}
             </Text>
@@ -269,9 +265,6 @@ function HangDetailContent({
             <View className="ml-3">
               <Text className="text-[15px] font-semibold text-gray-900">
                 {formatHangDateLong(hang.starts_at)}
-              </Text>
-              <Text className="text-sm text-gray-500">
-                {formatHangTimeRange(hang.starts_at)}
               </Text>
             </View>
           </View>

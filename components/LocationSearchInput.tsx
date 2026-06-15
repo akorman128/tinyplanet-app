@@ -215,7 +215,7 @@ export function LocationSearchInput({
           value={query}
           onChangeText={handleChangeText}
           placeholder={placeholder}
-          className={`font-sans py-3 px-4 rounded-xl bg-white text-base text-gray-900 leading-5 ${inputClassName}`}
+          className={`font-sans py-3 px-4 rounded-xl bg-white text-base text-gray-900 leading-5 shadow-xs ${inputClassName}`}
           placeholderTextColor={colors.hex.placeholder}
           autoCapitalize="words"
           autoCorrect={false}

@@ -177,20 +177,10 @@ export function HangCard({
         {/* Legibility gradient (transparent → dark at bottom) */}
         <ImageGradient
           stops={[
-            { offset: 0.45, opacity: 0 },
+            { offset: 0.35, opacity: 0 },
             { offset: 1, opacity: 0.5 },
           ]}
         />
-
-        {/* HANG badge */}
-        <View
-          className="absolute top-3 left-3 px-2.5 py-1 rounded-full"
-          style={{ backgroundColor: "rgba(0,0,0,0.34)" }}
-        >
-          <Text className="text-[11px] font-bold tracking-wider text-white">
-            HANG
-          </Text>
-        </View>
 
         {/* Time bottom-left */}
         <View className="absolute bottom-3 left-3 flex-row items-center">
