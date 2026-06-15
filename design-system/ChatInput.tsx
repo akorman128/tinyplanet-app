@@ -99,7 +99,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             placeholderTextColor={colors.hex.placeholder}
             multiline
             maxLength={1000}
-            className="font-sans flex-1 bg-gray-100 rounded-lg px-4 py-4 max-h-24"
+            className="flex-1 bg-gray-100 rounded-lg px-4 py-4 max-h-24"
             style={{ fontSize: 16 }}
           />
           <Pressable

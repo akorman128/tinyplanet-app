@@ -60,11 +60,7 @@ export default function CreateListScreen() {
     >
       <ScreenHeader title="Create List" onClose={handleCancel} />
       <View className="flex-1">
-        <ListForm
-          onSubmit={handleSubmit}
-          onCancel={handleCancel}
-          initialPlaces={initialPlaces}
-        />
+        <ListForm onSubmit={handleSubmit} initialPlaces={initialPlaces} />
       </View>
     </SafeAreaView>
   );

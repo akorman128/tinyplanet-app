@@ -13,7 +13,7 @@ export function Text({
 
   return (
     <RNText
-      className={`font-sans ${className}`}
+      className={`${className}`}
       style={StyleSheet.flatten([themeStyle, style])}
       {...props}
     />
