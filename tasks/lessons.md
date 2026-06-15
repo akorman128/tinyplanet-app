@@ -1,21 +1,5 @@
 # Lessons
 
-## "Remove the header" on a screen = overlay, not delete
-
-When the user references a transparent-header screen (e.g. `list/[listId]` with
-`headerTransparent: true`) and asks to "remove the headers" from other pages,
-the intent is: **the header should overlay the content instead of occupying
-vertical space**, and screen titles aren't needed.
-
-- Don't offer a "hide it completely vs make it transparent" binary — default to
-  transparent overlay so back/action buttons stay accessible.
-- For in-component title bars (tab screens), delete the title and add a top
-  safe-area inset (`useSafeAreaInsets`) to the scroll/list content so the first
-  row clears the notch.
-- For native Stack headers, use `headerTransparent: true` + transparent
-  `headerStyle` + `headerShadowVisible: false`, and pad the content past the
-  floating header (`insets.top + ~64`).
-
 ## Auth-guard migrations: never blanket-guard an OPTIONAL RPC param
 
 A `SECURITY DEFINER` IDOR guard of the form
@@ -49,54 +33,6 @@ own path flag over `cd`:
 `npx vitest`/`npx tsc` resolve config from the worktree automatically when its
 `node_modules` is installed there.
 
-## "Emulator" ≠ Android — confirm platform before platform-specific fixes
-
-The user said "emulator" and I assumed Android, shipping an Android-only fix
-(`@rnmapbox/maps` `surfaceView={false}`) for what was actually an **iOS
-Simulator** bug. On macOS "emulator" loosely covers the iOS Simulator too.
-Confirm iOS vs Android before any platform-gated change.
-
-Debugging signature notes for "screen turns black in dev":
-- Black that **survives a JS reload** and only clears on a **full app restart**
-  = native-side state, not JS (a reload resets all JS/React/Reanimated state).
-- But black on **every screen including ones with no map** + **silent (no red
-  box, no Metro error)** rules out a single native view (Mapbox) and points at
-  the **build/tooling layer** — prime suspects on a bleeding-edge stack:
-  experimental **React Compiler** (`experiments.reactCompiler`, rewrites every
-  component → breaks on every edit), the New-Arch Fabric Fast Refresh path, or
-  the Metro CSS transformer (uniwind/nativewind).
-- None of the app's own fallbacks render true black here (splash, loading,
-  ErrorBoundary are all `bg-cream`) — a genuinely black screen is a strong tell
-  it's the native host/renderer, not a React fallback state.
-
-## ROOT CAUSE (confirmed): `global.css` imported in the provider-heavy root layout
-
-The "black screen on every UI edit, needs full restart" bug was **uniwind +
-Metro Fast Refresh**, not Mapbox / React Compiler / native renderer (all ruled
-out first — three wrong guesses before instrumenting).
-
-- `app/_layout.tsx` imported `../global.css` at the **root** module, which also
-  holds every provider (ErrorBoundary→Supabase→Query→LocationPermission) and
-  heavy module-level side effects (`initializeMapbox`, `initMonitoring`,
-  `SplashScreen.preventAutoHideAsync`). Per the **uniwind FAQ**, importing
-  `global.css` in a provider-heavy module makes Metro Fast Refresh unable to
-  patch surgically, so it **re-executes the whole root module** on every UI
-  edit → tears down/rebuilds the Fabric tree → black until a full process
-  restart (a JS reload doesn't clear the wedged native splash/surface state).
-- **Fix:** move `import global.css` out of the root into provider-free layouts
-  (`app/(public)/_layout.tsx` + `app/(protected)/_layout.tsx`, which cover all
-  routes). Then `npx expo start --clear`.
-
-Debugging technique that cracked it (after Metro/red-box were silent):
-- Capture the iOS Simulator **unified log** for just the app process:
-  `xcrun simctl spawn booted log stream --predicate 'process == "TinyPlanet"'`
-  (needs `dangerouslyDisableSandbox`). JS/Hermes errors do NOT appear there, but
-  the lone app-level signal did: a CoreAnimation **"deleted thread with
-  uncommitted CATransaction"** warning = view-tree manipulated off the main
-  thread and torn down mid-commit → the silent black screen. That pointed at a
-  Fast-Refresh-driven full root teardown, which the vendor FAQ then confirmed.
-- After 3 failed fixes, STOP guessing and instrument (per systematic-debugging
-  Phase 4.5). The unified-log capture + vendor-doc search found it in one pass.
 
 ## `post_visibility` enum can't express "friends + mutuals" — gate special posts by their own audience
 
@@ -150,3 +86,21 @@ instances" warning is the tell.
   rpc file in isolation, or fix the shared sign-in helper, before trusting a
   red full-suite run. Diff against the baseline (temporarily remove your new
   migrations + `db reset`) to confirm a failure is pre-existing, not yours.
+
+## "Text not visible" on an image overlay = contrast/scrim, not glyph clipping
+
+When a user reports overlay text (a hero title, caption over a photo/map) is
+"not visible / not completely visible", the cause is almost always **white text
+over a light/bright background**, not CSS line-height clipping the glyphs. I
+guessed `leading-8` was clipping the Hang detail title; the real cause was the
+white title sitting above the hero's bottom legibility gradient, over the bright
+part of the static map → white-on-white.
+
+- First check: text color vs the actual pixels behind it, and whether the
+  gradient/scrim that's supposed to guarantee contrast actually **reaches** the
+  text. Overlay blocks anchored at the bottom (`bottom-8`) often extend higher
+  than a short scrim covers.
+- Fix the legibility mechanism (extend/darken the scrim so it covers the whole
+  text block; add a `textShadow` for safety), not the typography.
+- Don't infer the cause of a visual bug from the code alone — the user can see
+  the screen and you can't. Lead with their diagnosis, or actually render it.
