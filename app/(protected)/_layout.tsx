@@ -32,13 +32,6 @@ export default function ProtectedLayout() {
       <Stack.Screen name="create-intro" options={{ headerShown: false }} />
       <Stack.Screen name="comments" options={{ headerShown: false }} />
       <Stack.Screen
-        name="theme-editor"
-        options={{
-          headerShown: false,
-          presentation: "modal",
-        }}
-      />
-      <Stack.Screen
         name="search"
         options={{
           headerShown: false,
