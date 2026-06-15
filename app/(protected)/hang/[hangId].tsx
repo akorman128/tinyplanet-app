@@ -16,6 +16,7 @@ import {
   LoadingState,
   ErrorState,
   Avatar,
+  AvatarStack,
   ImageGradient,
   Text,
   Icons,
@@ -187,19 +188,19 @@ function HangDetailContent({
           ) : (
             <View
               style={{ height: HERO_HEIGHT }}
-              className="bg-coral-tint justify-center items-center"
+              className="bg-gray-100 justify-center items-center"
             >
-              <Icons.pin size={36} color={colors.hex.coral} />
+              <Icons.pin size={36} color={colors.hex.gray500} />
             </View>
           )}
 
           {/* Top + bottom gradients for legibility */}
           <ImageGradient
             stops={[
-              { offset: 0, opacity: 0.35 },
+              { offset: 0, opacity: 0.4 },
               { offset: 0.35, opacity: 0 },
-              { offset: 0.6, opacity: 0 },
-              { offset: 1, opacity: 0.6 },
+              { offset: 0.55, opacity: 0.35 },
+              { offset: 1, opacity: 0.9 },
             ]}
           />
 
@@ -229,7 +230,14 @@ function HangDetailContent({
             <Text className="text-xs font-bold tracking-widest text-white/90 mb-1">
               HANG · {eyebrowDay}
             </Text>
-            <Text className="text-[27px] font-bold text-white leading-8">
+            <Text
+              className="text-[27px] font-bold text-white leading-8"
+              style={{
+                textShadowColor: "rgba(0,0,0,0.5)",
+                textShadowOffset: { width: 0, height: 1 },
+                textShadowRadius: 8,
+              }}
+            >
               {hang.title}
             </Text>
             <Link
@@ -261,7 +269,7 @@ function HangDetailContent({
         >
           {/* Date */}
           <View className="flex-row items-center mb-4">
-            <Icons.calendar size={20} color={colors.hex.coral} />
+            <Icons.calendar size={20} color={colors.hex.gray900} />
             <View className="ml-3">
               <Text className="text-[15px] font-semibold text-gray-900">
                 {formatHangDateLong(hang.starts_at)}
@@ -274,7 +282,7 @@ function HangDetailContent({
             onPress={handleOpenMaps}
             className="flex-row items-center mb-4"
           >
-            <Icons.pin size={20} color={colors.hex.coral} />
+            <Icons.pin size={20} color={colors.hex.gray900} />
             <View className="ml-3 flex-1">
               <Text className="text-[15px] font-semibold text-gray-900">
                 {hang.location_name}
@@ -287,35 +295,15 @@ function HangDetailContent({
           <View className="h-px bg-gray-100 my-2" />
 
           {/* Attendees */}
-          <View className="flex-row items-center justify-between mt-2 mb-3">
-            <Text className="text-base font-semibold text-gray-900">
-              Going · {hang.attendee_count}
-            </Text>
-          </View>
-          <View className="flex-row items-center flex-wrap gap-3 mb-2">
-            {hang.attendees
-              .filter((a) => a.id !== hang.user_id)
-              .map((a) => (
-                <Link
-                  key={a.id}
-                  href={{ pathname: "/profile", params: { userId: a.id } }}
-                  asChild
-                >
-                  <Pressable className="items-center" style={{ width: 56 }}>
-                    <Avatar
-                      fullName={a.full_name}
-                      avatarUrl={a.avatar_url ?? undefined}
-                      size="small"
-                    />
-                    <Text
-                      className="text-xs text-gray-600 mt-1"
-                      numberOfLines={1}
-                    >
-                      {a.full_name.split(" ")[0]}
-                    </Text>
-                  </Pressable>
-                </Link>
-              ))}
+          <View className="flex-row items-center gap-3 mt-2 mb-3">
+            <Text className="text-base font-semibold text-gray-900">Going</Text>
+            {hang.attendees.length > 0 && (
+              <AvatarStack
+                people={hang.attendees}
+                total={hang.attendee_count}
+                size={32}
+              />
+            )}
           </View>
 
           {hang.description ? (
@@ -336,7 +324,7 @@ function HangDetailContent({
               onPress={() => addHangToCalendar(hang)}
               className="flex-1 flex-row items-center justify-center border border-gray-200 rounded-xl py-3"
             >
-              <Icons.calendar size={18} color={colors.hex.coral} />
+              <Icons.calendar size={18} color={colors.hex.gray900} />
               <Text className="ml-2 text-sm font-medium text-gray-900">
                 Calendar
               </Text>
@@ -345,7 +333,7 @@ function HangDetailContent({
               onPress={handleOpenMaps}
               className="flex-1 flex-row items-center justify-center border border-gray-200 rounded-xl py-3"
             >
-              <Icons.pin size={18} color={colors.hex.coral} />
+              <Icons.pin size={18} color={colors.hex.gray900} />
               <Text className="ml-2 text-sm font-medium text-gray-900">
                 Maps
               </Text>
@@ -370,8 +358,7 @@ function HangDetailContent({
             </Pressable>
             <Pressable
               onPress={confirmDelete}
-              className="flex-1 flex-row items-center justify-center rounded-xl py-3.5"
-              style={{ backgroundColor: colors.hex.coralTint }}
+              className="flex-1 flex-row items-center justify-center rounded-xl py-3.5 bg-gray-100"
             >
               <Icons.trash size={18} color={colors.hex.error} />
               <Text
@@ -386,18 +373,17 @@ function HangDetailContent({
           <Pressable
             onPress={handleRsvpToggle}
             disabled={rsvpPending}
-            className="flex-row items-center justify-center rounded-xl py-3.5"
-            style={{
-              backgroundColor: going ? colors.hex.coralTint : colors.hex.coral,
-            }}
+            className={`flex-row items-center justify-center rounded-xl py-3.5 ${
+              going ? "bg-gray-100" : "bg-black"
+            }`}
           >
             <Icons.check
               size={20}
-              color={going ? colors.hex.coral : colors.hex.white}
+              color={going ? colors.hex.gray900 : colors.hex.white}
             />
             <Text
               className="ml-2 font-semibold text-base"
-              style={{ color: going ? colors.hex.coral : colors.hex.white }}
+              style={{ color: going ? colors.hex.gray900 : colors.hex.white }}
             >
               {going ? "Going ✓" : "I'm Going"}
             </Text>

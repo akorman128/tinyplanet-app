@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Linking } from "react-native";
 import { Stack, router } from "expo-router";
-import { Text, Button, Slider, MenuRow } from "@/design-system";
+import { Button, Slider, MenuRow } from "@/design-system";
 import { Body } from "@/design-system/Typography";
 import { useSupabase } from "@/hooks/useSupabase";
 import { useLocationStore } from "@/stores/locationStore";
@@ -38,13 +38,7 @@ export default function MutualsScreen() {
             icon={<Body>🚫</Body>}
             label="Blocked Users"
             onPress={() => router.push("/blocked-users")}
-            position="first"
-          />
-          <MenuRow
-            icon={<Body>🎨</Body>}
-            label="Theme"
-            onPress={() => router.push("/theme-editor")}
-            position="last"
+            position="standalone"
           />
           <View className="flex flex-col gap-2">
             <Button
