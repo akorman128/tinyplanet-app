@@ -146,7 +146,7 @@ export default function EditListScreen() {
             <TextInput
               value={title}
               onChangeText={setTitle}
-              className="font-sans border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-900"
+              className="rounded-lg px-4 py-3 text-base text-gray-900 shadow-xs"
               placeholder="List name"
               autoFocus
             />
@@ -170,7 +170,7 @@ export default function EditListScreen() {
             <TextInput
               value={note}
               onChangeText={setNote}
-              className="font-sans border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-900"
+              className="border border-gray-300 rounded-lg px-4 py-3 text-base text-gray-900"
               placeholder="Add any notes about this list..."
               multiline
               numberOfLines={3}

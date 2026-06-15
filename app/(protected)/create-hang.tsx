@@ -53,7 +53,7 @@ export default function CreateHangScreen() {
               : null,
             startsAt: new Date(),
           }}
-          submitLabel="Create"
+          submitLabel="Hang"
           isSubmitting={createHang.isPending}
           onSubmit={onSubmit}
         />

@@ -32,7 +32,7 @@ const MENU_ITEMS = [
   },
   { label: "List", emoji: "\ud83d\udccb", route: "/create-list" as const },
   {
-    label: "Ask / Tell",
+    label: "Post",
     emoji: "\ud83d\udc8c",
     route: "/create-post" as const,
   },

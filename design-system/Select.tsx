@@ -60,7 +60,7 @@ export function Select<T extends string>({
 
       <View ref={triggerRef} collapsable={false}>
         <Pressable
-          className={`flex-row items-center justify-between px-4 py-3 bg-white border rounded-lg ${
+          className={`flex-row items-center justify-between px-4 py-3 bg-white shadow-xs rounded-lg ${
             error
               ? "border-red-500"
               : isOpen

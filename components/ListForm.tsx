@@ -48,14 +48,12 @@ type ListFormData = z.infer<typeof listSchema>;
 
 interface ListFormProps {
   onSubmit: (data: CreateListInput) => Promise<void>;
-  onCancel: () => void;
   isLoading?: boolean;
   initialPlaces?: string;
 }
 
 export function ListForm({
   onSubmit,
-  onCancel,
   isLoading,
   initialPlaces = "",
 }: ListFormProps) {
@@ -177,7 +175,7 @@ export function ListForm({
 
         {/* Places Input */}
         <View>
-          <Label className="mb-2">Places</Label>
+          <Label className="mb-2 font-semibold">Places</Label>
           <Controller
             control={control}
             name="places"
@@ -190,7 +188,7 @@ export function ListForm({
                 multiline
                 numberOfLines={6}
                 textAlignVertical="top"
-                className="font-sans bg-white border-2 border-gray-300 rounded-xl px-4 py-3 text-base"
+                className="bg-white shadow-xs rounded-xl px-4 py-3 text-base"
                 placeholderTextColor="#9CA3AF"
                 style={{ minHeight: 120 }}
               />
@@ -212,7 +210,7 @@ export function ListForm({
           disabled={isLoading}
           className="w-full mb-4"
         >
-          {isLoading ? "Creating..." : "Create List"}
+          {isLoading ? "Creating..." : "List"}
         </Button>
       </View>
     </ScrollView>

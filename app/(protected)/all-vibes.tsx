@@ -182,7 +182,7 @@ export default function AllVibesScreen() {
               value={emojiInput}
               onChangeText={setEmojiInput}
               placeholder="🔥💎✨"
-              className="font-sans border border-gray-300 rounded-lg p-3 mb-4 text-2xl"
+              className="border border-gray-300 rounded-lg p-3 mb-4 text-2xl"
               style={{ color: colors.hex.purple900 }}
               maxLength={50}
               autoFocus
