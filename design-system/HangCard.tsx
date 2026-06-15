@@ -5,14 +5,13 @@ import { Text } from "./Text";
 import { Avatar } from "./Avatar";
 import { AvatarStack } from "./AvatarStack";
 import { ImageGradient } from "./ImageGradient";
+import { PostActions } from "./PostActions";
 import { Icons } from "./Icons";
 import { colors } from "./colors";
 import { PostWithAuthor } from "@/types/post";
-import { useLikePost, useUnlikePost } from "@/hooks/useLikes";
-import { useSavePost, useUnsavePost } from "@/hooks/useSavedPosts";
 import { useHangRsvpToggle, useDeleteHang } from "@/hooks/useHangs";
 import { useSupabase } from "@/hooks/useSupabase";
-import { formatTimeAgo, hapticLight } from "@/utils";
+import { formatTimeAgo } from "@/utils";
 import { buildStaticMapUrl } from "@/utils/mapSnapshot";
 import { formatHangWhen } from "@/utils/hangTime";
 import { logger } from "@/utils/logger";
@@ -41,10 +40,6 @@ export function HangCard({
   const hang = post.hang;
   const router = useRouter();
   const { session } = useSupabase();
-  const likePost = useLikePost();
-  const unlikePost = useUnlikePost();
-  const savePost = useSavePost();
-  const unsavePost = useUnsavePost();
   const deleteHang = useDeleteHang();
 
   const isOwnHang = session?.user?.id === post.author.id;
@@ -59,9 +54,6 @@ export function HangCard({
     { going: hang?.viewer_is_going ?? false, count: hang?.attendee_count ?? 0 },
     { disabled: isOwnHang }
   );
-
-  const isLiking = likePost.isPending || unlikePost.isPending;
-  const isSaving = savePost.isPending || unsavePost.isPending;
 
   const bannerUrl = useMemo(
     () =>
@@ -82,40 +74,6 @@ export function HangCard({
 
   const openDetail = () =>
     router.push({ pathname: "/hang/[hangId]", params: { hangId: hang.id } });
-
-  const handleLikeToggle = async () => {
-    if (isLiking) return;
-    hapticLight();
-    const wasLiked = post.liked_by_user;
-    onLike(post.id, {
-      liked_by_user: !wasLiked,
-      like_count: wasLiked ? post.like_count - 1 : post.like_count + 1,
-    });
-    try {
-      if (wasLiked) await unlikePost.mutateAsync(post.id);
-      else await likePost.mutateAsync(post.id);
-    } catch (err) {
-      logger.error("Error toggling like:", err);
-      onLike(post.id, {
-        liked_by_user: wasLiked,
-        like_count: post.like_count,
-      });
-    }
-  };
-
-  const handleSaveToggle = async () => {
-    if (isSaving) return;
-    hapticLight();
-    const wasSaved = post.saved_by_user;
-    onSave(post.id, { saved_by_user: !wasSaved });
-    try {
-      if (wasSaved) await unsavePost.mutateAsync(post.id);
-      else await savePost.mutateAsync(post.id);
-    } catch (err) {
-      logger.error("Error toggling save:", err);
-      onSave(post.id, { saved_by_user: wasSaved });
-    }
-  };
 
   const handleOptions = () => {
     if (!isOwnHang) return;
@@ -156,7 +114,7 @@ export function HangCard({
   };
 
   return (
-    <View className="bg-white border-b border-gray-200">
+    <View className="bg- border-b border-gray-200">
       {/* Map banner */}
       <Pressable onPress={openDetail} style={{ height: BANNER_HEIGHT }}>
         {bannerUrl ? (
@@ -177,20 +135,10 @@ export function HangCard({
         {/* Legibility gradient (transparent → dark at bottom) */}
         <ImageGradient
           stops={[
-            { offset: 0.45, opacity: 0 },
+            { offset: 0.35, opacity: 0 },
             { offset: 1, opacity: 0.5 },
           ]}
         />
-
-        {/* HANG badge */}
-        <View
-          className="absolute top-3 left-3 px-2.5 py-1 rounded-full"
-          style={{ backgroundColor: "rgba(0,0,0,0.34)" }}
-        >
-          <Text className="text-[11px] font-bold tracking-wider text-white">
-            HANG
-          </Text>
-        </View>
 
         {/* Time bottom-left */}
         <View className="absolute bottom-3 left-3 flex-row items-center">
@@ -249,7 +197,7 @@ export function HangCard({
         </Pressable>
 
         {/* Attendees + actions */}
-        <View className="flex-row items-center justify-between mt-3">
+        <View className="flex-row items-center justify-between mt-3 mb-3">
           <View className="flex-row items-center">
             {hang.attendees.length > 0 && (
               <AvatarStack
@@ -263,89 +211,48 @@ export function HangCard({
             </Text>
           </View>
 
-          <View className="flex-row items-center gap-4">
-            <Pressable
-              className="flex-row items-center"
-              onPress={handleLikeToggle}
-              disabled={isLiking}
-            >
-              <Icons.heartOutline
-                size={20}
-                color={
-                  post.liked_by_user ? colors.hex.error : colors.hex.gray500
-                }
-              />
-              {post.like_count > 0 && (
-                <Text
-                  className={`text-sm ml-1 ${
-                    post.liked_by_user ? "text-red-500" : "text-gray-500"
-                  }`}
-                >
-                  {post.like_count}
-                </Text>
-              )}
-            </Pressable>
-
-            <Pressable
-              className="flex-row items-center"
-              onPress={() => onOpenComments(post.id, post.comment_count)}
-            >
-              <Icons.comment size={20} color={colors.hex.gray500} />
-              {post.comment_count > 0 && (
-                <Text className="text-sm text-gray-500 ml-1">
-                  {post.comment_count}
-                </Text>
-              )}
-            </Pressable>
-
-            <Pressable onPress={handleSaveToggle} disabled={isSaving}>
-              <Icons.bookmark
-                size={20}
-                color={
-                  post.saved_by_user ? colors.hex.purple600 : colors.hex.gray500
-                }
-                fill={post.saved_by_user ? colors.hex.purple600 : "none"}
-              />
-            </Pressable>
-          </View>
-        </View>
-
-        {/* RSVP CTA */}
-        <Pressable
-          onPress={handleRsvpToggle}
-          disabled={rsvpPending || isOwnHang}
-          className="mt-4 flex-row items-center justify-center rounded-xl py-3"
-          style={{
-            backgroundColor: isOwnHang
-              ? colors.hex.gray300
-              : going
-                ? colors.hex.coralTint
-                : colors.hex.coral,
-          }}
-        >
-          <Icons.check
-            size={18}
-            color={
-              isOwnHang
-                ? colors.hex.gray600
-                : going
-                  ? colors.hex.coral
-                  : colors.hex.white
-            }
-          />
-          <Text
-            className="ml-2 font-semibold"
+          <Pressable
+            onPress={handleRsvpToggle}
+            disabled={rsvpPending || isOwnHang}
+            className="flex-row items-center justify-center rounded-lg p-2"
             style={{
-              color: isOwnHang
-                ? colors.hex.gray600
+              backgroundColor: isOwnHang
+                ? colors.hex.gray300
                 : going
-                  ? colors.hex.coral
-                  : colors.hex.white,
+                  ? colors.black
+                  : colors.black,
             }}
           >
-            {isOwnHang ? "You're going" : going ? "Going" : "I'm Going"}
-          </Text>
-        </Pressable>
+            <Icons.check
+              size={18}
+              color={
+                isOwnHang
+                  ? colors.hex.gray600
+                  : going
+                    ? colors.hex.coral
+                    : colors.hex.white
+              }
+            />
+            <Text
+              className="ml-2 font-semibold"
+              style={{
+                color: isOwnHang
+                  ? colors.hex.gray600
+                  : going
+                    ? colors.hex.coral
+                    : colors.hex.white,
+              }}
+            >
+              {isOwnHang ? "You're going" : going ? "Going" : "I'm Going"}
+            </Text>
+          </Pressable>
+        </View>
+        <PostActions
+          post={post}
+          onLike={onLike}
+          onSave={onSave}
+          onOpenComments={onOpenComments}
+        />
       </View>
     </View>
   );

@@ -46,6 +46,8 @@ export { ChannelListItem } from "./ChannelListItem";
 export { CommentItem } from "./CommentItem";
 export { FriendRequestItem } from "./FriendRequestItem";
 export { MessageBubble } from "./MessageBubble";
+export { PostActions } from "./PostActions";
+export type { PostActionsProps } from "./PostActions";
 export { PostCard } from "./PostCard";
 export { TravelPlanCard } from "./TravelPlanCard";
 export { HangCard } from "./HangCard";

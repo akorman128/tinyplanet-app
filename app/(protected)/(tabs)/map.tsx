@@ -137,11 +137,13 @@ export default function MapTab() {
           style={{ top: insets.top + 120 }}
         >
           {/* Connection-lines toggle (vertical) */}
-          <VerticalToggle
-            value={showConnectionLines}
-            onValueChange={setShowConnectionLines}
-            accessibilityLabel="Toggle connection lines"
-          />
+          {(mapFilter === "friends" || mapFilter === "hometown") && (
+            <VerticalToggle
+              value={showConnectionLines}
+              onValueChange={setShowConnectionLines}
+              accessibilityLabel="Toggle connection lines"
+            />
+          )}
 
           {/* Recenter on user location */}
           <TouchableOpacity

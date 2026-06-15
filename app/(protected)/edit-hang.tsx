@@ -1,11 +1,8 @@
 import React from "react";
 import { View, Alert } from "react-native";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, LoadingState, ErrorState } from "@/design-system";
-import { HangForm, hangSchema, HangFormData } from "@/components/HangForm";
+import { LoadingState, ErrorState } from "@/design-system";
+import { HangForm, HangFormData } from "@/components/HangForm";
 import { useGetHangDetail, useUpdateHang } from "@/hooks/useHangs";
 import { HangDetail } from "@/types/hang";
 import { logger } from "@/utils/logger";
@@ -13,25 +10,6 @@ import { logger } from "@/utils/logger";
 function EditHangForm({ hang }: { hang: HangDetail }) {
   const router = useRouter();
   const updateHang = useUpdateHang();
-
-  const {
-    control,
-    handleSubmit,
-    formState: { errors, isValid },
-  } = useForm<HangFormData>({
-    resolver: zodResolver(hangSchema),
-    defaultValues: {
-      title: hang.title,
-      description: hang.description ?? "",
-      location: {
-        name: hang.location_name,
-        latitude: hang.latitude,
-        longitude: hang.longitude,
-      },
-      startsAt: new Date(hang.starts_at),
-    },
-    mode: "all",
-  });
 
   const onSubmit = async (data: HangFormData) => {
     try {
@@ -59,25 +37,21 @@ function EditHangForm({ hang }: { hang: HangDetail }) {
   };
 
   return (
-    <KeyboardAwareScrollView
-      className="flex-1"
-      contentContainerClassName="px-6 pt-6 pb-12"
-      enableOnAndroid
-      extraScrollHeight={20}
-      keyboardShouldPersistTaps="handled"
-    >
-      <HangForm control={control} errors={errors} />
-
-      <View className="mt-6">
-        <Button
-          variant="coral"
-          onPress={handleSubmit(onSubmit)}
-          disabled={!isValid || updateHang.isPending}
-        >
-          Save Changes
-        </Button>
-      </View>
-    </KeyboardAwareScrollView>
+    <HangForm
+      defaultValues={{
+        title: hang.title,
+        description: hang.description ?? "",
+        location: {
+          name: hang.location_name,
+          latitude: hang.latitude,
+          longitude: hang.longitude,
+        },
+        startsAt: new Date(hang.starts_at),
+      }}
+      submitLabel="Save Changes"
+      isSubmitting={updateHang.isPending}
+      onSubmit={onSubmit}
+    />
   );
 }
 

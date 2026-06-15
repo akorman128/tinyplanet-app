@@ -5,11 +5,11 @@ import {
   TextInput,
   Switch,
   ScrollView,
-  SafeAreaView,
+  ActivityIndicator,
   useWindowDimensions,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { Text, Body, Caption, Button, Icons, colors } from "@/design-system";
+import { useRouter, Stack } from "expo-router";
+import { Text, Body, Caption, Icons, colors, MenuRow } from "@/design-system";
 import { ColorPicker } from "@/design-system/ColorPicker";
 import { FontSelector } from "@/components/FontSelector";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
@@ -59,7 +59,7 @@ function PresetCard({ preset, isSelected, width, onPress }: PresetCardProps) {
         backgroundColor: preset.backgroundColor,
         borderRadius: 16,
         borderWidth: isSelected ? 2 : 0,
-        borderColor: isSelected ? colors.hex.purple600 : "transparent",
+        borderColor: isSelected ? colors.hex.purple900 : "transparent",
         justifyContent: "center",
         alignItems: "center",
         overflow: "hidden",
@@ -71,7 +71,7 @@ function PresetCard({ preset, isSelected, width, onPress }: PresetCardProps) {
             position: "absolute",
             top: 8,
             right: 8,
-            backgroundColor: colors.hex.purple600,
+            backgroundColor: colors.hex.gray900,
             borderRadius: 10,
             width: 20,
             height: 20,
@@ -98,29 +98,18 @@ function PresetCard({ preset, isSelected, width, onPress }: PresetCardProps) {
   );
 }
 
-function ActionButtons({
-  onSave,
-  onReset,
-  isDirty,
-  saving,
-}: {
-  onSave: () => void;
-  onReset: () => void;
-  isDirty: boolean;
-  saving: boolean;
-}) {
+function ResetButton({ onReset }: { onReset: () => void }) {
   return (
     <View className="px-4 pt-2 ">
-      <Button onPress={onSave} disabled={!isDirty || saving}>
-        {saving ? "Saving..." : "Save Theme"}
-      </Button>
       <Pressable
         onPress={onReset}
         className="items-center py-2"
         accessibilityRole="button"
         accessibilityLabel="Reset theme to default"
       >
-        <Text className="text-gray-500 text-sm">Reset to Default</Text>
+        <Text className="text-gray-500 text-sm font-semibold">
+          Reset to Default
+        </Text>
       </Pressable>
     </View>
   );
@@ -175,160 +164,180 @@ export default function ThemeEditorScreen() {
   }, [save, router]);
 
   return (
-    <KeyboardAwareScrollView
-      style={{ flex: 1, backgroundColor: colors.hex.cream }}
-    >
-      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-        {!showCustomize ? (
-          <>
-            {/* Preset Grid */}
-            <View className="px-4 pt-4 pb-2">
-              <View
-                style={{
-                  flexDirection: "row",
-                  flexWrap: "wrap",
-                  gap: CARD_GAP,
-                }}
+    <>
+      <Stack.Screen
+        options={{
+          title: "Theme",
+          headerRight: () => {
+            const canSave = isDirty && !saving;
+            return (
+              <Pressable
+                onPress={handleSave}
+                disabled={!canSave}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                {PRESET_THEMES.map((preset) => (
-                  <PresetCard
-                    key={preset.id}
-                    preset={preset}
-                    isSelected={selectedPresetId === preset.id}
-                    width={cardWidth}
-                    onPress={() => applyPreset(preset)}
+                {saving ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={colors.hex.purple600}
                   />
-                ))}
+                ) : (
+                  <Icons.check
+                    size={24}
+                    color={canSave ? colors.hex.purple600 : colors.hex.gray300}
+                  />
+                )}
+              </Pressable>
+            );
+          },
+        }}
+      />
+      <KeyboardAwareScrollView
+        style={{ flex: 1, backgroundColor: colors.hex.cream }}
+      >
+        <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
+          {!showCustomize ? (
+            <>
+              {/* Preset Grid */}
+              <View className="px-4 pt-2">
+                <MenuRow
+                  icon={<Body>⚙️</Body>}
+                  label="Customize"
+                  onPress={() => setShowCustomize(true)}
+                />
               </View>
-            </View>
-
-            <View className="px-4 pt-2">
-              <Button
-                onPress={() => setShowCustomize(true)}
-                variant="secondary"
-              >
-                Customize
-              </Button>
-            </View>
-            <ActionButtons
-              onSave={handleSave}
-              onReset={reset}
-              isDirty={isDirty}
-              saving={saving}
-            />
-          </>
-        ) : (
-          <>
-            {/* Back to Presets */}
-            <View className="px-4 pt-4 pb-2">
-              <Pressable
-                onPress={() => setShowCustomize(false)}
-                accessibilityRole="button"
-                accessibilityLabel="Back to preset themes"
-              >
-                <Icons.arrowLeft size={32} color={colors.black} />
-              </Pressable>
-            </View>
-
-            {/* Font Section */}
-            <View className="px-4 pt-4 pb-2">
-              <Caption className="mb-2 uppercase tracking-wide font-semibold">
-                Font
-              </Caption>
-              <Pressable
-                onPress={() => setFontPickerVisible(true)}
-                accessibilityRole="button"
-                accessibilityLabel={`Current font: ${selectedFontDisplay}. Tap to change.`}
-                className="border border-gray-300 rounded-xl px-4 py-3 bg-white flex-row items-center justify-between"
-              >
-                <Body>{selectedFontDisplay}</Body>
-                <Text className="text-gray-400">Change</Text>
-              </Pressable>
-            </View>
-
-            {/* Background Color Section */}
-            <View className="px-4 pt-4 pb-2">
-              <Caption className="mb-2 uppercase tracking-wide font-semibold">
-                Background Color
-              </Caption>
-              <ColorPicker
-                value={
-                  draftTheme.backgroundColor ?? DEFAULT_THEME.backgroundColor!
-                }
-                onChange={(hex) => updateDraft({ backgroundColor: hex })}
-              />
-            </View>
-
-            {/* Font Color Section */}
-            <View className="px-4 pt-4 pb-2">
-              <Caption className="mb-2 uppercase tracking-wide font-semibold">
-                Font Color
-              </Caption>
-              <ColorPicker
-                value={draftTheme.fontColor ?? DEFAULT_THEME.fontColor!}
-                onChange={(hex) => updateDraft({ fontColor: hex })}
-                contrastAgainst={
-                  draftTheme.backgroundColor ?? DEFAULT_THEME.backgroundColor!
-                }
-              />
-            </View>
-
-            {/* Emoji Border Section */}
-            <View className="px-4 pt-4 pb-2">
-              <View className="flex-row items-center justify-between mb-3">
-                <Caption className="uppercase tracking-wide font-semibold">
-                  Emoji Border
-                </Caption>
-                <Switch
-                  value={emojiBorder.enabled}
-                  onValueChange={(val) => updateEmojiBorder({ enabled: val })}
-                  trackColor={{
-                    false: colors.hex.gray300,
-                    true: colors.hex.purple600,
+              <View className="px-4 pt-4 pb-2">
+                <View
+                  style={{
+                    flexDirection: "row",
+                    flexWrap: "wrap",
+                    gap: CARD_GAP,
                   }}
-                  accessibilityLabel="Toggle emoji border"
+                >
+                  {PRESET_THEMES.map((preset) => (
+                    <PresetCard
+                      key={preset.id}
+                      preset={preset}
+                      isSelected={selectedPresetId === preset.id}
+                      width={cardWidth}
+                      onPress={() => applyPreset(preset)}
+                    />
+                  ))}
+                </View>
+              </View>
+
+              <ResetButton onReset={reset} />
+            </>
+          ) : (
+            <>
+              {/* Back to Presets */}
+              <View className="px-4 pt-4 pb-2">
+                <Pressable
+                  onPress={() => setShowCustomize(false)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Back to preset themes"
+                >
+                  <Icons.arrowLeft size={32} color={colors.black} />
+                </Pressable>
+              </View>
+
+              {/* Font Section */}
+              <View className="px-4 pt-4 pb-2">
+                <Caption className="mb-2 uppercase tracking-wide font-semibold">
+                  Font
+                </Caption>
+                <Pressable
+                  onPress={() => setFontPickerVisible(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Current font: ${selectedFontDisplay}. Tap to change.`}
+                  className="border border-gray-300 rounded-xl px-4 py-3 bg-white flex-row items-center justify-between"
+                >
+                  <Body>{selectedFontDisplay}</Body>
+                  <Text className="text-gray-400">Change</Text>
+                </Pressable>
+              </View>
+
+              {/* Background Color Section */}
+              <View className="px-4 pt-4 pb-2">
+                <Caption className="mb-2 uppercase tracking-wide font-semibold">
+                  Background Color
+                </Caption>
+                <ColorPicker
+                  value={
+                    draftTheme.backgroundColor ?? DEFAULT_THEME.backgroundColor!
+                  }
+                  onChange={(hex) => updateDraft({ backgroundColor: hex })}
                 />
               </View>
 
-              {emojiBorder.enabled && (
-                <View className="gap-3">
-                  <View>
-                    <Caption className="mb-1">Emojis (space-separated)</Caption>
-                    <TextInput
-                      className="border border-gray-300 rounded-lg px-3 py-2 text-base"
-                      value={emojiBorder.emojis.join(" ")}
-                      onChangeText={(text) => {
-                        const emojis = text
-                          .split(/\s+/)
-                          .filter((e) => e.length > 0);
-                        if (emojis.length > 0) {
-                          updateEmojiBorder({ emojis });
-                        }
-                      }}
-                      autoCorrect={false}
-                      accessibilityLabel="Emoji border emojis, space-separated"
-                    />
-                  </View>
+              {/* Font Color Section */}
+              <View className="px-4 pt-4 pb-2">
+                <Caption className="mb-2 uppercase tracking-wide font-semibold">
+                  Font Color
+                </Caption>
+                <ColorPicker
+                  value={draftTheme.fontColor ?? DEFAULT_THEME.fontColor!}
+                  onChange={(hex) => updateDraft({ fontColor: hex })}
+                  contrastAgainst={
+                    draftTheme.backgroundColor ?? DEFAULT_THEME.backgroundColor!
+                  }
+                />
+              </View>
+
+              {/* Emoji Border Section */}
+              <View className="px-4 pt-4 pb-2">
+                <View className="flex-row items-center justify-between mb-3">
+                  <Caption className="uppercase tracking-wide font-semibold">
+                    Emoji Border
+                  </Caption>
+                  <Switch
+                    value={emojiBorder.enabled}
+                    onValueChange={(val) => updateEmojiBorder({ enabled: val })}
+                    trackColor={{
+                      false: colors.hex.gray300,
+                      true: colors.hex.gray900,
+                    }}
+                    accessibilityLabel="Toggle emoji border"
+                  />
                 </View>
-              )}
-            </View>
 
-            <ActionButtons
-              onSave={handleSave}
-              onReset={reset}
-              isDirty={isDirty}
-              saving={saving}
-            />
-          </>
-        )}
-      </ScrollView>
+                {emojiBorder.enabled && (
+                  <View className="gap-3">
+                    <View>
+                      <Caption className="mb-1">
+                        Emojis (space-separated)
+                      </Caption>
+                      <TextInput
+                        className="border border-gray-300 rounded-lg px-3 py-2 text-base"
+                        value={emojiBorder.emojis.join(" ")}
+                        onChangeText={(text) => {
+                          const emojis = text
+                            .split(/\s+/)
+                            .filter((e) => e.length > 0);
+                          if (emojis.length > 0) {
+                            updateEmojiBorder({ emojis });
+                          }
+                        }}
+                        autoCorrect={false}
+                        accessibilityLabel="Emoji border emojis, space-separated"
+                      />
+                    </View>
+                  </View>
+                )}
+              </View>
 
-      <FontSelector
-        visible={fontPickerVisible}
-        onClose={() => setFontPickerVisible(false)}
-        selectedFont={draftTheme.fontFamily}
-        onSelect={(family) => updateDraft({ fontFamily: family })}
-      />
-    </KeyboardAwareScrollView>
+              <ResetButton onReset={reset} />
+            </>
+          )}
+        </ScrollView>
+
+        <FontSelector
+          visible={fontPickerVisible}
+          onClose={() => setFontPickerVisible(false)}
+          selectedFont={draftTheme.fontFamily}
+          onSelect={(family) => updateDraft({ fontFamily: family })}
+        />
+      </KeyboardAwareScrollView>
+    </>
   );
 }

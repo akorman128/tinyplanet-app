@@ -14,7 +14,15 @@ import { z } from "zod";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import { colors, Input, Button, TabBar, Icons } from "@/design-system";
+import {
+  colors,
+  Input,
+  Button,
+  TabBar,
+  Icons,
+  Body,
+  MenuRow,
+} from "@/design-system";
 import {
   LocationSearchInput,
   LocationSearchValue,
@@ -190,6 +198,18 @@ export default function EditProfileScreen() {
         }}
       />
       <View className="flex-1 bg-cream">
+        {/* Theme */}
+        <MenuRow
+          icon={<Body>🎨</Body>}
+          label="Theme"
+          onPress={() =>
+            router.push({
+              pathname: "/theme-editor",
+            })
+          }
+          position="standalone"
+        />
+
         {/* Tabs */}
         <TabBar tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
