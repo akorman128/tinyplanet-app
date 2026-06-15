@@ -12,7 +12,14 @@ import { useGetUserPosts } from "@/hooks/useFeed";
 import { useGetSavedPosts } from "@/hooks/useSavedPosts";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
 import { PostWithAuthor } from "@/types/post";
-import { colors, TabBar, SectionTitle, Caption, Text } from "@/design-system";
+import {
+  colors,
+  TabBar,
+  Tab,
+  SectionTitle,
+  Caption,
+  Text,
+} from "@/design-system";
 import { queryKeys } from "@/lib/queryKeys";
 
 const isTravelPlanPost = (post: PostWithAuthor): boolean => {
@@ -20,6 +27,11 @@ const isTravelPlanPost = (post: PostWithAuthor): boolean => {
 };
 
 type PostFilter = "posts" | "saved";
+
+const POST_TABS: Tab<PostFilter>[] = [
+  { id: "posts", label: "Posts" },
+  { id: "saved", label: "Saved" },
+];
 
 interface UserPostsSectionProps {
   userId: string;
@@ -52,8 +64,8 @@ export function UserPostsSection({
     activeQuery.isRefetching && !activeQuery.isFetchingNextPage;
   const error = activeQuery.error?.message ?? null;
 
-  const handleFilterChange = (newFilter: string) => {
-    setActiveFilter(newFilter as PostFilter);
+  const handleFilterChange = (newFilter: PostFilter) => {
+    setActiveFilter(newFilter);
   };
 
   const handleRefresh = async () => {
@@ -154,10 +166,7 @@ export function UserPostsSection({
       <View className="flex-1">
         {isOwnProfile && (
           <TabBar
-            tabs={[
-              { id: "posts", label: "Posts" },
-              { id: "saved", label: "Saved" },
-            ]}
+            tabs={POST_TABS}
             activeTab={activeFilter}
             onTabChange={handleFilterChange}
           />
@@ -176,10 +185,7 @@ export function UserPostsSection({
       <View className="flex-1">
         {isOwnProfile && (
           <TabBar
-            tabs={[
-              { id: "posts", label: "Posts" },
-              { id: "saved", label: "Saved" },
-            ]}
+            tabs={POST_TABS}
             activeTab={activeFilter}
             onTabChange={handleFilterChange}
           />
@@ -200,10 +206,7 @@ export function UserPostsSection({
       <View className="flex-1">
         {isOwnProfile && (
           <TabBar
-            tabs={[
-              { id: "posts", label: "Posts" },
-              { id: "saved", label: "Saved" },
-            ]}
+            tabs={POST_TABS}
             activeTab={activeFilter}
             onTabChange={handleFilterChange}
           />
@@ -224,10 +227,7 @@ export function UserPostsSection({
     <View className="flex-1">
       {isOwnProfile && (
         <TabBar
-          tabs={[
-            { id: "posts", label: "Posts" },
-            { id: "saved", label: "Saved" },
-          ]}
+          tabs={POST_TABS}
           activeTab={activeFilter}
           onTabChange={handleFilterChange}
         />

@@ -4,24 +4,24 @@ import { Text } from "./Text";
 import { colors } from "@/design-system/colors";
 import { hapticSelection } from "@/utils";
 
-export type Tab = {
-  id: string;
+export type Tab<T extends string = string> = {
+  id: T;
   label: string;
 };
 
-type TabBarProps = {
-  tabs: Tab[];
-  activeTab: string;
-  onTabChange: (tabId: string) => void;
+type TabBarProps<T extends string> = {
+  tabs: readonly Tab<T>[];
+  activeTab: T;
+  onTabChange: (tabId: T) => void;
   className?: string;
 };
 
-export function TabBar({
+export function TabBar<T extends string>({
   tabs,
   activeTab,
   onTabChange,
   className = "",
-}: TabBarProps) {
+}: TabBarProps<T>) {
   return (
     <View className={`flex-row bg-cream  rounded-sm shadow-lg ${className}`}>
       {tabs.map((tab) => {

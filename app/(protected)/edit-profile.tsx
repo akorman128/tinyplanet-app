@@ -11,12 +11,18 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePicker, {
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 import { colors, Input, Button, TabBar, Icons } from "@/design-system";
-import { LocationSearchInput } from "@/components/LocationSearchInput";
+import {
+  LocationSearchInput,
+  LocationSearchValue,
+} from "@/components/LocationSearchInput";
 import { useProfileStore } from "@/stores/profileStore";
 import { useUpdateProfile } from "@/hooks/useProfile";
-import { parsePostGISPoint } from "@/utils/postgis";
+import { Profile } from "@/types/profile";
+import { createPostGISPoint, parsePostGISPoint } from "@/utils/postgis";
 import { logger } from "@/utils/logger";
 
 // Zod schema for profile edit validation
@@ -48,6 +54,16 @@ type EditProfileForm = z.infer<typeof editProfileSchema>;
 
 type Tab = "account" | "socials";
 
+function getInitialHometown(
+  profile: Profile | null
+): LocationSearchValue | null {
+  if (!profile?.hometown) return null;
+  const coords = profile.hometown_location
+    ? parsePostGISPoint(profile.hometown_location)
+    : null;
+  return coords ? { name: profile.hometown, ...coords } : null;
+}
+
 export default function EditProfileScreen() {
   const router = useRouter();
   const { profileState } = useProfileStore();
@@ -58,7 +74,7 @@ export default function EditProfileScreen() {
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid, isDirty },
+    formState: { errors, isDirty },
     setValue,
   } = useForm<EditProfileForm>({
     resolver: zodResolver(editProfileSchema),
@@ -67,16 +83,7 @@ export default function EditProfileScreen() {
       birthday: profileState?.birthday
         ? new Date(profileState.birthday)
         : undefined,
-      hometown: (() => {
-        if (!profileState?.hometown) return null;
-        const coords = profileState.hometown_location
-          ? parsePostGISPoint(profileState.hometown_location)
-          : null;
-        if (coords) {
-          return { name: profileState.hometown, ...coords };
-        }
-        return null;
-      })(),
+      hometown: getInitialHometown(profileState),
       website: profileState?.website || "",
       instagram: profileState?.instagram || "",
       x: profileState?.x || "",
@@ -94,7 +101,10 @@ export default function EditProfileScreen() {
           full_name: data.fullName.trim(),
           birthday: data.birthday.toISOString(),
           hometown: hometown.name,
-          hometown_location: `POINT(${hometown.longitude} ${hometown.latitude})`,
+          hometown_location: createPostGISPoint(
+            hometown.latitude,
+            hometown.longitude
+          ),
           website: data.website?.trim() || "",
           instagram: data.instagram?.trim() || "",
           x: data.x?.trim() || "",
@@ -121,7 +131,7 @@ export default function EditProfileScreen() {
 
   const handleDateChange = (
     onChange: (date: Date) => void,
-    _event: unknown,
+    _event: DateTimePickerEvent,
     selectedDate?: Date
   ) => {
     if (Platform.OS === "android") {
@@ -133,7 +143,7 @@ export default function EditProfileScreen() {
     }
   };
 
-  const formatDate = (date: Date | null) => {
+  const formatDate = (date?: Date | null) => {
     if (!date) return "";
     return date.toLocaleDateString("en-US", {
       month: "long",
@@ -145,7 +155,7 @@ export default function EditProfileScreen() {
   const tabs = [
     { id: "account", label: "Account" },
     { id: "socials", label: "Socials" },
-  ];
+  ] as const;
 
   return (
     <>
@@ -153,7 +163,10 @@ export default function EditProfileScreen() {
         options={{
           title: "Edit Profile",
           headerRight: () => {
-            const canSave = isDirty && isValid && !updateProfile.isPending;
+            const canSave =
+              isDirty &&
+              Object.keys(errors).length === 0 &&
+              !updateProfile.isPending;
             return (
               <Pressable
                 onPress={handleSubmit(onSubmit)}
@@ -178,11 +191,7 @@ export default function EditProfileScreen() {
       />
       <View className="flex-1 bg-cream">
         {/* Tabs */}
-        <TabBar
-          tabs={tabs}
-          activeTab={activeTab}
-          onTabChange={(tabId) => setActiveTab(tabId as Tab)}
-        />
+        <TabBar tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
         {/* Form */}
         <KeyboardAwareScrollView
