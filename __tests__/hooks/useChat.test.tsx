@@ -20,7 +20,8 @@ vi.mock("@/stores/profileStore", () => ({
   useProfileStore: () => ({ profileState: { id: "user-a" } }),
 }));
 
-const { useSendMessage, useDeleteMessage } = await import("@/hooks/useChat");
+const { useSendMessage, useDeleteMessage, useSubscribeToMessages } =
+  await import("@/hooks/useChat");
 
 describe("useSendMessage", () => {
   beforeEach(() => {
@@ -73,5 +74,64 @@ describe("useDeleteMessage", () => {
       expect.objectContaining({ deleted_at: expect.any(String) })
     );
     expect(chain?.eq).toHaveBeenCalledWith("id", "m1");
+  });
+});
+
+describe("useSubscribeToMessages", () => {
+  beforeEach(() => {
+    mockSupabase = createMockSupabase();
+  });
+
+  it("subscribes to INSERTs on the ordered conversation channel", () => {
+    const { Wrapper } = createTestWrapper(mockSupabase);
+    const { result } = renderHook(() => useSubscribeToMessages(), {
+      wrapper: Wrapper,
+    });
+
+    result.current("user-b", vi.fn());
+
+    expect(mockSupabase.channel).toHaveBeenCalledWith("chat:user-a:user-b");
+    const channel = mockSupabase.channel.mock.results[0].value;
+    expect(channel.on).toHaveBeenCalledWith(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+        filter: "user_id_a=eq.user-a,user_id_b=eq.user-b",
+      },
+      expect.any(Function)
+    );
+    expect(channel.subscribe).toHaveBeenCalled();
+  });
+
+  it("invokes onMessage with the inserted row when an event fires", () => {
+    const onMessage = vi.fn();
+    const { Wrapper } = createTestWrapper(mockSupabase);
+    const { result } = renderHook(() => useSubscribeToMessages(), {
+      wrapper: Wrapper,
+    });
+
+    result.current("user-b", onMessage);
+
+    const channel = mockSupabase.channel.mock.results[0].value;
+    const handler = channel.on.mock.calls[0][2];
+    const newRow = { id: "m1", text: "Hi", sender_id: "user-b" };
+    handler({ new: newRow });
+
+    expect(onMessage).toHaveBeenCalledWith(newRow);
+  });
+
+  it("removes the channel on cleanup", () => {
+    const { Wrapper } = createTestWrapper(mockSupabase);
+    const { result } = renderHook(() => useSubscribeToMessages(), {
+      wrapper: Wrapper,
+    });
+
+    const unsubscribe = result.current("user-b", vi.fn());
+    const channel = mockSupabase.channel.mock.results[0].value;
+    unsubscribe();
+
+    expect(mockSupabase.removeChannel).toHaveBeenCalledWith(channel);
   });
 });
