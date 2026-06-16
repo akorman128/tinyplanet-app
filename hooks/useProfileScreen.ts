@@ -23,9 +23,6 @@ export function useProfileScreen(userId?: string) {
     [profileQuery.data, isViewingOwnProfile, profile]
   );
 
-  const mutualCount =
-    (!isViewingOwnProfile && displayProfile?.mutual_friend_count) || 0;
-
   // Derived from query results
   const topVibes = topVibesQuery.data?.data ?? [];
   const totalVibeCount = topVibesQuery.data?.totalCount ?? 0;
@@ -72,7 +69,6 @@ export function useProfileScreen(userId?: string) {
     humanReadableLocation,
     geocoding,
     activeTravelPlan,
-    mutualCount,
     loading: profileQuery.isPending,
     error: profileQuery.error?.message ?? null,
     setError: () => {}, // Keep interface compatible — consumers may call setError(null)

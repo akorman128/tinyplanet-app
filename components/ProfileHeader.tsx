@@ -20,9 +20,7 @@ interface ProfileHeaderProps {
   totalVibeCount: number;
   isViewingOwnProfile: boolean;
   userId?: string;
-  mutualCount: number;
   onVibePress: () => void;
-  onMutualsPress: () => void;
   onMessagePress: () => void;
   onError: (error: string) => void;
 }
@@ -33,9 +31,7 @@ export function ProfileHeader({
   totalVibeCount,
   isViewingOwnProfile,
   userId,
-  mutualCount,
   onVibePress,
-  onMutualsPress,
   onMessagePress,
   onError,
 }: ProfileHeaderProps) {
@@ -103,13 +99,6 @@ export function ProfileHeader({
           />
         )}
 
-        {!isViewingOwnProfile && mutualCount > 0 && (
-          <Pressable onPress={onMutualsPress}>
-            <Badge variant="secondary" size="small">
-              {mutualCount === 1 ? "1 mutual" : `${mutualCount} mutuals`}
-            </Badge>
-          </Pressable>
-        )}
         {!isViewingOwnProfile && userId && !isBlocked && (
           <Pressable onPress={onMessagePress}>
             <Badge variant="default" size="small">
