@@ -114,7 +114,7 @@ export function HangCard({
   };
 
   return (
-    <View className="bg- border-b border-gray-200">
+    <View className="bg-cream border-b border-gray-200">
       {/* Map banner */}
       <Pressable onPress={openDetail} style={{ height: BANNER_HEIGHT }}>
         {bannerUrl ? (
@@ -157,7 +157,7 @@ export function HangCard({
       </Pressable>
 
       {/* Body */}
-      <View className="p-4">
+      <View className="px-5 py-4">
         {/* Host row */}
         <View className="flex-row items-center mb-3">
           <Link
@@ -185,74 +185,74 @@ export function HangCard({
             <Icons.dots size={20} color={colors.hex.gray500} />
           </Pressable>
         </View>
-
-        {/* Title */}
-        <Pressable onPress={openDetail}>
-          <Text className="text-lg font-bold text-gray-900">{hang.title}</Text>
-          {hang.description ? (
-            <Text className="text-sm text-gray-600 mt-1" numberOfLines={1}>
-              {hang.description}
+        <View className="ml-[52px]">
+          {/* Title */}
+          <Pressable onPress={openDetail}>
+            <Text className="text-lg font-bold text-gray-900">
+              {hang.title}
             </Text>
-          ) : null}
-        </Pressable>
+            {hang.description ? (
+              <Text className="text-sm text-gray-600 mt-1" numberOfLines={1}>
+                {hang.description}
+              </Text>
+            ) : null}
+          </Pressable>
 
-        {/* Attendees + actions */}
-        <View className="flex-row items-center justify-between mt-3 mb-3">
-          <View className="flex-row items-center">
-            {hang.attendees.length > 0 && (
-              <AvatarStack
-                people={hang.attendees}
-                total={hang.attendee_count}
-                size={26}
-              />
-            )}
-            <Text className="text-sm text-gray-500 ml-2">
-              {goingCount} going
-            </Text>
-          </View>
+          {/* Attendees + actions */}
+          <View className="flex-row items-center justify-between mt-3 mb-3">
+            <View className="flex-row items-center">
+              {hang.attendees.length > 0 && (
+                <AvatarStack
+                  people={hang.attendees}
+                  total={hang.attendee_count}
+                  size={26}
+                />
+              )}
+              <Text className="text-sm text-gray-500 ml-2">
+                {goingCount} going
+              </Text>
+            </View>
 
-          <Pressable
-            onPress={handleRsvpToggle}
-            disabled={rsvpPending || isOwnHang}
-            className="flex-row items-center justify-center rounded-lg p-2"
-            style={{
-              backgroundColor: isOwnHang
-                ? colors.hex.gray300
-                : going
-                  ? colors.black
-                  : colors.black,
-            }}
-          >
-            <Icons.check
-              size={18}
-              color={
-                isOwnHang
-                  ? colors.hex.gray600
-                  : going
-                    ? colors.hex.coral
-                    : colors.hex.white
-              }
-            />
-            <Text
-              className="ml-2 font-semibold"
+            <Pressable
+              onPress={handleRsvpToggle}
+              disabled={rsvpPending || isOwnHang}
+              className="flex-row items-center justify-center rounded-lg p-2"
               style={{
-                color: isOwnHang
-                  ? colors.hex.gray600
-                  : going
-                    ? colors.hex.coral
-                    : colors.hex.white,
+                backgroundColor: isOwnHang ? colors.hex.gray300 : colors.black,
               }}
             >
-              {isOwnHang ? "You're going" : going ? "Going" : "I'm Going"}
-            </Text>
-          </Pressable>
+              <Icons.check
+                size={18}
+                color={
+                  isOwnHang
+                    ? colors.hex.gray600
+                    : going
+                      ? colors.hex.coral
+                      : colors.hex.white
+                }
+              />
+              <Text
+                className="ml-2 font-semibold"
+                style={{
+                  color: isOwnHang
+                    ? colors.hex.gray600
+                    : going
+                      ? colors.hex.coral
+                      : colors.hex.white,
+                }}
+              >
+                {isOwnHang ? "You're going" : going ? "Going" : "I'm Going"}
+              </Text>
+            </Pressable>
+          </View>
+
+          <PostActions
+            post={post}
+            onLike={onLike}
+            onSave={onSave}
+            onOpenComments={onOpenComments}
+          />
         </View>
-        <PostActions
-          post={post}
-          onLike={onLike}
-          onSave={onSave}
-          onOpenComments={onOpenComments}
-        />
       </View>
     </View>
   );

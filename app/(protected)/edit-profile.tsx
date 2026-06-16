@@ -32,6 +32,7 @@ import { useUpdateProfile } from "@/hooks/useProfile";
 import { Profile } from "@/types/profile";
 import { createPostGISPoint, parsePostGISPoint } from "@/utils/postgis";
 import { logger } from "@/utils/logger";
+import { formatBirthday } from "@/utils/formatBirthday";
 
 // Zod schema for profile edit validation
 const editProfileSchema = z.object({
@@ -151,15 +152,6 @@ export default function EditProfileScreen() {
     }
   };
 
-  const formatDate = (date?: Date | null) => {
-    if (!date) return "";
-    return date.toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
   const tabs = [
     { id: "account", label: "Account" },
     { id: "socials", label: "Socials" },
@@ -198,7 +190,6 @@ export default function EditProfileScreen() {
         }}
       />
       <View className="flex-1 bg-cream">
-        {/* Theme */}
         <MenuRow
           icon={<Body>🎨</Body>}
           label="Theme"
@@ -253,7 +244,9 @@ export default function EditProfileScreen() {
                       <Pressable onPress={() => setShowDatePicker(true)}>
                         <Input
                           label="Birthday"
-                          value={value ? formatDate(value) : ""}
+                          value={
+                            value ? formatBirthday(value.toISOString()) : ""
+                          }
                           placeholder="Select your birthday"
                           editable={false}
                           pointerEvents="none"

@@ -137,7 +137,7 @@ export default function MapTab() {
           style={{ top: insets.top + 120 }}
         >
           {/* Connection-lines toggle (vertical) */}
-          {(mapFilter === "friends" || mapFilter === "hometown") && (
+          {mapFilter === "friends" && (
             <VerticalToggle
               value={showConnectionLines}
               onValueChange={setShowConnectionLines}

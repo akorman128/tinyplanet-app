@@ -17,7 +17,7 @@ export interface PostActionsProps {
   onLike: (postId: string, updates: Partial<PostWithAuthor>) => void;
   onSave: (postId: string, updates: Partial<PostWithAuthor>) => void;
   onOpenComments: (postId: string, commentCount: number) => void;
-  leading?: React.ReactNode;
+  trailing?: React.ReactNode;
   className?: string;
 }
 
@@ -26,7 +26,7 @@ export function PostActions({
   onLike,
   onSave,
   onOpenComments,
-  leading,
+  trailing,
   className = "flex-row items-center gap-4",
 }: PostActionsProps) {
   const likePost = useLikePost();
@@ -85,16 +85,13 @@ export function PostActions({
         onPress={handleLikeToggle}
         disabled={isLiking}
       >
-        <Icons.heartOutline
-          size={20}
-          color={post.liked_by_user ? colors.hex.error : colors.hex.gray500}
-        />
+        {post.liked_by_user ? (
+          <Icons.heartFill size={20} />
+        ) : (
+          <Icons.heartOutline size={20} color={colors.hex.gray500} />
+        )}
         {post.like_count > 0 && (
-          <Text
-            className={`text-sm ml-1 ${
-              post.liked_by_user ? "text-red-500" : "text-gray-500"
-            }`}
-          >
+          <Text className={`text-sm ml-1 text-gray-600`}>
             {post.like_count}
           </Text>
         )}
@@ -120,7 +117,7 @@ export function PostActions({
           fill={post.saved_by_user ? colors.hex.gray900 : "none"}
         />
       </Pressable>
-      {leading}
+      {trailing}
     </View>
   );
 }
