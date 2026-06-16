@@ -160,12 +160,6 @@ export function MemberCardOverlay() {
           </Animated.View>
         </>
       ) : null}
-
-      {showDevTrigger ? (
-        <Pressable style={styles.devTrigger} onPress={reveal}>
-          <Text style={styles.devTriggerText}>🪪</Text>
-        </Pressable>
-      ) : null}
     </GestureHandlerRootView>
   );
 }
