@@ -64,10 +64,6 @@ export function UserPostsSection({
     activeQuery.isRefetching && !activeQuery.isFetchingNextPage;
   const error = activeQuery.error?.message ?? null;
 
-  const handleFilterChange = (newFilter: PostFilter) => {
-    setActiveFilter(newFilter);
-  };
-
   const handleRefresh = async () => {
     await activeQuery.refetch();
   };
@@ -168,7 +164,7 @@ export function UserPostsSection({
           <TabBar
             tabs={POST_TABS}
             activeTab={activeFilter}
-            onTabChange={handleFilterChange}
+            onTabChange={setActiveFilter}
           />
         )}
         <View className="flex-1 items-center justify-center p-6">
@@ -187,7 +183,7 @@ export function UserPostsSection({
           <TabBar
             tabs={POST_TABS}
             activeTab={activeFilter}
-            onTabChange={handleFilterChange}
+            onTabChange={setActiveFilter}
           />
         )}
         <View className="flex-1 items-center justify-center p-6">
@@ -208,7 +204,7 @@ export function UserPostsSection({
           <TabBar
             tabs={POST_TABS}
             activeTab={activeFilter}
-            onTabChange={handleFilterChange}
+            onTabChange={setActiveFilter}
           />
         )}
         <View className="flex-1 items-center justify-center p-6">
@@ -229,7 +225,7 @@ export function UserPostsSection({
         <TabBar
           tabs={POST_TABS}
           activeTab={activeFilter}
-          onTabChange={handleFilterChange}
+          onTabChange={setActiveFilter}
         />
       )}
       <FlatList

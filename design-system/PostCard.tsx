@@ -149,7 +149,7 @@ export function PostCard({
           onLike={onLike}
           onSave={onSave}
           onOpenComments={onOpenComments}
-          leading={
+          trailing={
             visibilityIcon ? (
               <View className="flex-row items-center">
                 {visibilityIcon}

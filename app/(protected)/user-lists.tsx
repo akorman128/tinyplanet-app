@@ -17,6 +17,7 @@ export default function UserListsScreen() {
     <>
       <Stack.Screen
         options={{
+          title: "",
           headerShown: false,
           headerShadowVisible: false,
         }}

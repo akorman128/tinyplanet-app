@@ -104,16 +104,11 @@ export default function SearchScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const progress = useSharedValue(0);
-  const isFocusedRef = React.useRef(false);
 
   useFocusEffect(
     React.useCallback(() => {
-      isFocusedRef.current = true;
       progress.value = 0;
       progress.value = withTiming(1, { duration: ANIMATION_DURATION });
-      return () => {
-        isFocusedRef.current = false;
-      };
     }, [progress])
   );
 
@@ -123,7 +118,7 @@ export default function SearchScreen() {
         addListener: (event: string, callback: () => void) => () => void;
       }
     ).addListener("tabPress", () => {
-      if (isFocusedRef.current) {
+      if (navigation.isFocused()) {
         setTimeout(() => router.back(), 0);
       }
     });

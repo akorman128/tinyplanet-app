@@ -104,7 +104,6 @@ export function TravelPlanCard({
         destination: "Unknown",
         startDate: "",
         endDate: "",
-        duration: "",
       };
     }
 
@@ -112,7 +111,6 @@ export function TravelPlanCard({
       destination: match[1],
       startDate: match[2],
       endDate: match[3],
-      duration: match[4],
     };
   };
 
@@ -168,7 +166,6 @@ export function TravelPlanCard({
           <Text className="text-sm text-gray-700 mb-2">{customMessage}</Text>
         )}
 
-        {/* Itinerary ticket */}
         <View className="flex-row rounded-xl overflow-hidden mb-2">
           <View className="w-1 bg-gray-600" />
           <View className="flex-1 bg-gray-50 p-4">
