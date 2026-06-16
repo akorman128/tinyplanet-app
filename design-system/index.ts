@@ -81,6 +81,7 @@ export { AnimatedEmojiBorder } from "./AnimatedEmojiBorder";
 export type { AnimatedEmojiBorderProps } from "./AnimatedEmojiBorder";
 export { ScreenshotWarningModal } from "./ScreenshotWarningModal";
 export type { ScreenshotWarningModalProps } from "./ScreenshotWarningModal";
+export { MemberCardOverlay } from "./MemberCardOverlay";
 export { Slider } from "./Slider";
 export type { SliderProps } from "./Slider";
 export { ThemedProfileContainer } from "./ThemedProfileContainer";
