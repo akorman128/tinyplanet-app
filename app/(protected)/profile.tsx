@@ -17,8 +17,11 @@ import {
   MenuRow,
   ActiveTravelPlanBanner,
   ThemedProfileContainer,
+  AvatarStack,
+  Caption,
 } from "@/design-system";
 import { useProfileScreen } from "@/hooks/useProfileScreen";
+import { useGetMutualsBetweenUsers } from "@/hooks/useFriends";
 import { ProfileHeader } from "@/components/ProfileHeader";
 import { ProfileInfoCard } from "@/components/ProfileInfoCard";
 import { useFontLoader } from "@/hooks/useFontLoader";
@@ -41,11 +44,14 @@ export default function ProfileScreen() {
     humanReadableLocation,
     geocoding,
     activeTravelPlan,
-    mutualCount,
     loading,
     error,
     setError,
   } = useProfileScreen(userId);
+
+  const { data: mutuals = [] } = useGetMutualsBetweenUsers(
+    !isViewingOwnProfile ? userId : undefined
+  );
 
   const blockUser = useBlockUser();
   const unblockUser = useUnblockUser();
@@ -210,17 +216,10 @@ export default function ProfileScreen() {
             totalVibeCount={totalVibeCount}
             isViewingOwnProfile={isViewingOwnProfile}
             userId={userId}
-            mutualCount={mutualCount}
             onVibePress={() =>
               router.push({
                 pathname: "/all-vibes",
                 params: { userId: displayProfile.id },
-              })
-            }
-            onMutualsPress={() =>
-              router.push({
-                pathname: "/mutuals",
-                params: { userId: userId! },
               })
             }
             onMessagePress={() => router.push(`/chat/${userId}`)}
@@ -234,13 +233,36 @@ export default function ProfileScreen() {
             />
           )}
 
+          {!isViewingOwnProfile && mutuals.length > 0 && (
+            <Pressable
+              onPress={() =>
+                router.push({
+                  pathname: "/mutuals",
+                  params: { userId: userId! },
+                })
+              }
+              className="w-full flex-row items-center justify-start gap-2 mb-4 ml-2"
+            >
+              <AvatarStack
+                people={mutuals}
+                size="medium"
+                borderColor={savedTheme?.backgroundColor ?? colors.hex.cream}
+              />
+              <Caption>
+                {mutuals.length === 1
+                  ? "1 mutual"
+                  : `${mutuals.length} mutuals`}
+              </Caption>
+            </Pressable>
+          )}
+
           <View className="w-full mb-2">
             {isViewingOwnProfile && (
               <MenuRow
                 icon={<Body>✨</Body>}
                 label="Friends"
                 onPress={() => router.push("/friends")}
-                position="standalone"
+                position="first"
               />
             )}
             <MenuRow
@@ -252,7 +274,7 @@ export default function ProfileScreen() {
                   params: { userId: displayProfile.id },
                 })
               }
-              position="first"
+              position="standalone"
             />
             <MenuRow
               icon={<Body>📋</Body>}

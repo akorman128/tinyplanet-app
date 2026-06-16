@@ -4,6 +4,14 @@ import { Text } from "./Text";
 import { getInitials } from "@/utils";
 import { colors } from "./colors";
 
+export type AvatarStackSize = "small" | "medium" | "large";
+
+const SIZE_PX: Record<AvatarStackSize, number> = {
+  small: 26,
+  medium: 32,
+  large: 40,
+};
+
 export interface AvatarStackPerson {
   id?: string;
   full_name: string;
@@ -14,8 +22,8 @@ export interface AvatarStackProps {
   people: AvatarStackPerson[];
   /** Max avatars to render before collapsing into a +N chip. */
   max?: number;
-  /** Diameter in px. */
-  size?: number;
+  /** Named size variant, or an explicit diameter in px. */
+  size?: AvatarStackSize | number;
   /** Ground color the 2px border blends into. */
   borderColor?: string;
   /** Total count (e.g. attendee_count) used to compute the +N overflow. Defaults to people.length. */
@@ -25,13 +33,14 @@ export interface AvatarStackProps {
 export function AvatarStack({
   people,
   max = 3,
-  size = 26,
+  size = "small",
   borderColor = colors.hex.white,
   total,
 }: AvatarStackProps) {
+  const diameter = typeof size === "number" ? size : SIZE_PX[size];
   const shown = people.slice(0, max);
   const overflow = Math.max(0, (total ?? people.length) - shown.length);
-  const overlap = Math.round(size / 3);
+  const overlap = Math.round(diameter / 3);
 
   return (
     <View className="flex-row items-center">
@@ -39,9 +48,9 @@ export function AvatarStack({
         <View
           key={person.id ?? `${person.full_name}-${index}`}
           style={{
-            width: size,
-            height: size,
-            borderRadius: size / 2,
+            width: diameter,
+            height: diameter,
+            borderRadius: diameter / 2,
             borderWidth: 2,
             borderColor,
             marginLeft: index === 0 ? 0 : -overlap,
@@ -54,13 +63,13 @@ export function AvatarStack({
           {person.avatar_url ? (
             <Image
               source={{ uri: person.avatar_url }}
-              style={{ width: size, height: size }}
+              style={{ width: diameter, height: diameter }}
               fadeDuration={0}
             />
           ) : (
             <Text
               style={{
-                fontSize: size * 0.4,
+                fontSize: diameter * 0.4,
                 fontWeight: "600",
                 color: colors.hex.white,
               }}
@@ -74,10 +83,10 @@ export function AvatarStack({
       {overflow > 0 && (
         <View
           style={{
-            height: size,
-            minWidth: size,
+            height: diameter,
+            minWidth: diameter,
             paddingHorizontal: 4,
-            borderRadius: size / 2,
+            borderRadius: diameter / 2,
             borderWidth: 2,
             borderColor,
             marginLeft: -overlap,
@@ -88,7 +97,7 @@ export function AvatarStack({
         >
           <Text
             style={{
-              fontSize: size * 0.38,
+              fontSize: diameter * 0.38,
               fontWeight: "600",
               color: colors.hex.gray600,
             }}

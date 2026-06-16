@@ -18,7 +18,11 @@ export type { IconProps } from "./Icons";
 export { Avatar } from "./Avatar";
 export type { AvatarProps } from "./Avatar";
 export { AvatarStack } from "./AvatarStack";
-export type { AvatarStackProps, AvatarStackPerson } from "./AvatarStack";
+export type {
+  AvatarStackProps,
+  AvatarStackPerson,
+  AvatarStackSize,
+} from "./AvatarStack";
 export { ImageGradient } from "./ImageGradient";
 export type { GradientStop } from "./ImageGradient";
 export { InfoRow } from "./InfoRow";
