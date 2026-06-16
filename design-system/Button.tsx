@@ -1,13 +1,17 @@
-import { TouchableOpacity, TouchableOpacityProps } from "react-native";
+import { TouchableOpacity, TouchableOpacityProps, View } from "react-native";
 import { Text } from "./Text";
+import { IconProps } from "./icons/types";
+import { colors } from "./colors";
 
 type ButtonVariant = "primary" | "secondary" | "coral";
 type ButtonSize = "sm" | "md" | "lg";
+type IconComponent = React.ComponentType<IconProps>;
 
 interface ButtonProps extends TouchableOpacityProps {
   variant?: ButtonVariant;
   size?: ButtonSize;
   className?: string;
+  icon?: IconComponent;
   children: string;
 }
 
@@ -47,10 +51,29 @@ const textSizeStyles = {
   lg: "text-lg",
 };
 
+const iconSizes = {
+  sm: 16,
+  md: 18,
+  lg: 20,
+};
+
+const iconColors = {
+  primary: colors.hex.white,
+  secondary: colors.hex.black,
+  coral: colors.hex.white,
+};
+
+const disabledIconColors = {
+  primary: colors.hex.gray500,
+  secondary: colors.hex.placeholder,
+  coral: colors.hex.gray500,
+};
+
 export function Button({
   variant = "primary",
   size = "lg",
   className = "",
+  icon: Icon,
   children,
   disabled = false,
   ...props
@@ -64,14 +87,28 @@ export function Button({
     ? disabledTextStyles[variant]
     : textStyles[variant];
   const textSize = textSizeStyles[size];
+  const iconColor = disabled
+    ? disabledIconColors[variant]
+    : iconColors[variant];
+
+  const label = (
+    <Text
+      className={`text-center ${textSize} font-semibold ${textVariantStyle}`}
+    >
+      {children}
+    </Text>
+  );
 
   return (
     <TouchableOpacity className={buttonClass} disabled={disabled} {...props}>
-      <Text
-        className={`text-center ${textSize} font-semibold ${textVariantStyle}`}
-      >
-        {children}
-      </Text>
+      {Icon ? (
+        <View className="flex-row items-center justify-center gap-1.5">
+          <Icon size={iconSizes[size]} color={iconColor} />
+          {label}
+        </View>
+      ) : (
+        label
+      )}
     </TouchableOpacity>
   );
 }

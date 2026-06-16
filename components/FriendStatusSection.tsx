@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ActionSheetIOS, Platform, Alert, Pressable } from "react-native";
-import { Badge, Button } from "@/design-system";
+import { Badge, Button, Icons } from "@/design-system";
 import { FriendshipDisplayStatus } from "@/types/friendship";
 import {
   useGetFriendshipStatus,

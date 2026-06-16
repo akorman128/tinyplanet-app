@@ -159,7 +159,7 @@ export function HangCard({
       {/* Body */}
       <View className="px-5 py-4">
         {/* Host row */}
-        <View className="flex-row items-center mb-3">
+        <View className="flex-row items-center">
           <Link
             href={{ pathname: "/profile", params: { userId: post.author.id } }}
             asChild
@@ -173,12 +173,8 @@ export function HangCard({
             </Pressable>
           </Link>
           <View className="flex-1 ml-3">
-            <Text className="text-[15px] font-semibold text-gray-900">
-              {post.author.full_name}
-            </Text>
-            <Text className="text-xs text-gray-500">
-              {isOwnHang ? "You're hosting" : "invited you"} ·{" "}
-              {formatTimeAgo(post.created_at)}
+            <Text className="text-lg font-bold text-gray-900">
+              {hang.title}
             </Text>
           </View>
           <Pressable onPress={handleOptions} hitSlop={8}>
@@ -186,11 +182,7 @@ export function HangCard({
           </Pressable>
         </View>
         <View className="ml-[52px]">
-          {/* Title */}
           <Pressable onPress={openDetail}>
-            <Text className="text-lg font-bold text-gray-900">
-              {hang.title}
-            </Text>
             {hang.description ? (
               <Text className="text-sm text-gray-600 mt-1" numberOfLines={1}>
                 {hang.description}
