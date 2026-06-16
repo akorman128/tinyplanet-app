@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Dimensions, Pressable, StyleSheet, Text } from "react-native";
 import {
   Gesture,
@@ -73,30 +73,34 @@ export function MemberCardOverlay() {
     onShake: reveal,
   });
 
-  const flick = Gesture.Pan()
-    .onUpdate((e) => {
-      dragX.value = e.translationX;
-      dragY.value = e.translationY;
-    })
-    .onEnd((e) => {
-      const dist = Math.hypot(e.translationX, e.translationY);
-      const speed = Math.hypot(e.velocityX, e.velocityY);
-      if (dist > FLICK_DISTANCE || speed > FLICK_SPEED) {
-        dragX.value = withTiming(e.translationX + e.velocityX * 0.2, {
-          duration: 250,
-        });
-        dragY.value = withTiming(
-          e.translationY + e.velocityY * 0.2 + SCREEN_H * 0.3,
-          { duration: 250 }
-        );
-        progress.value = withTiming(0, { duration: 250 }, (done) => {
-          if (done) runOnJS(finishDismiss)();
-        });
-      } else {
-        dragX.value = withSpring(0);
-        dragY.value = withSpring(0);
-      }
-    });
+  const flick = useMemo(
+    () =>
+      Gesture.Pan()
+        .onUpdate((e) => {
+          dragX.value = e.translationX;
+          dragY.value = e.translationY;
+        })
+        .onEnd((e) => {
+          const dist = Math.hypot(e.translationX, e.translationY);
+          const speed = Math.hypot(e.velocityX, e.velocityY);
+          if (dist > FLICK_DISTANCE || speed > FLICK_SPEED) {
+            dragX.value = withTiming(e.translationX + e.velocityX * 0.2, {
+              duration: 250,
+            });
+            dragY.value = withTiming(
+              e.translationY + e.velocityY * 0.2 + SCREEN_H * 0.3,
+              { duration: 250 }
+            );
+            progress.value = withTiming(0, { duration: 250 }, (done) => {
+              if (done) runOnJS(finishDismiss)();
+            });
+          } else {
+            dragX.value = withSpring(0);
+            dragY.value = withSpring(0);
+          }
+        }),
+    [dragX, dragY, progress, finishDismiss]
+  );
 
   const backdropStyle = useAnimatedStyle(() => ({ opacity: progress.value }));
   const cardStyle = useAnimatedStyle(() => ({

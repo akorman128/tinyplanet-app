@@ -53,6 +53,49 @@ const ORBIT_OUTER = 168;
 const ORBIT_INNER = 124;
 const SYSTEM = ORBIT_OUTER;
 
+const EASE_IN_OUT = Easing.inOut(Easing.ease);
+const EASE_IN = Easing.in(Easing.ease);
+
+// Drives a shared value 0→1 on an infinite loop. When Reduce Motion is on it
+// assigns a static rest value (which also cancels any animation already running,
+// e.g. if the setting is toggled on while the card is visible).
+function useLoopedValue({
+  durationMs,
+  easing,
+  delayMs = 0,
+  reverse = false,
+  reducedMotion,
+  reducedValue = 0,
+}: {
+  durationMs: number;
+  easing: (value: number) => number;
+  delayMs?: number;
+  reverse?: boolean;
+  reducedMotion: boolean;
+  reducedValue?: number;
+}) {
+  const value = useSharedValue(reducedValue);
+  useEffect(() => {
+    if (reducedMotion) {
+      value.value = reducedValue;
+      return;
+    }
+    value.value = withDelay(
+      delayMs,
+      withRepeat(withTiming(1, { duration: durationMs, easing }), -1, reverse)
+    );
+  }, [
+    value,
+    durationMs,
+    easing,
+    delayMs,
+    reverse,
+    reducedMotion,
+    reducedValue,
+  ]);
+  return value;
+}
+
 function Star({
   spec,
   color,
@@ -62,21 +105,14 @@ function Star({
   color: string;
   reducedMotion: boolean;
 }) {
-  const t = useSharedValue(0.6);
-  useEffect(() => {
-    if (reducedMotion) {
-      t.value = 0.6;
-      return;
-    }
-    t.value = withDelay(
-      spec.delay,
-      withRepeat(
-        withTiming(1, { duration: 1300, easing: Easing.inOut(Easing.ease) }),
-        -1,
-        true
-      )
-    );
-  }, [t, spec.delay, reducedMotion]);
+  const t = useLoopedValue({
+    durationMs: 1300,
+    easing: EASE_IN_OUT,
+    delayMs: spec.delay,
+    reverse: true,
+    reducedMotion,
+    reducedValue: 0.6,
+  });
 
   const style = useAnimatedStyle(() => ({
     opacity: interpolate(t.value, [0, 1], [0.15, 0.95]),
@@ -116,15 +152,11 @@ function Orbit({
   reducedMotion: boolean;
   children?: React.ReactNode;
 }) {
-  const r = useSharedValue(0);
-  useEffect(() => {
-    if (reducedMotion) return;
-    r.value = withRepeat(
-      withTiming(1, { duration: durationMs, easing: Easing.linear }),
-      -1,
-      false
-    );
-  }, [r, durationMs, reducedMotion]);
+  const r = useLoopedValue({
+    durationMs,
+    easing: Easing.linear,
+    reducedMotion,
+  });
 
   const style = useAnimatedStyle(() => ({
     transform: [{ rotate: `${(reverse ? -1 : 1) * r.value * 360}deg` }],
@@ -160,18 +192,12 @@ function ShootingStar({
   reducedMotion: boolean;
   delayMs: number;
 }) {
-  const p = useSharedValue(0);
-  useEffect(() => {
-    if (reducedMotion) return;
-    p.value = withDelay(
-      delayMs,
-      withRepeat(
-        withTiming(1, { duration: 7000, easing: Easing.in(Easing.ease) }),
-        -1,
-        false
-      )
-    );
-  }, [p, delayMs, reducedMotion]);
+  const p = useLoopedValue({
+    durationMs: 7000,
+    easing: EASE_IN,
+    delayMs,
+    reducedMotion,
+  });
 
   const style = useAnimatedStyle(() => ({
     opacity: interpolate(p.value, [0, 0.05, 0.12, 0.2, 1], [0, 0.9, 0.9, 0, 0]),
