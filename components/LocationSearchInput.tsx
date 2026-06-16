@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, TextInput, Pressable, ScrollView } from "react-native";
-import { colors, Label, Body, Caption, Text } from "@/design-system";
+import {
+  View,
+  TextInput,
+  Pressable,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
+import { colors, Label, Body, Caption, Text, Icons } from "@/design-system";
 import { useLocationStore } from "@/stores/locationStore";
 import { logger } from "@/utils/logger";
 
@@ -37,6 +43,13 @@ interface LocationSearchInputProps {
   error?: string;
   placeholder?: string;
   inputClassName?: string;
+  /**
+   * When provided, renders a button beside the input that fetches the user's
+   * current location. The handler is responsible for resolving and committing
+   * the location (e.g. via onChange); this component only owns the button's
+   * loading state.
+   */
+  onUseCurrentLocation?: () => Promise<void> | void;
 }
 
 export function LocationSearchInput({
@@ -48,11 +61,13 @@ export function LocationSearchInput({
   error,
   placeholder = "Search for a place...",
   inputClassName = "",
+  onUseCurrentLocation,
 }: LocationSearchInputProps) {
   const { currentLocation } = useLocationStore();
   const [query, setQuery] = useState(value?.name || "");
   const [results, setResults] = useState<LocationResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
   const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const sessionTokenRef = useRef(generateSessionToken());
 
@@ -206,26 +221,56 @@ export function LocationSearchInput({
     }
   };
 
+  const handleUseCurrentLocation = async () => {
+    if (!onUseCurrentLocation || isLocating) return;
+    setIsLocating(true);
+    try {
+      await onUseCurrentLocation();
+    } finally {
+      setIsLocating(false);
+    }
+  };
+
   return (
     <View className="mb-4">
       <Label className="mb-2 font-semibold">{label}</Label>
 
       <View className="relative">
-        <TextInput
-          value={query}
-          onChangeText={handleChangeText}
-          placeholder={placeholder}
-          className={`py-3 px-4 rounded-xl bg-white text-base text-gray-900 leading-5 shadow-xs ${inputClassName}`}
-          placeholderTextColor={colors.hex.placeholder}
-          autoCapitalize="words"
-          autoCorrect={false}
-        />
+        <View className="flex-row gap-2">
+          <View className="flex-1 relative">
+            <TextInput
+              value={query}
+              onChangeText={handleChangeText}
+              placeholder={placeholder}
+              className={`py-3 px-4 rounded-xl bg-white text-base text-gray-900 leading-5 shadow-xs ${inputClassName}`}
+              placeholderTextColor={colors.hex.placeholder}
+              autoCapitalize="words"
+              autoCorrect={false}
+            />
 
-        {isLoading && (
-          <View className="absolute right-4 top-3">
-            <Text className="text-gray-500 text-sm">Searching...</Text>
+            {isLoading && (
+              <View className="absolute right-4 top-3">
+                <Text className="text-gray-500 text-sm">Searching...</Text>
+              </View>
+            )}
           </View>
-        )}
+
+          {onUseCurrentLocation && (
+            <Pressable
+              onPress={handleUseCurrentLocation}
+              disabled={isLocating}
+              accessibilityRole="button"
+              accessibilityLabel="Use current location"
+              className="w-12 items-center justify-center rounded-xl bg-white shadow-xs active:opacity-70"
+            >
+              {isLocating ? (
+                <ActivityIndicator size="small" color={colors.hex.purple600} />
+              ) : (
+                <Icons.pin size={22} color={colors.hex.purple600} />
+              )}
+            </Pressable>
+          )}
+        </View>
 
         {/* Dropdown results */}
         {showDropdown && (

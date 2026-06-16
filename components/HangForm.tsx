@@ -6,7 +6,10 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { z } from "zod";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Input, Button, Body, Text, colors } from "@/design-system";
-import { LocationSearchInput } from "@/components/LocationSearchInput";
+import {
+  LocationSearchInput,
+  LocationSearchValue,
+} from "@/components/LocationSearchInput";
 import { HANG_MAX_ADVANCE_MS } from "@/utils/hangTime";
 
 export const hangSchema = z.object({
@@ -41,6 +44,11 @@ interface HangFormProps {
   submitLabel: string;
   isSubmitting: boolean;
   onSubmit: (data: HangFormData) => void | Promise<void>;
+  /**
+   * When provided, the location field shows a "use current location" button
+   * that resolves the device's location into a value for the field.
+   */
+  onResolveCurrentLocation?: () => Promise<LocationSearchValue | null>;
 }
 
 const formatWhen = (date: Date) =>
@@ -57,6 +65,7 @@ export function HangForm({
   submitLabel,
   isSubmitting,
   onSubmit,
+  onResolveCurrentLocation,
 }: HangFormProps) {
   const [showPicker, setShowPicker] = useState(false);
   const {
@@ -127,6 +136,14 @@ export function HangForm({
               placeholder="Search for a place…"
               value={value}
               onChange={onChange}
+              onUseCurrentLocation={
+                onResolveCurrentLocation
+                  ? async () => {
+                      const resolved = await onResolveCurrentLocation();
+                      if (resolved) onChange(resolved);
+                    }
+                  : undefined
+              }
               error={errors.location?.message}
             />
           )}
