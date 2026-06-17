@@ -11,7 +11,7 @@ export default function Page() {
         await signUpWithPhoneNumber.mutateAsync({ phone });
       }}
       heading="Create your account"
-      subheading="Enter your phone number to get started"
+      subheading=""
       buttonText="Continue"
       footerText="Already have an account?"
       footerLinkText="Sign in"

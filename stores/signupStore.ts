@@ -16,6 +16,10 @@ export interface SignupData {
     latitude: number;
     longitude: number;
   };
+  consents?: {
+    pledgeFamily: boolean;
+    pledgeLocation: boolean;
+  };
 }
 
 export interface SignupState {

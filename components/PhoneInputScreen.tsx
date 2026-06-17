@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import { Button, Input, Heading, Body } from "@/design-system";
+import { logger } from "@/utils/logger";
 
 // Zod schema for phone number validation
 const phoneSchema = z.object({
@@ -63,6 +64,7 @@ export function PhoneInputScreen({
         params: { phone },
       } as Href);
     } catch (err) {
+      logger.error("Phone sign-in failed:", err);
       setError("phone", {
         type: "manual",
         message: "Failed to send verification code. Please try again.",
@@ -72,55 +74,55 @@ export function PhoneInputScreen({
 
   return (
     <KeyboardAwareScrollView
-      automaticallyAdjustsScrollIndicatorInsets
-      contentInsetAdjustmentBehavior="automatic"
-      contentContainerClassName="flex-1 justify-center p-4 gap-6"
+      contentContainerClassName="flex-grow items-center justify-center px-6"
       enableOnAndroid={true}
       extraScrollHeight={20}
       keyboardShouldPersistTaps="handled"
     >
-      <View className="gap-2">
-        <Heading className="text-center">{heading}</Heading>
-        {subheading && (
-          <Body className="text-center text-gray-600">{subheading}</Body>
-        )}
-      </View>
-
-      <View className="gap-4">
-        <Controller
-          control={control}
-          name="phone"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <Input
-              label="Phone Number"
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              placeholder="(917) 123-4567"
-              keyboardType="phone-pad"
-              autoComplete="tel"
-              textContentType="telephoneNumber"
-              error={errors.phone?.message}
-            />
+      <View className="w-full max-w-md gap-6">
+        <View className="gap-2">
+          <Heading className="text-center">{heading}</Heading>
+          {subheading && (
+            <Body className="text-center text-gray-600">{subheading}</Body>
           )}
-        />
+        </View>
 
-        <Button
-          onPress={handleSubmit(onSubmit)}
-          disabled={!isValid || !isLoaded}
-        >
-          {buttonText}
-        </Button>
-      </View>
+        <View className="gap-4">
+          <Controller
+            control={control}
+            name="phone"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label="Phone Number"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                placeholder="(917) 123-4567"
+                keyboardType="phone-pad"
+                autoComplete="tel"
+                textContentType="telephoneNumber"
+                error={errors.phone?.message}
+              />
+            )}
+          />
 
-      <View className="flex flex-row justify-center">
-        <Body className="text-gray-600">{footerText} </Body>
-        <Body
-          className="text-purple-600 font-semibold"
-          onPress={() => router.replace(footerLinkPath)}
-        >
-          {footerLinkText}
-        </Body>
+          <Button
+            onPress={handleSubmit(onSubmit)}
+            disabled={!isValid || !isLoaded}
+          >
+            {buttonText}
+          </Button>
+        </View>
+
+        <View className="flex flex-row justify-center">
+          <Body className="text-gray-600">{footerText} </Body>
+          <Body
+            className="text-purple-600 font-semibold"
+            onPress={() => router.replace(footerLinkPath)}
+          >
+            {footerLinkText}
+          </Body>
+        </View>
       </View>
     </KeyboardAwareScrollView>
   );
