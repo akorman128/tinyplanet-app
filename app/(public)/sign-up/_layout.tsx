@@ -29,6 +29,13 @@ export default function SignUpLayout() {
         }}
       />
       <Stack.Screen
+        name="onboarding"
+        options={{
+          headerShown: false,
+          gestureEnabled: false,
+        }}
+      />
+      <Stack.Screen
         name="phone-number"
         options={{
           title: "",

@@ -84,7 +84,7 @@ export default function UserDetailsPage() {
     });
 
     // Navigate to next screen
-    router.push("/sign-up/phone-number");
+    router.push("/sign-up/onboarding");
   };
 
   const handleDateChange = (
@@ -119,10 +119,7 @@ export default function UserDetailsPage() {
     >
       <View className="w-full max-w-md gap-6">
         <View className="gap-2">
-          <Heading className="text-center">Tell us about yourself</Heading>
-          <Subheading className="text-center">
-            Like what&apos;s your deal?
-          </Subheading>
+          <Heading className="text-center">So what's your deal?</Heading>
         </View>
 
         <View className="gap-4">
@@ -177,6 +174,7 @@ export default function UserDetailsPage() {
                       value={value || new Date()}
                       mode="date"
                       display={Platform.OS === "ios" ? "spinner" : "default"}
+                      className="border-none"
                       onChange={(event, date) =>
                         handleDateChange(onChange, event, date)
                       }
