@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import { Button, Input, Heading, Body } from "@/design-system";
+import { logger } from "@/utils/logger";
 
 // Zod schema for OTP validation
 const otpSchema = z.object({
@@ -55,6 +56,7 @@ export function OtpVerificationScreen({
       // Navigation will be handled automatically after successful verification
       // as the auth state changes
     } catch (err) {
+      logger.error("OTP verification failed:", err);
       setError("otp", {
         type: "manual",
         message: "Invalid verification code. Please try again.",

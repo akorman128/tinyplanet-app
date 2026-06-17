@@ -93,7 +93,7 @@ export function Slider({
               bottom: 0,
               width: `${fraction * 100}%`,
               borderRadius: TRACK_HEIGHT / 2,
-              backgroundColor: colors.hex.purple600,
+              backgroundColor: colors.hex.gray900,
             }}
           />
         </View>
@@ -108,7 +108,7 @@ export function Slider({
             width: THUMB_SIZE,
             height: THUMB_SIZE,
             borderRadius: THUMB_SIZE / 2,
-            backgroundColor: colors.hex.purple600,
+            backgroundColor: colors.hex.gray900,
             shadowColor: "#000",
             shadowOffset: { width: 0, height: 1 },
             shadowOpacity: 0.2,
