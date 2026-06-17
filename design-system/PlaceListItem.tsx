@@ -48,7 +48,7 @@ export function PlaceListItem({
   );
 
   const content = (
-    <View className="mb-4 pb-4 border-b border-gray-100 bg-white">
+    <View className="mb-4 pb-4 border-b border-gray-100 bg-cream">
       <View className="flex-row items-start justify-between mb-1">
         <Text className="text-base font-semibold text-gray-900 flex-1">
           {index + 1}. {place.resolved_name}
@@ -63,12 +63,6 @@ export function PlaceListItem({
       {place.original_text !== place.resolved_name && (
         <Text className="text-sm text-gray-600 mb-1">
           Original: {place.original_text}
-        </Text>
-      )}
-
-      {place.confidence !== null && (
-        <Text className="text-xs text-gray-500">
-          Confidence: {(place.confidence * 100).toFixed(0)}%
         </Text>
       )}
     </View>
