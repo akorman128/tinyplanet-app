@@ -90,9 +90,21 @@ export default function MapTab() {
             >
               <Defs>
                 <LinearGradient id="headerFade" x1="0" y1="0" x2="0" y2="1">
-                  <Stop offset="0" stopColor="#faf9f5" stopOpacity={1} />
-                  <Stop offset="0.4" stopColor="#faf9f5" stopOpacity={1} />
-                  <Stop offset="1" stopColor="#faf9f5" stopOpacity={0} />
+                  <Stop
+                    offset="0"
+                    stopColor={colors.hex.cream}
+                    stopOpacity={1}
+                  />
+                  <Stop
+                    offset="0.4"
+                    stopColor={colors.hex.cream}
+                    stopOpacity={1}
+                  />
+                  <Stop
+                    offset="1"
+                    stopColor={colors.hex.cream}
+                    stopOpacity={0}
+                  />
                 </LinearGradient>
               </Defs>
               <Rect width="100%" height="100%" fill="url(#headerFade)" />

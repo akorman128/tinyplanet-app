@@ -3,7 +3,6 @@ import {
   View,
   FlatList,
   Pressable,
-  TextInput,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -17,6 +16,8 @@ import {
   Body,
   Subheading,
   Caption,
+  colors,
+  Input,
 } from "@/design-system";
 import { useGetFriends } from "@/hooks/useFriends";
 import { useCreateIntro } from "@/hooks/useIntros";
@@ -100,7 +101,7 @@ export default function CreateIntroScreen() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#faf9f5" }}
+      style={{ flex: 1, backgroundColor: colors.hex.cream }}
       edges={["top"]}
     >
       <ScreenHeader
@@ -149,13 +150,12 @@ export default function CreateIntroScreen() {
             </View>
 
             <Body className="font-medium mb-2">Your intro message</Body>
-            <TextInput
+            <Input
               value={message}
               onChangeText={setMessage}
               placeholder="e.g. You both love hiking and live in SF!"
               multiline
-              className="bg-white border border-gray-200 rounded-lg p-4 text-base min-h-[120px]"
-              textAlignVertical="top"
+              className="min-h-[120px]"
               autoFocus
             />
 

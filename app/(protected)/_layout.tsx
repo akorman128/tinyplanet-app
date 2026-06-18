@@ -5,7 +5,7 @@
 // in this minimal layout lets Fast Refresh patch surgically. See uniwind FAQ.
 import "../../global.css";
 import { Stack } from "expo-router";
-import { MemberCardOverlay } from "@/design-system";
+import { MemberCardOverlay, colors } from "@/design-system";
 
 export default function ProtectedLayout() {
   return (
@@ -14,13 +14,13 @@ export default function ProtectedLayout() {
         screenOptions={{
           headerShown: true,
           headerShadowVisible: false,
-          headerStyle: { backgroundColor: "#faf9f5" },
+          headerStyle: { backgroundColor: colors.hex.cream },
           headerTitleStyle: {
             fontWeight: "bold",
             fontSize: 20,
-            color: "#111827",
+            color: colors.hex.gray900,
           },
-          headerTintColor: "#111827",
+          headerTintColor: colors.hex.gray900,
           headerBackButtonDisplayMode: "minimal",
         }}
       >

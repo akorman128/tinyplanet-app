@@ -4,6 +4,7 @@ import ColorPickerLib, { Panel1, HueSlider } from "reanimated-color-picker";
 import { runOnJS } from "react-native-reanimated";
 import { Text } from "./Text";
 import { colors } from "./colors";
+import { radius } from "./tokens";
 import { getContrastRatio } from "@/utils/themeDefaults";
 
 export interface ColorPickerProps {
@@ -48,8 +49,8 @@ export function ColorPicker({
         onComplete={handleColorChange}
         style={{ gap: 12 }}
       >
-        <Panel1 style={{ height: 120, borderRadius: 12 }} />
-        <HueSlider style={{ height: 32, borderRadius: 12 }} />
+        <Panel1 style={{ height: 120, borderRadius: radius.md }} />
+        <HueSlider style={{ height: 32, borderRadius: radius.md }} />
       </ColorPickerLib>
 
       <View className="flex-row items-center gap-2">
@@ -57,7 +58,7 @@ export function ColorPicker({
           style={{
             width: 32,
             height: 32,
-            borderRadius: 8,
+            borderRadius: radius.sm,
             backgroundColor: value,
             borderWidth: 1,
             borderColor: colors.hex.gray300,

@@ -9,7 +9,15 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { useRouter, Stack } from "expo-router";
-import { Text, Body, Caption, Icons, colors, MenuRow } from "@/design-system";
+import {
+  Text,
+  Body,
+  Caption,
+  Icons,
+  colors,
+  MenuRow,
+  radius,
+} from "@/design-system";
 import { ColorPicker } from "@/design-system/ColorPicker";
 import { FontSelector } from "@/components/FontSelector";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
@@ -57,7 +65,7 @@ function PresetCard({ preset, isSelected, width, onPress }: PresetCardProps) {
         width,
         height: width,
         backgroundColor: preset.backgroundColor,
-        borderRadius: 16,
+        borderRadius: radius.lg,
         borderWidth: isSelected ? 2 : 0,
         borderColor: isSelected ? colors.hex.purple900 : "transparent",
         justifyContent: "center",

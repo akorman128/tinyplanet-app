@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import type { MemberCardColors } from "./memberCardColors";
 import { MemberCardStarfield } from "./MemberCardStarfield";
+import { radius } from "./tokens";
 
 interface MemberCardProps {
   colors: MemberCardColors;
@@ -55,7 +56,7 @@ const styles = StyleSheet.create({
   card: {
     width: 280,
     height: 360,
-    borderRadius: 20,
+    borderRadius: radius.xl,
     overflow: "hidden",
   },
   content: {

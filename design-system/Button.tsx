@@ -2,6 +2,7 @@ import { TouchableOpacity, TouchableOpacityProps, View } from "react-native";
 import { Text } from "./Text";
 import { IconProps } from "./icons/types";
 import { colors } from "./colors";
+import { iconSize } from "./tokens";
 
 type ButtonVariant = "primary" | "secondary" | "coral";
 type ButtonSize = "sm" | "md" | "lg";
@@ -51,12 +52,6 @@ const textSizeStyles = {
   lg: "text-lg",
 };
 
-const iconSizes = {
-  sm: 16,
-  md: 18,
-  lg: 20,
-};
-
 const iconColors = {
   primary: colors.hex.white,
   secondary: colors.hex.black,
@@ -103,7 +98,7 @@ export function Button({
     <TouchableOpacity className={buttonClass} disabled={disabled} {...props}>
       {Icon ? (
         <View className="flex-row items-center justify-center gap-1.5">
-          <Icon size={iconSizes[size]} color={iconColor} />
+          <Icon size={iconSize[size]} color={iconColor} />
           {label}
         </View>
       ) : (

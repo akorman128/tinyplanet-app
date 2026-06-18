@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { z } from "zod";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Input, Button, Body, Text, colors } from "@/design-system";
+import { Input, Button, FormField, Text, colors } from "@/design-system";
 import {
   LocationSearchInput,
   LocationSearchValue,
@@ -154,10 +154,7 @@ export function HangForm({
           control={control}
           name="startsAt"
           render={({ field: { value, onChange } }) => (
-            <View className="w-full">
-              <Body className="text-sm font-semibold text-gray-900 mb-2">
-                🕒 When
-              </Body>
+            <FormField label="🕒 When" error={errors.startsAt?.message}>
               <TouchableOpacity onPress={() => setShowPicker((s) => !s)}>
                 <View
                   className={`py-4 px-4 rounded-xl  bg-white ${
@@ -169,11 +166,6 @@ export function HangForm({
                   </Text>
                 </View>
               </TouchableOpacity>
-              {errors.startsAt && (
-                <Text className="text-sm text-red-500 mt-1">
-                  {errors.startsAt.message}
-                </Text>
-              )}
 
               {showPicker && (
                 <View className="bg-white rounded-xl p-4 gap-4 mt-2">
@@ -194,7 +186,7 @@ export function HangForm({
                   )}
                 </View>
               )}
-            </View>
+            </FormField>
           )}
         />
       </View>

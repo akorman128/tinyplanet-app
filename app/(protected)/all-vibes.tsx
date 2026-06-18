@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   FlatList,
-  ActivityIndicator,
   Pressable,
   Modal,
   TextInput,
@@ -19,6 +18,7 @@ import {
   Meta,
   SectionTitle,
   Text,
+  LoadingState,
 } from "@/design-system";
 import {
   useGetVibesWithSenderInfo,
@@ -133,9 +133,7 @@ export default function AllVibesScreen() {
       <View className="flex-1 bg-cream">
         {/* Content */}
         {loading ? (
-          <View className="flex-1 justify-center items-center">
-            <ActivityIndicator size="large" color={colors.hex.purple600} />
-          </View>
+          <LoadingState />
         ) : error ? (
           <View className="flex-1 justify-center items-center px-6">
             <Body className="text-gray-400 text-center">{error}</Body>

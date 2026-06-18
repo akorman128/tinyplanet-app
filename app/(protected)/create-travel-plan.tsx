@@ -11,6 +11,7 @@ import {
   LoadingState,
   ActiveTravelPlanBanner,
   ScreenHeader,
+  colors,
 } from "@/design-system";
 import {
   TravelPlanForm,
@@ -113,7 +114,7 @@ export default function CreateTravelPlanScreen() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#faf9f5" }}
+      style={{ flex: 1, backgroundColor: colors.hex.cream }}
       edges={["top"]}
     >
       <ScreenHeader title="Create Plan" onClose={() => router.back()} />
