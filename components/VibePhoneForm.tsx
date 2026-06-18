@@ -1,6 +1,6 @@
-import { View } from "react-native";
+import { View, Pressable } from "react-native";
 import { Control, Controller } from "react-hook-form";
-import { Button, Input } from "@/design-system";
+import { Icons, Input, colors } from "@/design-system";
 
 interface VibeFormValues {
   emojis: string;
@@ -65,10 +65,16 @@ export function VibePhoneForm({
             />
           </View>
 
-          {showContactPicker && onSelectContact && (
-            <Button variant="secondary" onPress={onSelectContact}>
-              Select Contact
-            </Button>
+          {showContactPicker && (
+            <Pressable
+              onPress={onSelectContact}
+              accessibilityRole="button"
+              accessibilityLabel="Select contact"
+              hitSlop={8}
+              className="h-11 w-11 items-center justify-center rounded-xl bg-primary active:bg-primary-dark"
+            >
+              <Icons.userList size={22} color={colors.hex.white} />
+            </Pressable>
           )}
         </View>
       </View>

@@ -52,20 +52,13 @@ export default function FriendsScreen() {
   const { profileState } = useProfileStore();
   const [activeTab, setActiveTab] = useState<TabId>("requests");
 
-  // Send Vibe forms
-  const form1 = useForm({
+  // Send Vibe form
+  const form = useForm({
     resolver: zodResolver(vibeFormSchema),
     defaultValues: { emojis: "", phone: "" },
     mode: "all",
   });
 
-  const form2 = useForm({
-    resolver: zodResolver(vibeFormSchema),
-    defaultValues: { emojis: "", phone: "" },
-    mode: "all",
-  });
-
-  const forms = [form1, form2];
   const [isSending, setIsSending] = useState(false);
 
   // Invite limit tracking (3 per month)
@@ -73,7 +66,7 @@ export default function FriendsScreen() {
   const { data: invitesUsedThisMonth = 0 } = useGetInviteCountThisMonth();
   const invitesRemaining = MONTHLY_INVITE_LIMIT - invitesUsedThisMonth;
 
-  const allFormsValid = form1.formState.isValid && form2.formState.isValid;
+  const isFormValid = form.formState.isValid;
 
   const {
     data: pendingData,
@@ -113,23 +106,23 @@ export default function FriendsScreen() {
     [declineFriendRequest]
   );
 
-  const pickContact = async (formIndex: number) => {
+  const pickContact = async () => {
     const phoneNumber = await pickContactFromDevice();
     if (phoneNumber) {
-      forms[formIndex].setValue("phone", phoneNumber, { shouldValidate: true });
+      form.setValue("phone", phoneNumber, { shouldValidate: true });
     }
   };
 
-  const sendAllInvites = async () => {
-    if (!allFormsValid) {
-      Alert.alert("Incomplete", "Please fill out both invite forms");
+  const sendInvite = async () => {
+    if (!isFormValid) {
+      Alert.alert("Incomplete", "Please fill out the invite form");
       return;
     }
 
-    if (invitesRemaining < 2) {
+    if (invitesRemaining < 1) {
       Alert.alert(
         "Invite Limit Reached",
-        `You only have ${invitesRemaining} invite${invitesRemaining === 1 ? "" : "s"} remaining this month. You can send up to ${MONTHLY_INVITE_LIMIT} invites per month.`
+        `You have no invites remaining this month. You can send up to ${MONTHLY_INVITE_LIMIT} invites per month.`
       );
       return;
     }
@@ -137,45 +130,40 @@ export default function FriendsScreen() {
     setIsSending(true);
 
     try {
-      const formData = [form1.getValues(), form2.getValues()];
+      const data = form.getValues();
+      const emojiArray = extractEmojis(data.emojis);
+      const phoneNumber = formatPhoneNumber(data.phone);
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30);
 
-      const sendPromises = formData.map(async (data) => {
-        const emojiArray = extractEmojis(data.emojis);
-        const phoneNumber = formatPhoneNumber(data.phone);
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 30);
+      const { data: inviteCodeData, code } = await createInviteCode.mutateAsync(
+        {
+          expires_at: expiresAt,
+        }
+      );
 
-        const { data: inviteCodeData, code } =
-          await createInviteCode.mutateAsync({
-            expires_at: expiresAt,
-          });
-
-        await createVibe.mutateAsync({
-          receiverId: null,
-          emojis: emojiArray,
-          inviteCodeId: inviteCodeData.id,
-        });
-
-        await sendInviteCode.mutateAsync({
-          phone_number: phoneNumber,
-          invite_code: code,
-          inviter_name: profileState?.full_name,
-        });
+      await createVibe.mutateAsync({
+        receiverId: null,
+        emojis: emojiArray,
+        inviteCodeId: inviteCodeData.id,
       });
 
-      await Promise.all(sendPromises);
+      await sendInviteCode.mutateAsync({
+        phone_number: phoneNumber,
+        invite_code: code,
+        inviter_name: profileState?.full_name,
+      });
 
-      Alert.alert("Success", "Vibes and invites sent successfully!");
+      Alert.alert("Success", "Vibe and invite sent successfully!");
 
-      form1.reset();
-      form2.reset();
+      form.reset();
     } catch (error: unknown) {
-      logger.error("Error sending invites:", error);
+      logger.error("Error sending invite:", error);
       Alert.alert(
         "Error",
         error instanceof Error
           ? error.message
-          : "Failed to send invites. Please try again."
+          : "Failed to send invite. Please try again."
       );
     } finally {
       setIsSending(false);
@@ -236,20 +224,20 @@ export default function FriendsScreen() {
         </View>
 
         <VibePhoneForm
-          control={form1.control}
-          vibeError={form1.formState.errors?.emojis?.message}
-          phoneError={form1.formState.errors?.phone?.message}
-          onSelectContact={() => pickContact(0)}
+          control={form.control}
+          vibeError={form.formState.errors?.emojis?.message}
+          phoneError={form.formState.errors?.phone?.message}
+          onSelectContact={pickContact}
           showContactPicker={true}
           maxLength={3}
         />
         <Button
           variant="primary"
-          onPress={sendAllInvites}
-          disabled={!allFormsValid || isSending || invitesRemaining < 2}
+          onPress={sendInvite}
+          disabled={!isFormValid || isSending || invitesRemaining < 1}
           className="mt-2"
         >
-          {isSending ? "Sending..." : "Send Invites"}
+          {isSending ? "Sending..." : "Send Invite"}
         </Button>
       </View>
     </View>
