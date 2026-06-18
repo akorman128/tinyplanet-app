@@ -94,3 +94,66 @@ failures (see lessons.md) — untouched by this frontend-only change.
 - Deferred new primitives still failing the semantic rule-of-three: `Divider`, `ModalDialog`,
   `StickyFooter`, `InfoCard`, `IconButton`. Closest fast-follows: `ScreenContainer` (5× identical
   cream safe-area wrapper) and the `mx-6` list separator (3× identical).
+
+---
+
+# Remove purple → adopt brand blue
+
+Decision (confirmed via AskUserQuestion): **re-anchor brand to base 500 = #007AFF** (iOS blue).
+Rename token scale `purple-*` → `blue-*` so no token is named "purple" while holding blue.
+
+## New blue ramp (global.css @theme + design-system/colors.ts)
+blue-50 #F0F7FF (lightest tint, defined — extends the given ramp, replaces purple-50) ·
+blue-100 #E6F2FF · blue-200 #C7E2FF (primary.light) · blue-300 #94C7FF · blue-400 #4DA2FF ·
+**blue-500 #007AFF (base/brand, primary.DEFAULT)** · blue-600 #0064D1 (pressed/primary.dark) ·
+blue-700 #004EA3 · blue-800 #003875 · blue-900 #002247 (darkest)
+
+## Re-anchor mapping (old purple level → new blue token)
+50→50 · 100→100 · 200→200 · 300→300 · 400→400 · 500→400 · **600→500 (brand)** · 700→600 · 800→700 · 900→900
+
+## Steps
+- [ ] Rewrite `global.css` @theme: blue scale + primary tokens + comments
+- [ ] Rewrite `design-system/colors.ts`: hex.blueNNN + primary.{light,DEFAULT,dark} + comments
+- [ ] Bulk rename across app/ components/ design-system/ (skip 4 manual files)
+- [ ] `OnboardingBackground.tsx`: recolor hex constants + comments (SKY_DEEP plum → deep navy)
+- [ ] `LocationPermissionScreen.tsx`: `to-purple-50` → `to-blue-100` (don't flatten gradient)
+- [ ] `.design-sync/conventions.md` + `NOTES.md`: doc references
+- [ ] Verify: 0 remaining purple / old hexes; typecheck/lint
+- [ ] Follow-up note: re-sync DS to claude.ai/design (untracked `.ds-sync`) — user-initiated
+
+## Review (purple→blue) — DONE
+
+**Outcome:** 53 files recolored. `purple-*` token scale renamed to `blue-*` with the provided
+ramp; brand re-anchored from purple-600 to **base blue-500 #007AFF**. Zero `purple` left in code;
+no old purple hex values remain. `tsc --noEmit` clean; ESLint/Prettier clean on all touched files.
+
+**How:**
+- `global.css` @theme: `--color-blue-50…900` (added blue-50 #F0F7FF) + `--color-primary`=#007AFF,
+  `--color-primary-dark`=#0064D1, `--color-primary-light`=#C7E2FF.
+- `design-system/colors.ts`: `hex.blue50…900` + `primary.{light:blue-200, DEFAULT:blue-500, dark:blue-600}`.
+- Bulk re-anchor rename (per the mapping above) across app/ + components/ + design-system/ —
+  perl with `(?![0-9])` lookaheads so `purple-50` never ate `purple-500`. Opacity suffixes
+  (`/15`, `/70`…) preserved.
+- `OnboardingBackground.tsx`: SVG hex constants remapped (sky navy, planet blue, SKY_DEEP plum
+  → deep navy #001530, near-white `YOU` de-tinted to #F0F7FF).
+- `LocationPermissionScreen.tsx`: gradient `to-purple-50` → `to-blue-100` (kept a gradient
+  instead of flattening to from/to-blue-50).
+- `.design-sync/conventions.md` + `NOTES.md` doc references updated.
+
+**Verified:** repo-wide grep (0 purple tokens/hex in code) · tsc clean · eslint+prettier clean
+on touched files · headless-Chrome swatch+component preview rendered (ramp, brand button #007AFF,
+pressed #0064D1, banner/chips/badge, progress dots, onboarding sky) — all read as intended blue.
+
+**Two prettier errors I introduced & fixed:** shorter `blue-*` names let two wrapped JSX strings
+fit on one line (PostForm, ActiveTravelPlanBanner); fixed with targeted `prettier --write` (NOT
+`expo lint --fix`, which rewrites the whole repo). theme-editor/edit-profile fail prettier at HEAD
+too (pre-existing) — left untouched.
+
+**Left untouched (flagged, not in scope):** historical `.claude/plans/*` archives and two dated
+design docs (`docs/superpowers/specs/2026-06-16-onboarding-flow-design.md`,
+`docs/hang-mockups/HANDOFF.md`) still describe the old purple brand.
+
+**Follow-ups (user-initiated):**
+- The Paper design file + the untracked `.ds-sync/ds-dist` build still hold purple — re-sync to
+  push blue to claude.ai/design.
+- Optionally update the two dated `docs/` specs above for full doc parity.

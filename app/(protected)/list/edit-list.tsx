@@ -123,7 +123,7 @@ export default function EditListScreen() {
             >
               <Text
                 className="text-base font-semibold"
-                style={{ color: colors.hex.purple600 }}
+                style={{ color: colors.hex.blue500 }}
               >
                 {isSubmitting ? "Saving..." : "Save"}
               </Text>

@@ -77,7 +77,7 @@ export function MessagesView() {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={handleRefresh}
-          tintColor={colors.hex.purple600}
+          tintColor={colors.hex.blue500}
         />
       }
       contentContainerStyle={{ paddingTop: insets.top, paddingBottom: 80 }}

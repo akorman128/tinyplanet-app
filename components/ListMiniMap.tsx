@@ -95,7 +95,7 @@ export function ListMiniMap({
                 "case",
                 ["get", "isAmbiguous"],
                 "#fb923c",
-                colors.hex.purple600,
+                colors.hex.blue500,
               ],
               circleStrokeColor: "#ffffff",
               circleStrokeWidth: 2,

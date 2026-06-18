@@ -9,7 +9,7 @@ export interface LoadingStateProps {
 export const LoadingState = React.memo<LoadingStateProps>(({ className }) => {
   return (
     <View className={`flex-1 justify-center items-center ${className || ""}`}>
-      <ActivityIndicator size="large" color={colors.hex.purple600} />
+      <ActivityIndicator size="large" color={colors.hex.blue500} />
     </View>
   );
 });

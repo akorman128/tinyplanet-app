@@ -86,7 +86,7 @@ export default function AllVibesScreen() {
       />
       <View className="flex-1 ml-3">
         <View className="flex-row justify-between items-center mb-2">
-          <Body className="font-semibold text-purple-900">
+          <Body className="font-semibold text-blue-900">
             {item.giver.full_name}
           </Body>
           <Meta className="font-medium text-gray-400">
@@ -115,7 +115,7 @@ export default function AllVibesScreen() {
             !hasUserGivenVibe
               ? () => (
                   <Pressable onPress={() => setShowModal(true)}>
-                    <Icons.plus size={24} color={colors.hex.purple600} />
+                    <Icons.plus size={24} color={colors.hex.blue500} />
                   </Pressable>
                 )
               : undefined,
@@ -125,7 +125,7 @@ export default function AllVibesScreen() {
         <Stack.Toolbar placement="right">
           <Stack.Toolbar.Button
             icon="plus"
-            tintColor={colors.hex.purple600}
+            tintColor={colors.hex.blue500}
             onPress={() => setShowModal(true)}
           />
         </Stack.Toolbar>
@@ -170,7 +170,7 @@ export default function AllVibesScreen() {
             className="bg-white rounded-2xl p-6 mx-6 w-[85%]"
             onPress={(e) => e.stopPropagation()}
           >
-            <SectionTitle className="text-xl font-bold text-purple-900 mb-4">
+            <SectionTitle className="text-xl font-bold text-blue-900 mb-4">
               Send a Vibe
             </SectionTitle>
             <Body className="text-sm text-gray-600 mb-4">
@@ -181,7 +181,7 @@ export default function AllVibesScreen() {
               onChangeText={setEmojiInput}
               placeholder="🔥💎✨"
               className="border border-gray-300 rounded-lg p-3 mb-4 text-2xl"
-              style={{ color: colors.hex.purple900 }}
+              style={{ color: colors.hex.blue900 }}
               maxLength={50}
               autoFocus
             />

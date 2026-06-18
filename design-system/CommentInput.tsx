@@ -69,7 +69,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({
         onPress={onSubmit}
         disabled={isDisabled}
         className={`p-3 rounded-lg  ${
-          isDisabled ? "bg-gray-300" : "bg-purple-600"
+          isDisabled ? "bg-gray-300" : "bg-blue-500"
         }`}
       >
         <Icons.send

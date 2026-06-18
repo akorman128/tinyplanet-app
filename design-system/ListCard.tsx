@@ -50,8 +50,8 @@ export function ListCard({ list, onPress, fullWidth }: ListCardProps) {
         {/* Location & Category */}
         <View className="flex-row items-center gap-2 mb-2">
           <Text className="text-sm text-gray-600">{list.location_name}</Text>
-          <View className="bg-purple-100 px-2 py-0.5 rounded">
-            <Text className="text-xs text-purple-700">
+          <View className="bg-blue-100 px-2 py-0.5 rounded">
+            <Text className="text-xs text-blue-600">
               {CATEGORY_LABELS[list.category] || "Other"}
             </Text>
           </View>

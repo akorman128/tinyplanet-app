@@ -215,8 +215,8 @@ export default function FriendsScreen() {
   const renderInviteTab = () => (
     <View className="flex-1">
       <View className="p-6 gap-6">
-        <View className="bg-purple-50 p-4 rounded-lg">
-          <Caption className="text-purple-900 font-medium text-center">
+        <View className="bg-blue-50 p-4 rounded-lg shadow-xl">
+          <Caption className="text-blue-900 font-medium text-center">
             {invitesRemaining > 0
               ? `${invitesRemaining} of ${MONTHLY_INVITE_LIMIT} invites remaining this month`
               : `No invites remaining this month (${MONTHLY_INVITE_LIMIT} limit)`}

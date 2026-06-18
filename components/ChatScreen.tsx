@@ -366,7 +366,7 @@ export default function ChatScreen() {
   const renderLoadingMore = () => {
     return (
       <View className="py-4 items-center">
-        <ActivityIndicator size="small" color={colors.hex.purple600} />
+        <ActivityIndicator size="small" color={colors.hex.blue500} />
       </View>
     );
   };

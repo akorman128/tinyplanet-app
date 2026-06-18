@@ -110,7 +110,7 @@ export function OtpVerificationScreen({
       <View className="flex flex-row justify-center">
         <Body className="text-gray-600">Wrong number? </Body>
         <Body
-          className="text-purple-600 font-semibold"
+          className="text-blue-500 font-semibold"
           onPress={() => router.back()}
         >
           Go back

@@ -29,7 +29,7 @@ export function PlaceListItem({
       {onEdit && (
         <Pressable
           onPress={() => onEdit(place)}
-          className="justify-center items-center bg-purple-600 w-16 mb-4"
+          className="justify-center items-center bg-blue-500 w-16 mb-4"
           style={{ height: "100%" }}
         >
           <Icons.edit size={20} color={colors.black} />

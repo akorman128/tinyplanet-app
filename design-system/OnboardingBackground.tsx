@@ -19,16 +19,16 @@ import Svg, {
 } from "react-native-svg";
 
 // Brand palette (hex for SVG) — see global.css @theme.
-const SKY_TOP = "#29246e"; // purple-900
-const SKY_MID = "#3c359b"; // purple-800
-const SKY_DEEP = "#1a1340"; // deep plum-purple
-const PLANET_CORE = "#a79ef8"; // purple-400 (lit horizon)
-const PLANET_MID = "#6b61f3"; // purple-600
-const PLANET_LOW = "#3c359b"; // purple-800
-const PLANET_BASE = "#29246e"; // purple-900
-const GLOW = "#8b81f6"; // purple-500
-const LIGHT = "#dedbfd"; // purple-200
-const YOU = "#f4f1ff";
+const SKY_TOP = "#002247"; // blue-900
+const SKY_MID = "#003875"; // blue-800
+const SKY_DEEP = "#001530"; // deep navy (darker than blue-900)
+const PLANET_CORE = "#4da2ff"; // blue-400 (lit horizon)
+const PLANET_MID = "#007aff"; // blue-500 (brand)
+const PLANET_LOW = "#003875"; // blue-800
+const PLANET_BASE = "#002247"; // blue-900
+const GLOW = "#4da2ff"; // blue-400
+const LIGHT = "#c7e2ff"; // blue-200
+const YOU = "#f0f7ff"; // blue-50 (near-white)
 const STAR = "#faf9f5"; // cream
 
 interface StarSpec {

@@ -84,7 +84,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       >
         {editingMessage && (
           <View className="flex-row items-center justify-between mb-2 pb-2 border-b border-gray-200">
-            <Text className="text-sm text-purple-600">Editing message</Text>
+            <Text className="text-sm text-blue-500">Editing message</Text>
             <Pressable onPress={handleCancel}>
               <Icons.close size={20} color={colors.hex.gray600} />
             </Pressable>
@@ -106,7 +106,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             onPress={handleSend}
             disabled={!text.trim()}
             className={`w-12 h-12 rounded-lg items-center justify-center ${
-              text.trim() ? "bg-purple-600" : "bg-gray-300"
+              text.trim() ? "bg-blue-500" : "bg-gray-300"
             }`}
           >
             <Icons.send

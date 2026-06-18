@@ -282,8 +282,8 @@ export default function ListDetailScreen() {
             <Text className="text-2xl font-bold text-gray-900 mb-2">
               {list.title}
             </Text>
-            <View className="bg-purple-100 px-3 py-1 rounded-full self-start mb-2">
-              <Text className="text-sm text-purple-700 font-medium">
+            <View className="bg-blue-100 px-3 py-1 rounded-full self-start mb-2">
+              <Text className="text-sm text-blue-600 font-medium">
                 {getCategoryLabel(list.category)}
               </Text>
             </View>

@@ -143,7 +143,7 @@ export default function OnboardingScreen() {
   const showOptOut = isPledgeScreen(activeIndex);
 
   return (
-    <View className="flex-1 bg-purple-900">
+    <View className="flex-1 bg-blue-900">
       <OnboardingBackground
         activeLights={lightsForIndex(activeIndex)}
         ignited={false}
@@ -169,7 +169,7 @@ export default function OnboardingScreen() {
           className="absolute left-[20px] z-20"
           style={{ top: insets.top + 12 }}
         >
-          <Text className="text-[26px] leading-none text-purple-200">‹</Text>
+          <Text className="text-[26px] leading-none text-blue-200">‹</Text>
         </Pressable>
 
         <ScrollView
@@ -188,7 +188,7 @@ export default function OnboardingScreen() {
               className="px-[30px] pt-12"
             >
               <Text
-                className="text-purple-300 font-semibold"
+                className="text-blue-300 font-semibold"
                 style={{ fontSize: 12, letterSpacing: 2.4 }}
               >
                 {screen.eyebrow.toUpperCase()}
@@ -200,7 +200,7 @@ export default function OnboardingScreen() {
                 {screen.title}
               </Text>
               <Text
-                className="mt-[18px] text-purple-200"
+                className="mt-[18px] text-blue-200"
                 style={{ fontSize: 16.5, lineHeight: 24, maxWidth: 320 }}
               >
                 {screen.body}
@@ -227,12 +227,12 @@ export default function OnboardingScreen() {
             accessibilityRole="button"
             accessibilityState={{ disabled: advanceDisabled }}
             className={`w-full items-center rounded-2xl py-[17px] ${
-              advanceDisabled ? "bg-purple-200/10" : "bg-purple-600"
+              advanceDisabled ? "bg-blue-200/10" : "bg-blue-500"
             }`}
           >
             <Text
               className={`text-base font-semibold ${
-                advanceDisabled ? "text-purple-400" : "text-white"
+                advanceDisabled ? "text-blue-400" : "text-white"
               }`}
             >
               {ctaForIndex(activeIndex)}
@@ -241,7 +241,7 @@ export default function OnboardingScreen() {
 
           {showOptOut && (
             <Pressable onPress={() => setOptOutOpen(true)} hitSlop={8}>
-              <Text className="text-[13.5px] font-medium text-purple-200 underline">
+              <Text className="text-[13.5px] font-medium text-blue-200 underline">
                 {"This isn't for me"}
               </Text>
             </Pressable>
@@ -262,7 +262,7 @@ export default function OnboardingScreen() {
               {"No hard feelings."}
             </Text>
             <Text
-              className="mb-7 text-center text-purple-200"
+              className="mb-7 text-center text-blue-200"
               style={{ fontSize: 15.5, lineHeight: 24, maxWidth: 280 }}
             >
               {
@@ -271,7 +271,7 @@ export default function OnboardingScreen() {
             </Text>
             <Pressable
               onPress={() => setOptOutOpen(false)}
-              className="rounded-2xl bg-purple-600 px-7 py-3.5"
+              className="rounded-2xl bg-blue-500 px-7 py-3.5"
             >
               <Text className="text-base font-semibold text-white">
                 {"Actually, I'm in"}

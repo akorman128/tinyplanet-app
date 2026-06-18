@@ -64,7 +64,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     >
       <View
         className={`max-w-[75%] rounded-2xl px-4 py-2 ${
-          isOwnMessage ? "bg-purple-600" : "bg-gray-200"
+          isOwnMessage ? "bg-blue-500" : "bg-gray-200"
         }`}
       >
         {isDeleted ? (

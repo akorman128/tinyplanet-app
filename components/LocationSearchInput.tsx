@@ -264,9 +264,9 @@ export function LocationSearchInput({
               className="w-12 items-center justify-center rounded-xl bg-white shadow-xs active:opacity-70"
             >
               {isLocating ? (
-                <ActivityIndicator size="small" color={colors.hex.purple600} />
+                <ActivityIndicator size="small" color={colors.hex.blue500} />
               ) : (
-                <Icons.pin size={22} color={colors.hex.purple600} />
+                <Icons.pin size={22} color={colors.hex.blue500} />
               )}
             </Pressable>
           )}

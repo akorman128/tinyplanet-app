@@ -254,7 +254,7 @@ export function UserPostsSection({
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor={colors.hex.purple600}
+            tintColor={colors.hex.blue500}
           />
         }
         onEndReached={handleLoadMore}
@@ -262,7 +262,7 @@ export function UserPostsSection({
         ListFooterComponent={() =>
           activeQuery.isFetchingNextPage ? (
             <View className="py-4">
-              <ActivityIndicator size="small" color={colors.hex.purple600} />
+              <ActivityIndicator size="small" color={colors.hex.blue500} />
             </View>
           ) : null
         }

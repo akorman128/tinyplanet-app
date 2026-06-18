@@ -28,7 +28,7 @@ export function FriendRequestItem({
         size="small"
       />
       <View className="flex-1 ml-3">
-        <Text className="text-base font-semibold text-purple-900 mb-0.5">
+        <Text className="text-base font-semibold text-blue-900 mb-0.5">
           {request.full_name}
         </Text>
         {request.hometown && (

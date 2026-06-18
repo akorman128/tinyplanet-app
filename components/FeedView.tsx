@@ -100,7 +100,7 @@ export function FeedView() {
     if (!isFetchingNextPage) return null;
     return (
       <View className="py-4">
-        <ActivityIndicator size="small" color={colors.hex.purple600} />
+        <ActivityIndicator size="small" color={colors.hex.blue500} />
       </View>
     );
   };
@@ -140,7 +140,7 @@ export function FeedView() {
         <RefreshControl
           refreshing={isRefetching && !isFetchingNextPage}
           onRefresh={handleRefresh}
-          tintColor={colors.hex.purple600}
+          tintColor={colors.hex.blue500}
         />
       }
       onEndReached={() => {

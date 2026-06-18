@@ -147,7 +147,7 @@ export function UserListsSection({ userId }: UserListsSectionProps) {
           <RefreshControl
             refreshing={isRefetching}
             onRefresh={handleRefresh}
-            tintColor={colors.hex.purple600}
+            tintColor={colors.hex.blue500}
           />
         }
       >
@@ -189,7 +189,7 @@ export function UserListsSection({ userId }: UserListsSectionProps) {
         <RefreshControl
           refreshing={isRefetching}
           onRefresh={handleRefresh}
-          tintColor={colors.hex.purple600}
+          tintColor={colors.hex.blue500}
         />
       }
     />

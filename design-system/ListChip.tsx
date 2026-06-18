@@ -19,13 +19,13 @@ export function ListChip({ list, size = "medium" }: ListChipProps) {
       href={{ pathname: "/list/[listId]", params: { listId: list.id } }}
       asChild
     >
-      <Pressable className="flex-row items-center bg-purple-50  rounded-lg px-3 py-4">
+      <Pressable className="flex-row items-center bg-blue-50  rounded-lg px-3 py-4">
         <Link.AppleZoom>
           <View className="flex-row items-center flex-1" collapsable={false}>
-            <Icons.list size={isSmall ? 14 : 16} color={colors.hex.purple600} />
+            <Icons.list size={isSmall ? 14 : 16} color={colors.hex.blue500} />
             <View className="flex-1 ml-2">
               <Text
-                className={`font-medium text-purple-700 ${isSmall ? "text-xs" : "text-sm"}`}
+                className={`font-medium text-blue-600 ${isSmall ? "text-xs" : "text-sm"}`}
                 numberOfLines={1}
               >
                 {list.title}
@@ -33,7 +33,7 @@ export function ListChip({ list, size = "medium" }: ListChipProps) {
             </View>
             <Icons.chevronRight
               size={isSmall ? 12 : 14}
-              color={colors.hex.purple400}
+              color={colors.hex.blue400}
             />
           </View>
         </Link.AppleZoom>

@@ -27,7 +27,7 @@ export function FontPreviewItem({
         onPress();
       }}
       className={`flex-row items-center px-4 py-3 border-b border-gray-100 ${
-        selected ? "bg-purple-50" : ""
+        selected ? "bg-blue-50" : ""
       }`}
     >
       <View className="flex-1">
@@ -39,7 +39,7 @@ export function FontPreviewItem({
         </Text>
       </View>
       {!loaded && <ActivityIndicator size="small" color={colors.hex.gray500} />}
-      {selected && <Icons.check size={20} color={colors.hex.purple600} />}
+      {selected && <Icons.check size={20} color={colors.hex.blue500} />}
     </Pressable>
   );
 }
