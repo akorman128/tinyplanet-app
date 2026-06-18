@@ -88,8 +88,7 @@ export default function ProfileScreen() {
         ActionSheetIOS.showActionSheetWithOptions(
           {
             title: `Hide ${name}?`,
-            message:
-              "This removes you from their map and hides their updates.",
+            message: "This removes you from their map and hides their updates.",
             options: ["Cancel", "Hide User"],
             cancelButtonIndex: 0,
             destructiveButtonIndex: 1,
