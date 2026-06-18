@@ -65,29 +65,31 @@ export default function ProfileScreen() {
     const name = displayProfile.full_name;
 
     if (isBlocked) {
-      // Unblock
+      // Unhide
       if (Platform.OS === "ios") {
         ActionSheetIOS.showActionSheetWithOptions(
-          { options: ["Cancel", "Unblock"], cancelButtonIndex: 0 },
+          { options: ["Cancel", "Unhide"], cancelButtonIndex: 0 },
           (idx) => {
             if (idx === 1) unblockUser.mutate({ targetUserId: userId });
           }
         );
       } else {
-        Alert.alert("Unblock", `Unblock ${name}?`, [
+        Alert.alert("Unhide", `Unhide ${name}?`, [
           { text: "Cancel", style: "cancel" },
           {
-            text: "Unblock",
+            text: "Unhide",
             onPress: () => unblockUser.mutate({ targetUserId: userId }),
           },
         ]);
       }
     } else {
-      // Block
+      // Hide
       if (Platform.OS === "ios") {
         ActionSheetIOS.showActionSheetWithOptions(
           {
-            options: ["Cancel", "Block User"],
+            title: `Hide ${name}?`,
+            message: "This removes you from their map and hides their updates.",
+            options: ["Cancel", "Hide User"],
             cancelButtonIndex: 0,
             destructiveButtonIndex: 1,
           },
@@ -97,12 +99,12 @@ export default function ProfileScreen() {
         );
       } else {
         Alert.alert(
-          `Block ${name}?`,
-          "They won't see your location and you won't see theirs.",
+          `Hide ${name}?`,
+          "This removes you from their map and hides their updates.",
           [
             { text: "Cancel", style: "cancel" },
             {
-              text: "Block",
+              text: "Hide",
               onPress: () => blockUser.mutate({ targetUserId: userId }),
               style: "destructive",
             },

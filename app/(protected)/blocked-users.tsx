@@ -25,7 +25,7 @@ function BlockedUserRow({ user }: { user: BlockedUser }) {
         disabled={unblock.isPending}
       >
         <Badge variant="default" size="small">
-          Unblock
+          Unhide
         </Badge>
       </Pressable>
     </View>
@@ -37,7 +37,7 @@ export default function BlockedUsersScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: "Blocked Users" }} />
+      <Stack.Screen options={{ title: "Hidden Users" }} />
       <View className="flex-1 bg-cream">
         <FlatList
           data={blockedUsers ?? []}
@@ -45,7 +45,7 @@ export default function BlockedUsersScreen() {
           renderItem={({ item }) => <BlockedUserRow user={item} />}
           ListEmptyComponent={
             !isPending ? (
-              <EmptyState message="You haven't blocked anyone" />
+              <EmptyState message="You haven't hidden anyone" />
             ) : null
           }
         />

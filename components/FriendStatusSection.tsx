@@ -208,7 +208,7 @@ export function FriendStatusSection({
         };
       case FriendshipDisplayStatus.BLOCKED:
         return {
-          text: "Blocked",
+          text: "Hidden",
           onPress: () => {},
         };
     }
