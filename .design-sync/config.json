@@ -29,6 +29,8 @@
     "TabBar": "design-system/TabBar.tsx",
     "MenuRow": "design-system/MenuRow.tsx",
     "ScreenHeader": "design-system/ScreenHeader.tsx",
+    "FormField": "design-system/FormField.tsx",
+    "ProgressDots": "design-system/ProgressDots.tsx",
     "SuperHeading": "design-system/Typography.tsx",
     "Heading": "design-system/Typography.tsx",
     "Subheading": "design-system/Typography.tsx",
@@ -60,6 +62,8 @@
     "TabBar": "tabs: readonly { id: string; label: string }[]; activeTab: string; onTabChange: (tabId: string) => void; className?: string;",
     "MenuRow": "icon: React.ReactNode; label: string; onPress: () => void; position?: \"first\" | \"middle\" | \"last\" | \"standalone\";",
     "ScreenHeader": "title: string; onClose: () => void; className?: string;",
+    "FormField": "label?: string; error?: string; className?: string; children: React.ReactNode;",
+    "ProgressDots": "count: number; activeIndex: number;",
     "SuperHeading": "children?: React.ReactNode; className?: string; numberOfLines?: number;",
     "Heading": "children?: React.ReactNode; className?: string; numberOfLines?: number;",
     "Subheading": "children?: React.ReactNode; className?: string; numberOfLines?: number;",
@@ -99,6 +103,8 @@
     "AvatarStack": ".design-sync/groups/AvatarStack.md",
     "TabBar": ".design-sync/groups/TabBar.md",
     "MenuRow": ".design-sync/groups/MenuRow.md",
-    "ScreenHeader": ".design-sync/groups/ScreenHeader.md"
+    "ScreenHeader": ".design-sync/groups/ScreenHeader.md",
+    "FormField": ".design-sync/groups/FormField.md",
+    "ProgressDots": ".design-sync/groups/ProgressDots.md"
   }
 }

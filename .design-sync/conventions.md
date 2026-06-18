@@ -38,13 +38,15 @@ the components already use ship in the stylesheet — stay within this vocabular
 ## The component set
 - **Actions**: `Button` (`variant`: primary | secondary | coral; `size`: sm | md | lg),
   `ButtonGroup`, `OptionSelector` (segmented selectors).
-- **Inputs**: `Input` (label/error/character-count), `Select`, `Slider`, `CommentInput`.
+- **Inputs**: `Input` (label/error/character-count), `Select`, `Slider`, `CommentInput`,
+  `FormField` (label + error wrapper for custom controls like date pickers — matches `Input`'s label/error).
 - **Typography**: `SuperHeading`, `Heading`, `Subheading`, `SectionTitle`, `Body`, `Label`,
   `Caption`, `Meta`, and the base `Text`.
 - **Display**: `Badge` (six variants), `InfoRow`, `GlassInfoCard` (+ `GlassInfoItem` children),
   `IntroBanner`, `EmptyState`, `ErrorState`, `LoadingState`, `TypingIndicator`.
 - **Avatars**: `Avatar` (initials or photo), `AvatarStack` (overlapping, with `+N` overflow).
-- **Navigation**: `TabBar`, `MenuRow`, `ScreenHeader`. Icons are on `window.TinyPlanet.Icons.*`.
+- **Navigation**: `TabBar`, `MenuRow`, `ScreenHeader`, `ProgressDots` (stepper/pagination dots,
+  designed for dark onboarding backgrounds). Icons are on `window.TinyPlanet.Icons.*`.
 
 ## Where the truth lives
 Read `styles.css` (and the `_ds_bundle.css` it imports) for the exact compiled tokens and
