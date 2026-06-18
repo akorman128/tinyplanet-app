@@ -54,3 +54,10 @@ android/
 
 # Claude Code linked worktrees (live git worktrees, never committed)
 .claude/worktrees/
+
+# design-sync scratch + build output (durable inputs under .design-sync/ ARE committed)
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules

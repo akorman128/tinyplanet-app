@@ -8,7 +8,15 @@ module.exports = defineConfig([
   {
     // Deno edge functions target a different runtime (npm: specifiers, Deno
     // globals) and are excluded from tsconfig too; lint them separately.
-    ignores: ["dist/*", "supabase/functions/**"],
+    // .design-sync/ (committed) and .ds-sync/ (scratch) hold design-sync
+    // preview compositions that import the virtual `tiny-planet` bundle
+    // specifier — not resolvable by the app's import resolver, and not app code.
+    ignores: [
+      "dist/*",
+      "supabase/functions/**",
+      ".design-sync/**",
+      ".ds-sync/**",
+    ],
   },
   {
     // The `import` plugin is already registered by eslint-config-expo/flat;
