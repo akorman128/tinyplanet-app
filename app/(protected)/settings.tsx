@@ -36,7 +36,7 @@ export default function MutualsScreen() {
           />
           <MenuRow
             icon={<Body>🚫</Body>}
-            label="Blocked Users"
+            label="Hidden Users"
             onPress={() => router.push("/blocked-users")}
             position="standalone"
           />

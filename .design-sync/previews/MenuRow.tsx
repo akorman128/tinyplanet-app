@@ -33,7 +33,7 @@ export const Standalone = () => (
   <div style={{ width: 340, background: "#ffffff", borderRadius: 12 }}>
     <MenuRow
       icon={<Icons.shieldCheck size={20} color="#111827" />}
-      label="Blocked accounts"
+      label="Hidden accounts"
       onPress={() => {}}
       position="standalone"
     />
