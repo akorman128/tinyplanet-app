@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { View, Alert } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ScreenHeader } from "@/design-system";
+import { ScreenHeader, colors } from "@/design-system";
 import { ListForm } from "@/components/ListForm";
 import { useCreateList } from "@/hooks/useLists";
 import { CreateListInput } from "@/types/list";
@@ -55,7 +55,7 @@ export default function CreateListScreen() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#faf9f5" }}
+      style={{ flex: 1, backgroundColor: colors.hex.cream }}
       edges={["top"]}
     >
       <ScreenHeader title="Create List" onClose={handleCancel} />

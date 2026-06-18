@@ -2,6 +2,7 @@ import React from "react";
 import { View, Pressable } from "react-native";
 import { Heading } from "./Typography";
 import { Icons } from "./Icons";
+import { colors } from "./colors";
 
 export interface ScreenHeaderProps {
   title: string;
@@ -20,7 +21,7 @@ export function ScreenHeader({
     >
       <Heading>{title}</Heading>
       <Pressable onPress={onClose} hitSlop={12}>
-        <Icons.close width={22} height={22} color="#111827" />
+        <Icons.close width={22} height={22} color={colors.hex.gray900} />
       </Pressable>
     </View>
   );

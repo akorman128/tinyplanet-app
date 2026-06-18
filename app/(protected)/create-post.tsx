@@ -4,7 +4,13 @@ import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, OptionSelector, Icons, ScreenHeader } from "@/design-system";
+import {
+  Button,
+  OptionSelector,
+  Icons,
+  ScreenHeader,
+  colors,
+} from "@/design-system";
 import { PostForm, postSchema, PostFormData } from "@/components/PostForm";
 import { useCreatePost } from "@/hooks/usePosts";
 import { PostVisibility } from "@/types/post";
@@ -53,7 +59,7 @@ export default function CreatePostScreen() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#faf9f5" }}
+      style={{ flex: 1, backgroundColor: colors.hex.cream }}
       edges={["top"]}
     >
       <ScreenHeader title="New Post" onClose={() => router.back()} />

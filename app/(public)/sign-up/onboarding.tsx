@@ -16,9 +16,11 @@ import { router } from "expo-router";
 import { useSignupStore } from "@/stores/signupStore";
 import { useLocation } from "@/hooks/useLocation";
 import { hapticSuccess } from "@/utils/haptics";
-import { OnboardingBackground } from "@/components/onboarding/OnboardingBackground";
-import { PledgeToggle } from "@/components/onboarding/PledgeToggle";
-import { ProgressDots } from "@/components/onboarding/ProgressDots";
+import {
+  OnboardingBackground,
+  PledgeToggle,
+  ProgressDots,
+} from "@/design-system";
 import {
   ONBOARDING_SCREENS,
   PLEDGE_LABELS,

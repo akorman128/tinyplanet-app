@@ -1,16 +1,17 @@
 import React, { useState, useCallback } from "react";
-import {
-  View,
-  FlatList,
-  ActivityIndicator,
-  Alert,
-  RefreshControl,
-} from "react-native";
+import { View, FlatList, Alert, RefreshControl } from "react-native";
 import { Stack } from "expo-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { colors, Button, Body, Caption, TabBar, Tab } from "@/design-system";
+import {
+  Button,
+  Body,
+  Caption,
+  TabBar,
+  Tab,
+  LoadingState,
+} from "@/design-system";
 import { FriendRequestItem } from "@/design-system/FriendRequestItem";
 import { VibePhoneForm } from "@/components/VibePhoneForm";
 import {
@@ -190,9 +191,7 @@ export default function FriendsScreen() {
   const renderRequestsTab = () => (
     <View className="flex-1">
       {requestsLoading ? (
-        <View className="flex-1 justify-center items-center px-6">
-          <ActivityIndicator size="large" color={colors.hex.purple600} />
-        </View>
+        <LoadingState className="px-6" />
       ) : incomingRequests.length === 0 ? (
         <View className="flex-1 justify-center items-center px-6">
           <Body className="text-base text-gray-400 text-center">

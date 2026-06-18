@@ -1,7 +1,7 @@
 import React from "react";
-import { View, ActivityIndicator, Pressable, FlatList } from "react-native";
+import { View, Pressable, FlatList } from "react-native";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
-import { colors, Avatar, Body, Caption, Text } from "@/design-system";
+import { Avatar, Body, Caption, LoadingState } from "@/design-system";
 import { useGetMutualsBetweenUsers } from "@/hooks/useFriends";
 import { Friend } from "@/types/friendship";
 
@@ -38,9 +38,7 @@ export default function MutualsScreen() {
       <>
         <Stack.Screen options={{ title: "Mutual Friends" }} />
         <View className="flex-1 bg-cream">
-          <View className="flex-1 justify-center items-center">
-            <ActivityIndicator size="large" color={colors.hex.purple600} />
-          </View>
+          <LoadingState />
         </View>
       </>
     );

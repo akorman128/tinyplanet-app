@@ -189,7 +189,7 @@ export function ListForm({
                 numberOfLines={6}
                 textAlignVertical="top"
                 className="bg-white shadow-xs rounded-xl px-4 py-3 text-base"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.hex.placeholder}
                 style={{ minHeight: 120 }}
               />
             )}

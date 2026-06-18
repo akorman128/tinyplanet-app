@@ -1,79 +1,96 @@
-# Hangs Feature — Implementation
+# Design System Hardening — 4 Slices
 
-Lightweight real-world meetups (Hangs) with "Going" RSVPs, visible in the feed and on the
-map, with push notifications. Mirrors the Travel Plan pattern (a structured row linked to an
-auto-created post) with a coral-accented "Scene" UI per `docs/hang-mockups/`.
+Goal: tighten the boundary between the published design system (RN-web-renderable,
+synced via `.design-sync/config.json`) and app-level code. Sequence by risk-adjusted
+value: tokens → adoption → relocation → one earned abstraction.
 
-Plan: `.claude/plans/here-is-the-prd-vivid-neumann.md`
+Boundary rule applied throughout:
+- **In DS** = presentational, renders standalone under react-native-web (no provider,
+  no native module), within the token vocabulary.
+- **Shared but not DS** = data-coupled or native-dependent → `components/` (+ new `components/map/`).
+- Tailwind `rounded-*`/`shadow-*` utility classes already ship in the bundle and are left alone;
+  only inline RN `StyleSheet`/`style={{}}` literals are tokenized (no visual regressions: adopt
+  only exact-value matches).
 
-## Stage 0 — Design tokens & primitives
-- [x] Coral ramp in `global.css @theme` + `design-system/colors.ts`
-- [x] Coral `Button` variant + coral `Badge` variant
-- [x] `design-system/AvatarStack.tsx` (overlapping attendee avatars)
+## Slice 1 — Tokens (foundation, zero indirection)
+- [x] Add `design-system/tokens.ts`: `radius`, `shadow`, `iconSize` scales
+- [x] Export tokens from `design-system/index.ts`
+- [x] `Button.tsx`: replace local `iconSizes` with shared `iconSize`
+- [x] Adopt color tokens for inline literals that already have a token:
+      `#faf9f5`→`cream` (_layout, comments, create-{post,list,intro,travel-plan}, map SVG),
+      `#9CA3AF`→`placeholder` (Input, ListForm), `#111827`→`gray900` (_layout, ScreenHeader),
+      `text-[#9ca3af]`→`text-gray-400` shipped class (GlassInfoCard, InfoRow)
+- [x] Adopt `shadow.md` in `create.tsx` (ITEM_SHADOW exact match). list/[listId] & Select
+      shadows left inline — NOT exact-value matches, forcing a preset would change visuals
+- [x] Adopt `radius.*` for exact-match inline `borderRadius` (Select 8, ColorPicker 12/8, MemberCard 20, theme-editor 16)
+- [x] `tsc --noEmit` clean
 
-## Stage A — Database (3 migrations; validated via `supabase db reset` + psql + RPC tests)
-- [x] `20260612000001_create_hangs.sql` — `hangs` + `hang_attendees`, RLS, realtime
-- [x] `20260612000002_hang_rpc_functions.sql` — create/update/delete/detail/locations/friends-and-mutuals
-- [x] `20260612000003_add_hangs_to_feed_functions.sql` — embed `hang` JSONB + exclude expired
+## Slice 2 — Adoption pass (use already-shipped components)
+- [x] Replace full-screen inline `ActivityIndicator` with `LoadingState`:
+      search, mutuals, friends, all-vibes (left header save-spinners in
+      theme-editor/edit-profile; left boot loader in _layout — different semantics)
+- [x] Add `multiline` support to `Input` (textAlignVertical top when multiline)
+- [x] Convert create-intro message textarea to `Input multiline` (left specialized emoji/numeric inputs)
+- [x] `tsc --noEmit` clean
 
-## Stage B — Client data layer
-- [x] `types/hang.ts`; `PostWithAuthor.hang`; `lib/queryKeys.ts` hangs; `lib/rpc.ts` RpcReturns
-- [x] `hooks/useHangs.ts` (create/update/delete/rsvp/unrsvp/detail/locations/realtime)
-- [x] `hooks/useMapData.ts` wiring; `utils/mapSnapshot.ts`; `utils/hangTime.ts`
+## Slice 3 — Relocate, correctly
+- [x] Move onboarding trio (`ProgressDots`, `PledgeToggle`, `OnboardingBackground`) → `design-system/` (git mv)
+- [x] Export trio from `design-system/index.ts`; rewire `sign-up/onboarding.tsx`
+- [x] Create `components/map/`; move 7 markers into it (git mv)
+- [x] Rewire importers (only `MapView.tsx` imported markers; `map.tsx` did not)
+- [x] `tsc --noEmit` clean
+- Note: registering trio in `.design-sync/config.json` + recapturing previews is a follow-up
+  (runs the sync/capture pipeline) — out of scope for this code change.
 
-## Stage C — UI (per designs; create/edit modeled on `edit-profile.tsx`)
-- [x] Create-menu item + `create-hang` / `edit-hang` + `components/HangForm.tsx`
-- [x] `design-system/HangCard.tsx` (Scene feed card) + `FeedView` branching
-- [x] `app/(protected)/hang/[hangId].tsx` (Scene detail) — host/attendees/calendar/maps/RSVP/realtime
-- [x] `components/HangMarker.tsx` (Quiet marker + preview) + `MapView` + "Hangs" map filter
+## Slice 4 — Extract the one earned abstraction: FormField
+- [x] Add `design-system/FormField.tsx` (label + control slot + error), styled to match `Input`
+- [x] Export from `design-system/index.ts`
+- [x] Adopt in HangForm (`startsAt`) and TravelPlanForm (`startDate`) date pickers — the only
+      hand-rolled label+control+error wrappers. PostForm/VibePhoneForm are pure `Input`
+      (label/error built in) so they need nothing — NOT force-fitted.
+- [x] `tsc --noEmit` clean
 
-## Stage D — Notifications, realtime, calendar
-- [x] `supabase/functions/notify-hangs/index.ts` (branches on `hangs` / `hang_attendees`)
-- [x] `usePushNotifications.ts` routes `data.hangId` → `/hang/[hangId]`
-- [x] `expo-calendar` installed + `utils/calendar.ts` wired to detail
-
-## Verification
-- [x] `tsc --noEmit`: 0 errors across the project
-- [x] eslint: 0 errors (warnings only, consistent with codebase)
-- [x] `__tests__/hooks/useHangs.test.tsx`: 8/8 pass
-- [x] `__tests__/rpc/hangs.test.ts`: 16/16 pass (create/RSVP/visibility/expiry/feed/update/delete)
-- [x] Baseline comparison proves my changes add **0** new failures to the existing suite
+## Final verification
+- [x] `tsc --noEmit` across project: 0 errors
+- [x] ESLint (no --fix) on changed files: clean (tidied 2 pre-existing unused imports in files I touched)
+- [x] `vitest run` design-system + components + utils: 24/24 pass (RPC suites need local DB; not touched)
 
 ---
 
 ## Review
 
-### What was built
-End-to-end Hang feature: DB schema + RLS + RPCs, React Query hooks with realtime RSVP
-updates, a coral "Scene" feed card / detail / map marker, native-calendar integration, and a
-fan-out push edge function. Hangs auto-create a linked post (reusing feed pagination +
-visibility) and are hidden once `starts_at + 3h` passes — pure query-time filtering, no cron.
+### What changed (≈30 files)
+- **Slice 1 — tokens:** new `design-system/tokens.ts` (`radius`, `shadow`, `iconSize`), exported
+  from the barrel. `Button` now uses the shared `iconSize`. Inline hex literals that duplicated
+  existing tokens swapped to `colors.hex.*`; two arbitrary `text-[#9ca3af]` classes (which would
+  NOT ship in the RN-web bundle CSS) swapped to the standard `text-gray-400` class. Adopted
+  `shadow.md`/`radius.*` only where the inline value matched a scale step exactly (no visual regressions).
+- **Slice 2 — adoption:** 4 full-screen loaders → existing `LoadingState`; `Input` gained
+  `multiline` support; create-intro textarea normalized to `Input`.
+- **Slice 3 — relocation:** onboarding trio → `design-system/`; 7 Mapbox markers → new
+  `components/map/` (native `@rnmapbox/maps` dep means they can never be DS-bundle members).
+- **Slice 4 — FormField:** one new presentational wrapper, adopted in the two divergent
+  date-picker fields (HangForm used `Body`/`Text`/gray-900; TravelPlanForm used `Label`/`Caption`)
+  — now both render identically to `Input` fields.
 
-### Bugs caught & fixed during verification
-1. **Feed visibility gap** — a `'mutuals'`-visibility hang post was invisible to **direct
-   friends** in `get_feed_posts` (the existing "mutuals" branch only matches friends-of-
-   friends). Added a hang-specific branch including friends **and** mutuals, independent of
-   post visibility. Caught by a psql end-to-end check.
-2. **Ambiguous `post_id`** in `update_hang_with_post` — the `RETURNS TABLE` output column
-   collided with `hangs.post_id` in `SELECT … INTO`. Fixed by aliasing the table. Caught by
-   the RPC integration test.
+### Boundary established
+The DS = RN-web-renderable + provider-free + presentational + token-vocabulary. The *synced*
+bundle is the `.design-sync/config.json` `componentSrcMap` (curated; ~29 of ~50 exports).
+Markers fail the native-dep test → `components/map/`. Promotion gate documented at top of file.
 
-### Verified behavior (live local DB)
-Host auto-RSVP, friend + mutual feed/map visibility, stranger exclusion, real-time attendee
-counts, expiry (invitee loses feed/detail access; host retains history), edit syncs the post,
-delete cascades RSVPs.
+### Verification
+`tsc --noEmit` clean after every slice and at the end. ESLint clean on changed files. 24/24
+non-DB tests pass. RPC suites require a local Supabase and have pre-existing GoTrue-clobber
+failures (see lessons.md) — untouched by this frontend-only change.
 
-### Manual steps before production (can't be automated here)
-- Deploy `notify-hangs` + create two Supabase **Dashboard webhooks** (INSERT on `hangs` and
-  `hang_attendees`) → the function URL with the service-role header.
-- **Native rebuild** (`npx expo run:ios` / `run:android`) for the new `expo-calendar` dep.
+### Not mine — flagged, left untouched
+- `components/VibePhoneForm.tsx`: a pre-existing working-tree edit (dropped `onSelectContact &&`
+  guard + double-space typo) was already present when I first read the file. Not my change; left as-is.
+- `uniwind-types.d.ts`: pre-existing generated-file diff from session start.
 
-### Out of scope (PRD follow-ups)
-Re-notifying attendees on host edits; hard-deleting expired rows (kept for future history); an
-intermediate map preview callout beyond the current tap-to-detail.
-
-### Pre-existing suite note
-The full RPC suite (run in one process) shows `forbidden: user mismatch` failures in
-`messages` / `profile` / `get_user_posts` — the shared GoTrue storage key clobbering
-`adminClient`'s session against the `enforce_auth_uid` migration. Confirmed identical on the
-hangs-free baseline; unrelated to this feature.
+### Follow-ups (deferred by design, behind the gate)
+- Register the onboarding trio + `FormField` in `componentSrcMap` and recapture previews (runs the
+  sync pipeline; out of scope for a code-only change).
+- Deferred new primitives still failing the semantic rule-of-three: `Divider`, `ModalDialog`,
+  `StickyFooter`, `InfoCard`, `IconButton`. Closest fast-follows: `ScreenContainer` (5× identical
+  cream safe-area wrapper) and the `mx-6` list separator (3× identical).

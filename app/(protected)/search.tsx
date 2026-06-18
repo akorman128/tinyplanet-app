@@ -1,15 +1,8 @@
 import React, { useState, useCallback } from "react";
-import {
-  View,
-  FlatList,
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  RefreshControl,
-} from "react-native";
+import { View, FlatList, Alert, Pressable, RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors, Input, Body, ScreenHeader } from "@/design-system";
+import { Input, Body, ScreenHeader, LoadingState } from "@/design-system";
 import { UserSearchListItem } from "@/components/UserSearchList";
 import { useSearchFriends, useSendFriendRequest } from "@/hooks/useFriends";
 import { logger } from "@/utils/logger";
@@ -77,9 +70,7 @@ export default function SearchScreen() {
         </View>
 
         {searchLoading && debouncedQuery ? (
-          <View className="flex-1 justify-center items-center px-6">
-            <ActivityIndicator size="large" color={colors.hex.purple600} />
-          </View>
+          <LoadingState className="px-6" />
         ) : searchResults.length === 0 ? (
           <View className="flex-1 justify-center items-center px-6">
             <Body className="text-base text-gray-400 text-center">

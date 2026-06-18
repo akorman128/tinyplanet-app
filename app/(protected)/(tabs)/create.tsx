@@ -10,19 +10,13 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from "react-native-reanimated";
-import { Body, Subheading } from "@/design-system";
+import { Body, Subheading, shadow } from "@/design-system";
 import { hapticMedium } from "@/utils";
 
 const ANIMATION_DURATION = 250;
 const STAGGER_OFFSET = 0.15;
 
-const ITEM_SHADOW: ViewStyle = {
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.15,
-  shadowRadius: 4,
-  elevation: 4,
-};
+const ITEM_SHADOW: ViewStyle = shadow.md;
 
 const MENU_ITEMS = [
   {

@@ -3,15 +3,7 @@ import { View, Pressable } from "react-native";
 import { Controller, Control, FieldErrors } from "react-hook-form";
 import { z } from "zod";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import {
-  Input,
-  Body,
-  Label,
-  Caption,
-  Meta,
-  Text,
-  ActiveTravelPlanBanner,
-} from "@/design-system";
+import { Input, Body, Meta, Text, FormField } from "@/design-system";
 import { TravelPlan } from "@/types/travelPlan";
 import { LocationSearchInput } from "./LocationSearchInput";
 // Travel plan schema
@@ -81,8 +73,11 @@ export function TravelPlanForm({
             control={control}
             name="startDate"
             render={({ field }) => (
-              <View className="mb-4">
-                <Label className="mb-2">Start Date</Label>
+              <FormField
+                label="Start Date"
+                error={errors.startDate?.message}
+                className="mb-4"
+              >
                 <DateTimePicker
                   value={field.value}
                   mode="date"
@@ -91,13 +86,7 @@ export function TravelPlanForm({
                     if (date) field.onChange(date);
                   }}
                 />
-
-                {errors.startDate && (
-                  <Caption className="text-red-500 mt-1">
-                    {errors.startDate.message}
-                  </Caption>
-                )}
-              </View>
+              </FormField>
             )}
           />
 

@@ -3,6 +3,7 @@ import { View, Pressable, Modal, FlatList } from "react-native";
 import { Text } from "./Text";
 import { Icons } from "./Icons";
 import { colors } from "./colors";
+import { radius } from "./tokens";
 
 export interface SelectOption<T extends string> {
   value: T;
@@ -102,7 +103,7 @@ export function Select<T extends string>({
               left: dropdownPosition.left,
               width: dropdownPosition.width,
               backgroundColor: "white",
-              borderRadius: 8,
+              borderRadius: radius.sm,
               borderWidth: 1,
               borderColor: colors.hex.gray300,
               shadowColor: "#000",

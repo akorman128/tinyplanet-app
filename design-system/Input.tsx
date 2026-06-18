@@ -58,8 +58,8 @@ export function Input({
       <View className="relative">
         <TextInput
           className={inputClass}
-          placeholderTextColor="#9CA3AF"
-          textAlignVertical="center"
+          placeholderTextColor={colors.hex.placeholder}
+          textAlignVertical={props.multiline ? "top" : "center"}
           autoComplete="off"
           maxLength={maxLength}
           {...props}

@@ -21,7 +21,7 @@ export function GlassInfoItem({
 
   const content = (
     <View className="py-3">
-      <Text className="text-xs font-semibold text-[#9ca3af] mb-1 uppercase tracking-wide">
+      <Text className="text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wide">
         {label}
       </Text>
       {loading ? (
