@@ -15,14 +15,14 @@ export function IntroBanner({
   message,
 }: IntroBannerProps) {
   return (
-    <View className="mb-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+    <View className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
       <View className="flex-row items-center mb-2">
         <Avatar
           fullName={introducerName}
           avatarUrl={introducerAvatarUrl ?? undefined}
           size="small"
         />
-        <Body className="ml-2 font-semibold text-purple-900">
+        <Body className="ml-2 font-semibold text-blue-900">
           {introducerName} introed you
         </Body>
       </View>

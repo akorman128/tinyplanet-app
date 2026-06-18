@@ -27,7 +27,7 @@ export function ListsSection({ userId, isOwnProfile }: ListsSectionProps) {
           <SectionTitle>Lists</SectionTitle>
         </View>
         <View className="items-center justify-center py-8">
-          <ActivityIndicator size="large" color={colors.hex.purple600} />
+          <ActivityIndicator size="large" color={colors.hex.blue500} />
         </View>
       </View>
     );

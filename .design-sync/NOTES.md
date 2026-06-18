@@ -71,7 +71,7 @@ VerticalToggle, AnimatedEmojiBorder, ContactCard, swipeable list items, etc.
 - `FormField` (Inputs) and `ProgressDots` (Navigation) were promoted into the synced set:
   `componentSrcMap` + `dtsPropsFor` + `docsMap` + `ds-entry.jsx` exports + authored previews.
 - `ProgressDots` lives on the dark onboarding background; its upcoming dots are intentionally
-  faint (`bg-purple-200/20`). Its preview (`previews/ProgressDots.tsx`) wraps cards in a dark
+  faint (`bg-blue-200/20`). Its preview (`previews/ProgressDots.tsx`) wraps cards in a dark
   div so the dots read — grading on a white card would look broken but isn't.
 - `FormField` is a label+control+error wrapper styled to match `Input`; its preview composes a
   plain styled control box as the child (illustrative — authors supply the real control).

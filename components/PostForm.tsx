@@ -62,11 +62,9 @@ export function PostForm({
 
       {!selectedList && (
         <Pressable onPress={onAttachList} className="flex-row items-center">
-          <Icons.list size={20} color={colors.hex.purple600} />
+          <Icons.list size={20} color={colors.hex.blue500} />
 
-          <Text className="ml-2 text-purple-600 font-medium">
-            Attach a List
-          </Text>
+          <Text className="ml-2 text-blue-500 font-medium">Attach a List</Text>
         </Pressable>
       )}
     </View>

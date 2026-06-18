@@ -22,7 +22,7 @@ export function InfoRow({
         {label}
       </Text>
       {loading ? (
-        <ActivityIndicator size="small" color={colors.hex.purple600} />
+        <ActivityIndicator size="small" color={colors.hex.blue500} />
       ) : (
         <>
           {typeof value === "string" ? (

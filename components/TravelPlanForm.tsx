@@ -50,7 +50,7 @@ export function TravelPlanForm({
             <View className="mb-4 flex-row items-center justify-between">
               <Body className="font-semibold">Editing Travel Plan</Body>
               <Pressable onPress={onCancelEdit}>
-                <Text className="text-purple-600 font-medium">Cancel</Text>
+                <Text className="text-blue-500 font-medium">Cancel</Text>
               </Pressable>
             </View>
           )}

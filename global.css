@@ -2,28 +2,28 @@
 @import "uniwind";
 
 @theme {
-  /* Custom primary colors */
-  --color-primary-light: #dedbfd;
-  --color-primary: #6b61f3;
-  --color-primary-dark: #5249c9;
+  /* Custom primary colors (brand blue, base #007AFF) */
+  --color-primary-light: #c7e2ff;
+  --color-primary: #007aff;
+  --color-primary-dark: #0064d1;
 
   /* Background */
   --color-cream: #faf9f5;
 
-  /* Hang accent ramp (coral) — distinct from Travel-Plans orange and brand purple */
+  /* Hang accent ramp (coral) — distinct from Travel-Plans orange and brand blue */
   --color-coral: #ff6b6b;
   --color-coral-pressed: #e8475f;
   --color-coral-tint: #ffedec;
 
-  /* Extended purple scale — light → dark, brand anchored at 600 */
-  --color-purple-50: #f7f6fe;
-  --color-purple-100: #efedfe;
-  --color-purple-200: #dedbfd;
-  --color-purple-300: #c7c1fb;
-  --color-purple-400: #a79ef8;
-  --color-purple-500: #8b81f6;
-  --color-purple-600: #6b61f3;
-  --color-purple-700: #5249c9;
-  --color-purple-800: #3c359b;
-  --color-purple-900: #29246e;
+  /* Brand blue scale — light → dark, base/brand anchored at 500 */
+  --color-blue-50: #f0f7ff;
+  --color-blue-100: #e6f2ff;
+  --color-blue-200: #c7e2ff;
+  --color-blue-300: #94c7ff;
+  --color-blue-400: #4da2ff;
+  --color-blue-500: #007aff;
+  --color-blue-600: #0064d1;
+  --color-blue-700: #004ea3;
+  --color-blue-800: #003875;
+  --color-blue-900: #002247;
 }

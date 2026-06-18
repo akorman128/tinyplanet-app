@@ -51,10 +51,10 @@ export const ListPickerSheet = forwardRef<BottomSheet, ListPickerSheetProps>(
       <Pressable
         onPress={() => handleSelect(item)}
         className={`flex-row items-center px-4 py-3 border-b border-gray-100 ${
-          selectedListId === item.id ? "bg-purple-50" : ""
+          selectedListId === item.id ? "bg-blue-50" : ""
         }`}
       >
-        <Icons.list size={20} color={colors.hex.purple600} />
+        <Icons.list size={20} color={colors.hex.blue500} />
         <View className="flex-1 ml-3">
           <Body className="font-medium">{item.title}</Body>
           <Caption>
@@ -63,7 +63,7 @@ export const ListPickerSheet = forwardRef<BottomSheet, ListPickerSheetProps>(
           </Caption>
         </View>
         {selectedListId === item.id && (
-          <Icons.check size={20} color={colors.hex.purple600} />
+          <Icons.check size={20} color={colors.hex.blue500} />
         )}
       </Pressable>
     );
@@ -82,7 +82,7 @@ export const ListPickerSheet = forwardRef<BottomSheet, ListPickerSheetProps>(
             <SectionTitle>Attach a List</SectionTitle>
             {selectedListId && (
               <Pressable onPress={handleClear}>
-                <Text className="text-purple-600 font-medium">Clear</Text>
+                <Text className="text-blue-500 font-medium">Clear</Text>
               </Pressable>
             )}
           </View>

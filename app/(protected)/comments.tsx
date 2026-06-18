@@ -261,12 +261,12 @@ export default function CommentsScreen() {
       >
         <View className="px-6 py-4 border-t border-gray-200 bg-cream">
           {replyingTo && (
-            <View className="flex-row items-center justify-between mb-2 px-3 py-2 bg-purple-50 rounded-lg">
-              <Text className="text-sm text-purple-700">
+            <View className="flex-row items-center justify-between mb-2 px-3 py-2 bg-blue-50 rounded-lg">
+              <Text className="text-sm text-blue-600">
                 Replying to {replyingTo.author.full_name}
               </Text>
               <Pressable onPress={handleCancelReply}>
-                <Icons.close size={16} color={colors.hex.purple600} />
+                <Icons.close size={16} color={colors.hex.blue500} />
               </Pressable>
             </View>
           )}
@@ -299,7 +299,7 @@ export default function CommentsScreen() {
                     onPress={() => router.push("/select-list")}
                     className="p-4 rounded-lg bg-gray-100 h-15 w-11 items-center justify-center"
                   >
-                    <Icons.list size={20} color={colors.hex.purple600} />
+                    <Icons.list size={20} color={colors.hex.blue500} />
                   </Pressable>
                 }
               />

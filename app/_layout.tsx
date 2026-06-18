@@ -183,7 +183,7 @@ function RootNavigator() {
   if (session && error && !profileState) {
     return (
       <View className="flex-1 justify-center items-center bg-cream px-6">
-        <SectionTitle className="text-purple-900 mb-2">
+        <SectionTitle className="text-blue-900 mb-2">
           Failed to Load Profile
         </SectionTitle>
         <Body className="text-gray-500 mb-6 text-center">{error.message}</Body>

@@ -19,11 +19,11 @@ export function ActiveTravelPlanBanner({
 }: ActiveTravelPlanBannerProps) {
   if (variant === "compact") {
     return (
-      <View className="w-full mb-6 px-4 py-3 bg-purple-100 rounded-lg border border-purple-200 flex-col justify-between">
-        <SectionTitle className="text-base text-purple-900 mb-1">
+      <View className="w-full mb-6 px-4 py-3 bg-blue-100 rounded-lg border border-blue-200 flex-col justify-between">
+        <SectionTitle className="text-base text-blue-900 mb-1">
           🚀 {travelPlan.destination_name}
         </SectionTitle>
-        <Body className="text-sm font-semibold text-purple-900">
+        <Body className="text-sm font-semibold text-blue-900">
           {new Date(travelPlan.start_date).toLocaleDateString()} →{" "}
           {new Date(travelPlan.end_date).toLocaleDateString()}
         </Body>
@@ -32,12 +32,10 @@ export function ActiveTravelPlanBanner({
   }
 
   return (
-    <View className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+    <View className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
       <View className="flex-row items-center justify-between mb-3">
-        <Body className="font-semibold text-purple-900">
-          Active Travel Plan
-        </Body>
-        <Meta className="text-purple-700">
+        <Body className="font-semibold text-blue-900">Active Travel Plan</Body>
+        <Meta className="text-blue-600">
           {new Date(travelPlan.start_date).toLocaleDateString()} -{" "}
           {new Date(travelPlan.end_date).toLocaleDateString()}
         </Meta>

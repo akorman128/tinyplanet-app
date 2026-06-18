@@ -127,8 +127,8 @@ export default function CreateIntroScreen() {
           }
           ListHeaderComponent={
             step === "pick-friend-b" && friendA ? (
-              <View className="px-6 py-3 bg-purple-50 border-b border-purple-200">
-                <Caption className="text-purple-700 mb-1">Introducing</Caption>
+              <View className="px-6 py-3 bg-blue-50 border-b border-blue-200">
+                <Caption className="text-blue-600 mb-1">Introducing</Caption>
                 <Body className="font-semibold">{friendA.full_name} &</Body>
               </View>
             ) : null
@@ -142,8 +142,8 @@ export default function CreateIntroScreen() {
           className="flex-1"
         >
           <View className="flex-1 px-6 pt-4">
-            <View className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-4">
-              <Caption className="text-purple-700 mb-1">Introducing</Caption>
+            <View className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <Caption className="text-blue-600 mb-1">Introducing</Caption>
               <Subheading>
                 {friendA.full_name} & {friendB.full_name}
               </Subheading>

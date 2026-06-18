@@ -67,7 +67,7 @@ function PresetCard({ preset, isSelected, width, onPress }: PresetCardProps) {
         backgroundColor: preset.backgroundColor,
         borderRadius: radius.lg,
         borderWidth: isSelected ? 2 : 0,
-        borderColor: isSelected ? colors.hex.purple900 : "transparent",
+        borderColor: isSelected ? colors.hex.blue900 : "transparent",
         justifyContent: "center",
         alignItems: "center",
         overflow: "hidden",
@@ -185,14 +185,11 @@ export default function ThemeEditorScreen() {
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
                 {saving ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={colors.hex.purple600}
-                  />
+                  <ActivityIndicator size="small" color={colors.hex.blue500} />
                 ) : (
                   <Icons.check
                     size={24}
-                    color={canSave ? colors.hex.purple600 : colors.hex.gray300}
+                    color={canSave ? colors.hex.blue500 : colors.hex.gray300}
                   />
                 )}
               </Pressable>

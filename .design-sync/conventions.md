@@ -26,9 +26,9 @@ Components are styled internally with Tailwind utility classes (via uniwind) and
 the components already use ship in the stylesheet — stay within this vocabulary:
 
 - **Brand colors** (from the `@theme` block): `coral` (#ff6b6b), `coral-pressed`, `coral-tint`;
-  the brand purple ramp `purple-50` / `purple-100` / `purple-200` / `purple-600` (brand, #6b61f3)
-  / `purple-700` / `purple-900`; `cream` (#faf9f5, the app background). Used as `bg-coral`,
-  `text-purple-600`, `bg-purple-100`, etc., alongside standard `gray-*`, `white`, `black`,
+  the brand blue ramp `blue-50` / `blue-100` / `blue-200` / `blue-500` (brand/base, #007AFF)
+  / `blue-600` / `blue-900`; `cream` (#faf9f5, the app background). Used as `bg-coral`,
+  `text-blue-500`, `bg-blue-100`, etc., alongside standard `gray-*`, `white`, `black`,
   `red-*`, `orange-*`.
 - **Layout / spacing**: `flex-row`, `items-center`, `justify-between`, `gap-1`…`gap-4`,
   `px-4`, `py-3`, `w-full`, `rounded-lg`, `rounded-xl`, `rounded-full`, `shadow-xs`.

@@ -104,12 +104,12 @@ export function FontSelector({
         <Pressable
           onPress={handleSelectSystem}
           className={`flex-row items-center px-4 py-3 border-b border-gray-100 ${
-            selectedFont === null ? "bg-purple-50" : ""
+            selectedFont === null ? "bg-blue-50" : ""
           }`}
         >
           <Text className="flex-1 text-base text-gray-900">System Default</Text>
           {selectedFont === null && (
-            <Icons.check size={20} color={colors.hex.purple600} />
+            <Icons.check size={20} color={colors.hex.blue500} />
           )}
         </Pressable>
         <FlatList

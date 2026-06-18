@@ -44,7 +44,7 @@ export class ErrorBoundary extends React.Component<
     if (error) {
       return (
         <View className="flex-1 justify-center items-center bg-cream px-6">
-          <SectionTitle className="text-purple-900 mb-2">
+          <SectionTitle className="text-blue-900 mb-2">
             Something went wrong
           </SectionTitle>
           <Body className="text-gray-500 mb-6 text-center">

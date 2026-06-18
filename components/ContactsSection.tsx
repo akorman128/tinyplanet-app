@@ -77,7 +77,7 @@ export function ContactsSection({ userId }: ContactsSectionProps) {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor={colors.hex.purple600}
+            tintColor={colors.hex.blue500}
           />
         }
       >
@@ -121,7 +121,7 @@ export function ContactsSection({ userId }: ContactsSectionProps) {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor={colors.hex.purple600}
+            tintColor={colors.hex.blue500}
           />
         }
       />

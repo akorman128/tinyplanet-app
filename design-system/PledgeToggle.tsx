@@ -49,13 +49,13 @@ export function PledgeToggle({
       onPress={handlePress}
       className={`flex-row items-center gap-3.5 rounded-2xl border px-4 py-4 ${
         value
-          ? "border-purple-600/70 bg-purple-600/15"
-          : "border-purple-400/30 bg-purple-600/10"
+          ? "border-blue-500/70 bg-blue-500/15"
+          : "border-blue-400/30 bg-blue-500/10"
       }`}
     >
       <View
         className={`h-7 w-12 justify-center rounded-full px-[3px] ${
-          value ? "bg-purple-600" : "bg-purple-200/20"
+          value ? "bg-blue-500" : "bg-blue-200/20"
         }`}
       >
         <Animated.View

@@ -72,7 +72,7 @@ export function LocationPermissionScreen({
   // Show loading screen while checking/requesting location permissions
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-gradient-to-b from-blue-50 to-purple-50">
+      <SafeAreaView className="flex-1 bg-gradient-to-b from-blue-50 to-blue-100">
         <View className="flex-1 items-center justify-center px-6">
           <Heading className="text-center">Getting your location...</Heading>
         </View>
@@ -97,7 +97,7 @@ export function LocationPermissionScreen({
         : "Location access was revoked. Please re-enable location permissions to continue using Tiny Planet.";
 
     return (
-      <SafeAreaView className="flex-1 bg-gradient-to-b from-blue-50 to-purple-50">
+      <SafeAreaView className="flex-1 bg-gradient-to-b from-blue-50 to-blue-100">
         <View className="flex-1 items-center justify-center px-6 gap-4">
           <Heading className="text-center">{title}</Heading>
           <Body className="text-center text-gray-600">{message}</Body>

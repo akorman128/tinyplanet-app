@@ -19,8 +19,8 @@ export interface BadgeProps extends ViewProps {
 
 const variantStyles = {
   default: "bg-gray-100",
-  primary: "bg-purple-600",
-  secondary: "bg-purple-100",
+  primary: "bg-blue-500",
+  secondary: "bg-blue-100",
   warning: "bg-orange-100",
   error: "bg-red-100",
   coral: "bg-coral-tint",
@@ -29,7 +29,7 @@ const variantStyles = {
 const textStyles = {
   default: "text-gray-500",
   primary: "text-white",
-  secondary: "text-purple-600",
+  secondary: "text-blue-500",
   warning: "text-orange-700",
   error: "text-red-700",
   coral: "text-coral",

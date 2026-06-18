@@ -65,7 +65,7 @@ export function Select<T extends string>({
             error
               ? "border-red-500"
               : isOpen
-                ? "border-purple-600"
+                ? "border-blue-500"
                 : "border-gray-300"
           }`}
           onPress={handleOpen}
@@ -122,7 +122,7 @@ export function Select<T extends string>({
                 return (
                   <Pressable
                     className={`px-4 py-3 ${
-                      isSelected ? "bg-purple-50" : "bg-white"
+                      isSelected ? "bg-blue-50" : "bg-white"
                     }`}
                     onPress={() => handleSelect(item.value)}
                   >
@@ -130,14 +130,14 @@ export function Select<T extends string>({
                       <Text
                         className={`text-base ${
                           isSelected
-                            ? "text-purple-600 font-medium"
+                            ? "text-blue-500 font-medium"
                             : "text-gray-900"
                         }`}
                       >
                         {item.label}
                       </Text>
                       {isSelected && (
-                        <Icons.check size={18} color={colors.hex.purple600} />
+                        <Icons.check size={18} color={colors.hex.blue500} />
                       )}
                     </View>
                   </Pressable>

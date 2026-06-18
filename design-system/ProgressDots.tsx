@@ -16,10 +16,10 @@ export function ProgressDots({ count, activeIndex }: ProgressDotsProps) {
             key={i}
             className={`h-[7px] rounded-full ${
               active
-                ? "w-[26px] bg-purple-600"
+                ? "w-[26px] bg-blue-500"
                 : done
-                  ? "w-[7px] bg-purple-600/55"
-                  : "w-[7px] bg-purple-200/20"
+                  ? "w-[7px] bg-blue-500/55"
+                  : "w-[7px] bg-blue-200/20"
             }`}
           />
         );

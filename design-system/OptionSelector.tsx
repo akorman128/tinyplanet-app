@@ -42,7 +42,7 @@ export function OptionSelector<T extends string>({
               key={option.value}
               className={`flex-1 py-3 rounded-xl border-2 flex-row justify-center items-center ${
                 isSelected
-                  ? "border-purple-600 bg-purple-50"
+                  ? "border-blue-500 bg-blue-50"
                   : "border-gray-300 bg-white"
               }`}
               onPress={() => {
@@ -53,12 +53,12 @@ export function OptionSelector<T extends string>({
               {Icon && (
                 <Icon
                   size={16}
-                  color={isSelected ? colors.hex.purple600 : colors.hex.gray500}
+                  color={isSelected ? colors.hex.blue500 : colors.hex.gray500}
                 />
               )}
               <Text
                 className={`${Icon ? "ml-1" : ""} text-sm font-medium ${
-                  isSelected ? "text-purple-600" : "text-gray-600"
+                  isSelected ? "text-blue-500" : "text-gray-600"
                 }`}
               >
                 {option.label}

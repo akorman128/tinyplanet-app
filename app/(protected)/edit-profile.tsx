@@ -174,14 +174,11 @@ export default function EditProfileScreen() {
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
                 {updateProfile.isPending ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={colors.hex.purple600}
-                  />
+                  <ActivityIndicator size="small" color={colors.hex.blue500} />
                 ) : (
                   <Icons.check
                     size={24}
-                    color={canSave ? colors.hex.purple600 : colors.hex.gray300}
+                    color={canSave ? colors.hex.blue500 : colors.hex.gray300}
                   />
                 )}
               </Pressable>

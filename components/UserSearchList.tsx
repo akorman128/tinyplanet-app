@@ -25,7 +25,7 @@ export function UserSearchListItem({
         size="small"
       />
       <View className="flex-1 ml-3">
-        <Body className="font-semibold text-purple-900 mb-1">
+        <Body className="font-semibold text-blue-900 mb-1">
           {user.full_name}
         </Body>
         <View className="flex-row items-center gap-2">

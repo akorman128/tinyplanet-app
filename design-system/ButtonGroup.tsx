@@ -47,7 +47,7 @@ export function ButtonGroup({
               option.onPress();
             }}
             className={`relative flex-1 py-4 px-6 ${
-              isActive ? "bg-purple-600" : "bg-transparent"
+              isActive ? "bg-blue-500" : "bg-transparent"
             } active:bg-gray-800 ${!isLast ? "border-r border-gray-600" : ""}`}
           >
             <View className="flex-row items-center justify-center gap-2">
