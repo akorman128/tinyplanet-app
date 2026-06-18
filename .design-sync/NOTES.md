@@ -67,7 +67,18 @@ VerticalToggle, AnimatedEmojiBorder, ContactCard, swipeable list items, etc.
 - **TypingIndicator**: the three dots animate opacity from 0, so they're invisible in a still
   capture; the typing bubble + "<name> is typing…" caption still identify the component.
 
-## Bundle exports beyond the 29 cards
+## 2026-06-18 — added FormField + ProgressDots (now 31 cards)
+- `FormField` (Inputs) and `ProgressDots` (Navigation) were promoted into the synced set:
+  `componentSrcMap` + `dtsPropsFor` + `docsMap` + `ds-entry.jsx` exports + authored previews.
+- `ProgressDots` lives on the dark onboarding background; its upcoming dots are intentionally
+  faint (`bg-purple-200/20`). Its preview (`previews/ProgressDots.tsx`) wraps cards in a dark
+  div so the dots read — grading on a white card would look broken but isn't.
+- `FormField` is a label+control+error wrapper styled to match `Input`; its preview composes a
+  plain styled control box as the child (illustrative — authors supply the real control).
+- `PledgeToggle` / `OnboardingBackground` (the other relocated onboarding pieces) stay EXCLUDED
+  (reanimated / SVG animation — same rationale as VerticalToggle etc.).
+
+## Bundle exports beyond the cards
 - `ds-entry.jsx` also exports `Icons` (the icon object) and `GlassInfoItem` (GlassInfoCard's
   child) onto `window.TinyPlanet` so previews can compose with them. They are NOT in
   `componentSrcMap`, so they get no card — but previews/agent code can import them.
@@ -91,3 +102,15 @@ VerticalToggle, AnimatedEmojiBorder, ContactCard, swipeable list items, etc.
 - Tailwind utility coverage comes from scanning the component sources via the Vite module
   graph — a class built by runtime string concatenation would be missed (these components use
   literal class strings, so OK today).
+- **Harness is uncommitted (reproducibility gap).** The hand-written RNW harness
+  (`.ds-sync/ds-entry.jsx`, `ds.css`, `vite.lib.config.mjs`, `utils-web.mjs`) lives under the
+  gitignored `.ds-sync/`, so a fresh clone has none of it and the build can't run. These are
+  durable, repo-specific sync inputs — they belong under the committed `.design-sync/` (and the
+  build paths updated to match). Until then, re-syncs only work on a machine that still has the
+  local `.ds-sync/`.
+- **MenuRow re-synced (2026-06-18).** `previews/MenuRow.tsx` carried a pre-existing UNCOMMITTED
+  edit (Standalone label "Blocked accounts" → "Hidden accounts") made outside the design-sync run,
+  so MenuRow legitimately re-built and re-uploaded (re-graded `good`). The uploaded card reflects
+  the current working-tree label. NOTE: that edit is not committed — confirm it's intended, else
+  revert and re-sync. (A minor unexplained quirk: the driver flagged MenuRow `unchanged` on the
+  first build and `changed` on the second; harmless either way — re-verify/re-upload, never under-upload.)
