@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 
 import { useSupabase } from "./useSupabase";
 import { useUpdateProfile } from "./useProfile";
+import { readImageAsArrayBuffer } from "@/utils/imageBytes";
 
 type AvatarSource = "camera" | "library";
 
@@ -43,17 +44,13 @@ export function useUploadAvatar() {
         { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
       );
 
-      // 3. Read as ArrayBuffer — a RN Blob loses its bytes when supabase-js
-      // wraps it in FormData, producing an empty upload.
-      const response = await fetch(manipulated.uri);
-      const arrayBuffer = await response.arrayBuffer();
+      // 3. Read as ArrayBuffer + guard size.
+      const arrayBuffer = await readImageAsArrayBuffer(
+        manipulated.uri,
+        2 * 1024 * 1024
+      );
 
-      // 4. Guard file size
-      if (arrayBuffer.byteLength > 2 * 1024 * 1024) {
-        throw new Error("Image is too large. Please choose a smaller photo.");
-      }
-
-      // 5. Upload to Supabase Storage
+      // 4. Upload to Supabase Storage
       const filePath = `${userId}.jpg`;
       const { error: uploadError } = await supabase.storage
         .from("avatars")
@@ -64,14 +61,14 @@ export function useUploadAvatar() {
 
       if (uploadError) throw uploadError;
 
-      // 6. Get public URL with cache-buster
+      // 5. Get public URL with cache-buster
       const {
         data: { publicUrl },
       } = supabase.storage.from("avatars").getPublicUrl(filePath);
 
       const avatarUrl = `${publicUrl}?t=${Date.now()}`;
 
-      // 7. Update profile (reuses useUpdateProfile for optimistic updates + rollback)
+      // 6. Update profile (reuses useUpdateProfile for optimistic updates + rollback)
       await updateProfile.mutateAsync({
         updateData: { avatar_url: avatarUrl },
       });

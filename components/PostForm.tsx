@@ -57,7 +57,6 @@ export function PostForm({
         )}
       />
 
-      {/* Photos */}
       {onAddPhoto && (
         <View className="mt-3">
           {photos.length > 0 && (

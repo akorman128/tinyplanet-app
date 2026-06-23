@@ -1,22 +1,10 @@
 import { createClient } from "npm:@supabase/supabase-js@2.35.0";
 import { stripToCleanJpeg } from "../_shared/strip-image-metadata.ts";
+import { corsHeaders, json } from "../_shared/http.ts";
+import { requireUser } from "../_shared/auth.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
-const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
-
-const json = (body: unknown, status: number) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -24,22 +12,9 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const authHeader =
-      req.headers.get("Authorization") ?? req.headers.get("authorization");
-    if (!authHeader) {
-      return json({ error: "Unauthorized" }, 401);
-    }
-    const token = authHeader.split(" ")[1]?.trim();
-
-    const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: `Bearer ${token}` } },
-    });
-    const { data: authData, error: authError } =
-      await userClient.auth.getUser(token);
-    if (authError || !authData?.user) {
-      return json({ error: "Unauthorized" }, 401);
-    }
-    const userId = authData.user.id;
+    const auth = await requireUser(req);
+    if (auth instanceof Response) return auth;
+    const userId = auth.userId;
 
     const { stagingPath } = await req.json();
     if (typeof stagingPath !== "string" || !stagingPath) {

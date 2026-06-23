@@ -3,6 +3,7 @@ import { Alert } from "react-native";
 
 import { useSupabase } from "./useSupabase";
 import { postMediaPathsFromUrls } from "@/utils/postMedia";
+import { readImageAsArrayBuffer } from "@/utils/imageBytes";
 
 const MAX_PHOTOS = 4;
 const MAX_BYTES = 8 * 1024 * 1024;
@@ -38,8 +39,11 @@ export function useUploadPostImages() {
           asset.width && asset.width > 1600
             ? [{ resize: { width: 1600 } }]
             : [];
+        // High client quality: the resize bounds upload size, and the edge
+        // function re-encodes at q80, so that server pass is the single binding
+        // compression rather than compounding two lossy passes.
         const out = await ImageManipulator.manipulateAsync(asset.uri, ops, {
-          compress: 0.7,
+          compress: 0.9,
           format: ImageManipulator.SaveFormat.JPEG,
         });
         manipulated.push({ localUri: out.uri });
@@ -57,11 +61,10 @@ export function useUploadPostImages() {
 
   const publishOne = useCallback(
     async (photo: PickedPhoto, userId: string): Promise<string> => {
-      const response = await fetch(photo.localUri);
-      const arrayBuffer = await response.arrayBuffer();
-      if (arrayBuffer.byteLength > MAX_BYTES) {
-        throw new Error("Photo is too large. Please choose a smaller one.");
-      }
+      const arrayBuffer = await readImageAsArrayBuffer(
+        photo.localUri,
+        MAX_BYTES
+      );
 
       const stagingPath = `${userId}/${Date.now()}-${Math.random()
         .toString(36)
