@@ -14,39 +14,23 @@ describe("post-media storage policies", () => {
   });
 
   afterAll(async () => {
-    await adminClient.storage
-      .from("post-media-staging")
-      .remove([`${userA.id}/a.jpg`]);
     await adminClient.storage.from("post-media").remove([`${userA.id}/a.jpg`]);
     await cleanupTestData([userA.id, userB.id]);
   });
 
-  it("lets a user upload to staging under their own prefix", async () => {
-    const client = await authedClientFor(userA.email);
-    // Plain INSERT (no upsert): the feature uploads unique paths, and upsert
-    // would emit ON CONFLICT DO UPDATE, which Postgres requires an UPDATE policy
-    // for — staging intentionally has none.
-    const { error } = await client.storage
-      .from("post-media-staging")
-      .upload(`${userA.id}/a.jpg`, tinyJpeg(), {
-        contentType: "image/jpeg",
-      });
-    expect(error).toBeNull();
-  });
-
-  it("blocks uploading to staging under another user's prefix", async () => {
-    const client = await authedClientFor(userA.email);
-    const { error } = await client.storage
-      .from("post-media-staging")
-      .upload(`${userB.id}/a.jpg`, tinyJpeg(), { contentType: "image/jpeg" });
-    expect(error).not.toBeNull();
-  });
-
-  it("blocks clients from writing to the public post-media bucket", async () => {
+  it("lets a user upload to their own folder in post-media", async () => {
     const client = await authedClientFor(userA.email);
     const { error } = await client.storage
       .from("post-media")
       .upload(`${userA.id}/a.jpg`, tinyJpeg(), { contentType: "image/jpeg" });
+    expect(error).toBeNull();
+  });
+
+  it("blocks uploading under another user's folder", async () => {
+    const client = await authedClientFor(userA.email);
+    const { error } = await client.storage
+      .from("post-media")
+      .upload(`${userB.id}/a.jpg`, tinyJpeg(), { contentType: "image/jpeg" });
     expect(error).not.toBeNull();
   });
 

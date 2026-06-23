@@ -39,11 +39,11 @@ export function useUploadPostImages() {
           asset.width && asset.width > 1600
             ? [{ resize: { width: 1600 } }]
             : [];
-        // High client quality: the resize bounds upload size, and the edge
-        // function re-encodes at q80, so that server pass is the single binding
-        // compression rather than compounding two lossy passes.
+        // Re-encode to a fresh JPEG: this drops all EXIF/GPS/IPTC/XMP on-device,
+        // so location metadata never leaves the phone. The resize bounds the
+        // upload size; this single on-device pass is the only compression.
         const out = await ImageManipulator.manipulateAsync(asset.uri, ops, {
-          compress: 0.9,
+          compress: 0.8,
           format: ImageManipulator.SaveFormat.JPEG,
         });
         manipulated.push({ localUri: out.uri });
@@ -66,21 +66,18 @@ export function useUploadPostImages() {
         MAX_BYTES
       );
 
-      const stagingPath = `${userId}/${Date.now()}-${Math.random()
+      const path = `${userId}/${Date.now()}-${Math.random()
         .toString(36)
         .slice(2)}.jpg`;
-      const { error: upError } = await supabase.storage
-        .from("post-media-staging")
-        .upload(stagingPath, arrayBuffer, { contentType: "image/jpeg" });
-      if (upError) throw upError;
-
-      const { data, error } = await supabase.functions.invoke(
-        "strip-image-metadata",
-        { body: { stagingPath } }
-      );
+      const { error } = await supabase.storage
+        .from("post-media")
+        .upload(path, arrayBuffer, { contentType: "image/jpeg" });
       if (error) throw error;
-      if (!data?.url) throw new Error("Image processing failed");
-      return data.url as string;
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("post-media").getPublicUrl(path);
+      return publicUrl;
     },
     [supabase]
   );
@@ -103,7 +100,7 @@ export function useUploadPostImages() {
 
       const failure = results.find((r) => r.status === "rejected");
       if (failure) {
-        // Remove any photos that already published so one failure can't strand
+        // Remove any photos that already uploaded so one failure can't strand
         // them as orphans in the public bucket.
         if (urls.length > 0) {
           try {

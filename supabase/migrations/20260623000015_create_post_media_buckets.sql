@@ -1,21 +1,18 @@
--- Private staging bucket: clients upload originals here; never publicly served.
--- allowed_mime_types is defense-in-depth (the edge function re-checks JPEG magic
--- bytes, since the declared content-type is client-controlled).
+-- Public bucket for post photos. Clients upload directly under their own {uid}/
+-- prefix; expo-image-manipulator re-encodes each photo to a fresh JPEG on-device,
+-- which drops all EXIF/GPS/IPTC/XMP before upload (same approach as avatars).
+-- allowed_mime_types is defense-in-depth (the declared content-type is
+-- client-controlled, but it blocks the obvious non-image upload).
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-VALUES ('post-media-staging', 'post-media-staging', false, 8388608, ARRAY['image/jpeg'])
+VALUES ('post-media', 'post-media', true, 8388608, ARRAY['image/jpeg'])
 ON CONFLICT (id) DO NOTHING;
 
--- Public delivery bucket: ONLY the edge function (service role) writes here.
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('post-media', 'post-media', true)
-ON CONFLICT (id) DO NOTHING;
-
--- Staging: a user may upload only under their own {uid}/ prefix.
-CREATE POLICY "Users upload post media to their own staging folder"
+-- A user may upload only under their own {uid}/ prefix.
+CREATE POLICY "Users upload post media to their own folder"
 ON storage.objects FOR INSERT
 TO authenticated
 WITH CHECK (
-  bucket_id = 'post-media-staging'
+  bucket_id = 'post-media'
   AND (storage.foldername(name))[1] = auth.uid()::text
 );
 
@@ -25,9 +22,7 @@ ON storage.objects FOR SELECT
 TO public
 USING (bucket_id = 'post-media');
 
--- Owner may delete their own delivered objects (cleanup on post delete / failed create).
--- No INSERT/UPDATE policy exists for post-media, so clients cannot publish — only the
--- service-role edge function can write, which is the metadata-strip guarantee.
+-- Owner may delete their own objects (cleanup on post delete / failed create).
 CREATE POLICY "Users delete their own post media"
 ON storage.objects FOR DELETE
 TO authenticated
