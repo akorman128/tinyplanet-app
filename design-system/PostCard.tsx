@@ -7,6 +7,7 @@ import { Icons } from "./Icons";
 import { colors } from "./colors";
 import { ListChip } from "./ListChip";
 import { PostActions } from "./PostActions";
+import { PostMediaGallery } from "@/components/PostMediaGallery";
 import { PostWithAuthor } from "@/types/post";
 import { useDeletePost } from "@/hooks/usePosts";
 import { useSupabase } from "@/hooks/useSupabase";
@@ -136,6 +137,11 @@ export function PostCard({
         <Text className="text-sm text-gray-900 leading-5 mb-2">
           {post.text}
         </Text>
+
+        {/* Photos */}
+        {post.media_urls && post.media_urls.length > 0 && (
+          <PostMediaGallery urls={post.media_urls} />
+        )}
 
         {/* Attached list */}
         {post.attached_list && (

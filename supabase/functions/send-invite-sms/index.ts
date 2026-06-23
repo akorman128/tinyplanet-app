@@ -1,21 +1,11 @@
-import { createClient } from "npm:@supabase/supabase-js@2.35.0";
-/*
-Assumptions:
-- SUPABASE_URL and SUPABASE_ANON_KEY are available by default in Edge Function environment.
-- TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_MESSAGING_SERVICE_SID are set via Supabase secrets.
-- This function is called by an authenticated user and uses the Authorization header passed through to the Supabase client.
-- No external dependencies other than supabase-js are used.
-*/ const TWILIO_ACCOUNT_SID = Deno.env.get("TWILIO_ACCOUNT_SID");
+import { corsHeaders } from "../_shared/http.ts";
+import { requireUser } from "../_shared/auth.ts";
+
+const TWILIO_ACCOUNT_SID = Deno.env.get("TWILIO_ACCOUNT_SID");
 const TWILIO_AUTH_TOKEN = Deno.env.get("TWILIO_AUTH_TOKEN");
 const TWILIO_MESSAGING_SERVICE_SID = Deno.env.get(
   "TWILIO_MESSAGING_SERVICE_SID"
 );
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -46,53 +36,8 @@ Deno.serve(async (req) => {
         }
       );
     }
-    // Validate and forward Authorization header to Supabase client
-    const authHeader =
-      req.headers.get("Authorization") ?? req.headers.get("authorization");
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({
-          error: "Unauthorized",
-          details: "Missing Authorization header",
-        }),
-        {
-          status: 401,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
-    const accessToken = authHeader.split(" ")[1].trim();
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
-    const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
-    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      },
-    });
-    // Get authenticated user
-    const { data: authData, error: authError } =
-      await supabaseClient.auth.getUser(accessToken);
-    if (authError || !authData?.user) {
-      console.error("Supabase auth error:", authError?.message ?? authError);
-      return new Response(
-        JSON.stringify({
-          error: "Unauthorized",
-          details: "Invalid or expired token",
-        }),
-        {
-          status: 401,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
+    const auth = await requireUser(req);
+    if (auth instanceof Response) return auth;
     // Parse request body
     let body;
     try {

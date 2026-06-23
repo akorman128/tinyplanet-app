@@ -10,6 +10,7 @@ import {
 import { useSupabase } from "./useSupabase";
 import { useRequireProfile } from "./useRequireProfile";
 import { queryKeys } from "@/lib/queryKeys";
+import { postMediaPathsFromUrls } from "@/utils/postMedia";
 import {
   Post,
   PostWithAuthor,
@@ -200,13 +201,23 @@ export const useDeletePost = () => {
 
   return useMutation({
     mutationFn: async (postId: string) => {
-      const { error } = await supabase
+      const { data: deleted, error } = await supabase
         .from("posts")
         .delete()
         .eq("id", postId)
-        .eq("author_id", profile.id);
+        .eq("author_id", profile.id)
+        .select("media_urls");
 
       if (error) throw error;
+
+      const paths = postMediaPathsFromUrls(deleted?.[0]?.media_urls ?? []);
+      if (paths.length > 0) {
+        try {
+          await supabase.storage.from("post-media").remove(paths);
+        } catch {
+          // Best-effort cleanup; never fail the delete on orphaned media.
+        }
+      }
     },
     onSuccess: (_data, postId) => {
       // Remove the deleted post from every post-list cache, then refresh.

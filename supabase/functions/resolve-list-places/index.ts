@@ -1,16 +1,8 @@
-import { createClient } from "npm:@supabase/supabase-js@2.35.0";
+import { corsHeaders, json } from "../_shared/http.ts";
+import { requireUser } from "../_shared/auth.ts";
 
 const MAPBOX_ACCESS_TOKEN = Deno.env.get("MAPBOX_ACCESS_TOKEN");
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
-const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
 
 // Generate session token for Mapbox Search Box API billing
 function generateSessionToken(): string {
@@ -290,47 +282,11 @@ Deno.serve(async (req) => {
 
   try {
     if (!MAPBOX_ACCESS_TOKEN) {
-      return new Response(
-        JSON.stringify({ error: "Mapbox access token not configured" }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      return json({ error: "Mapbox access token not configured" }, 500);
     }
 
-    const authHeader =
-      req.headers.get("Authorization") ?? req.headers.get("authorization");
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({
-          error: "Unauthorized",
-          details: "Missing Authorization header",
-        }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    const accessToken = authHeader.split(" ")[1].trim();
-
-    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: `Bearer ${accessToken}` } },
-    });
-
-    const { data: authData, error: authError } =
-      await supabaseClient.auth.getUser(accessToken);
-    if (authError || !authData?.user) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized", details: "Invalid token" }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
+    const auth = await requireUser(req);
+    if (auth instanceof Response) return auth;
 
     const body = await req.json();
     const {
