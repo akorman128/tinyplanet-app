@@ -5,6 +5,7 @@ import { friendRequest } from "./resolvers/friend-request.ts";
 import { comment } from "./resolvers/comment.ts";
 import { like } from "./resolvers/like.ts";
 import { newPost } from "./resolvers/new-post.ts";
+import { invitesRefreshed } from "./resolvers/invites-refreshed.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -17,8 +18,9 @@ Deno.serve(async (req) => {
     let resolved = null;
 
     if (body.type === "invites_refreshed") {
-      // wired in Task 8
-      return json({ message: "invites_refreshed not yet implemented" }, 200);
+      const resolved = await invitesRefreshed(client);
+      const sent = resolved ? await deliver(client, resolved) : 0;
+      return json({ success: true, kind: "invites_refreshed", sent });
     }
 
     const table: string = body.table;
