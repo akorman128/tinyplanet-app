@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Pressable } from "react-native";
+import { Image } from "expo-image";
 import { Controller, Control, FieldErrors } from "react-hook-form";
 import { z } from "zod";
 import { Input, Icons, colors, ListChip, Text } from "@/design-system";
@@ -18,6 +19,10 @@ interface PostFormProps {
   selectedList?: AttachedList | null;
   onAttachList?: () => void;
   onRemoveList?: () => void;
+  photos?: { localUri: string }[];
+  onAddPhoto?: () => void;
+  onRemovePhoto?: (index: number) => void;
+  canAddPhoto?: boolean;
 }
 
 export function PostForm({
@@ -26,6 +31,10 @@ export function PostForm({
   selectedList,
   onAttachList,
   onRemoveList,
+  photos = [],
+  onAddPhoto,
+  onRemovePhoto,
+  canAddPhoto = true,
 }: PostFormProps) {
   return (
     <View>
@@ -45,6 +54,44 @@ export function PostForm({
           />
         )}
       />
+
+      {/* Photos */}
+      {onAddPhoto && (
+        <View className="mt-3">
+          {photos.length > 0 && (
+            <View className="flex-row flex-wrap">
+              {photos.map((photo, index) => (
+                <View key={photo.localUri} className="mr-2 mb-2">
+                  <Image
+                    source={{ uri: photo.localUri }}
+                    style={{ width: 72, height: 72, borderRadius: 8 }}
+                    contentFit="cover"
+                  />
+                  <Pressable
+                    onPress={() => onRemovePhoto?.(index)}
+                    hitSlop={8}
+                    className="absolute -top-1.5 -right-1.5 bg-gray-900 rounded-full p-0.5"
+                  >
+                    <Icons.close size={14} color={colors.hex.cream} />
+                  </Pressable>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {canAddPhoto && (
+            <Pressable
+              onPress={onAddPhoto}
+              className="flex-row items-center mt-1"
+            >
+              <Icons.addImage size={20} color={colors.hex.purple600} />
+              <Text className="ml-2 text-purple-600 font-medium">
+                Add photo
+              </Text>
+            </Pressable>
+          )}
+        </View>
+      )}
 
       {/* Selected List Display */}
       {selectedList && (

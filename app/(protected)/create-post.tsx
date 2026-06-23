@@ -13,13 +13,18 @@ import {
 } from "@/design-system";
 import { PostForm, postSchema, PostFormData } from "@/components/PostForm";
 import { useCreatePost } from "@/hooks/usePosts";
+import { useUploadPostImages } from "@/hooks/useUploadPostImages";
+import { useSupabase } from "@/hooks/useSupabase";
 import { PostVisibility } from "@/types/post";
 import { useListSelectionStore } from "@/stores/listSelectionStore";
+import { postMediaPathsFromUrls } from "@/utils/postMedia";
 import { logger } from "@/utils/logger";
 
 export default function CreatePostScreen() {
   const router = useRouter();
   const createPost = useCreatePost();
+  const { supabase } = useSupabase();
+  const photos = useUploadPostImages();
   const { selectedList, clear: clearListSelection } = useListSelectionStore();
 
   const [visibility, setVisibility] = useState<PostVisibility>("public");
@@ -35,15 +40,34 @@ export default function CreatePostScreen() {
   }, [clearListSelection]);
 
   const onSubmit = async (data: PostFormData) => {
+    let mediaUrls: string[] = [];
+    try {
+      mediaUrls = await photos.publishAll();
+    } catch (err) {
+      logger.error("Error uploading photos:", err);
+      Alert.alert("Error", "Failed to upload photos. Please try again.");
+      return;
+    }
+
     try {
       await createPost.mutateAsync({
         text: data.text,
         visibility,
+        media_urls: mediaUrls,
         list_id: selectedList?.id || null,
       });
       router.back();
     } catch (err) {
       logger.error("Error creating post:", err);
+      if (mediaUrls.length > 0) {
+        try {
+          await supabase.storage
+            .from("post-media")
+            .remove(postMediaPathsFromUrls(mediaUrls));
+        } catch {
+          // Best-effort cleanup of orphaned media.
+        }
+      }
       Alert.alert("Error", "Failed to create post. Please try again.");
     }
   };
@@ -70,6 +94,10 @@ export default function CreatePostScreen() {
           selectedList={selectedList}
           onAttachList={() => router.push("/select-list")}
           onRemoveList={clearListSelection}
+          photos={photos.photos}
+          onAddPhoto={photos.pick}
+          onRemovePhoto={photos.removeAt}
+          canAddPhoto={photos.photos.length < photos.MAX_PHOTOS}
         />
 
         <OptionSelector
@@ -83,9 +111,17 @@ export default function CreatePostScreen() {
         <Button
           variant="primary"
           onPress={form.handleSubmit(onSubmit)}
-          disabled={createPost.isPending || !!form.formState.errors.text}
+          disabled={
+            createPost.isPending ||
+            photos.isPublishing ||
+            !!form.formState.errors.text
+          }
         >
-          {createPost.isPending ? "Posting..." : "Post"}
+          {photos.isPublishing
+            ? "Uploading photos..."
+            : createPost.isPending
+              ? "Posting..."
+              : "Post"}
         </Button>
       </ScrollView>
     </SafeAreaView>
