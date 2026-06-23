@@ -1,4 +1,5 @@
 import { adminClient } from "../utils/supabase-test-client";
+import { authedClientFor } from "../utils/auth-helpers";
 import {
   createTestUser,
   createFriendship,
@@ -34,12 +35,13 @@ describe("messages RPCs", () => {
 
   describe("get_message_channels", () => {
     it("returns channels with last message data", async () => {
-      const { data, error } = await adminClient.rpc("get_message_channels", {
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc("get_message_channels", {
         p_user_id: userA.id,
       });
       expect(error).toBeNull();
       expect(data).toHaveLength(1);
-      const channel = data[0];
+      const channel = data![0];
       expect(channel.friend_id).toBe(userB.id);
       expect(channel.full_name).toBe("Bob Messages");
       expect(channel.last_message_text).toBe("Good thanks!");
@@ -50,15 +52,17 @@ describe("messages RPCs", () => {
 
     it("calculates unread count", async () => {
       // A has 2 unread messages from B (the two B sent)
-      const { data, error } = await adminClient.rpc("get_message_channels", {
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc("get_message_channels", {
         p_user_id: userA.id,
       });
       expect(error).toBeNull();
-      expect(data[0].unread_count).toBe(2);
+      expect(data![0].unread_count).toBe(2);
     });
 
     it("returns empty for user with no friends", async () => {
-      const { data, error } = await adminClient.rpc("get_message_channels", {
+      const client = await authedClientFor(userLoner.email);
+      const { data, error } = await client.rpc("get_message_channels", {
         p_user_id: userLoner.id,
       });
       expect(error).toBeNull();
@@ -68,7 +72,8 @@ describe("messages RPCs", () => {
 
   describe("has_unread_messages", () => {
     it("returns true when unread messages exist", async () => {
-      const { data, error } = await adminClient.rpc("has_unread_messages", {
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc("has_unread_messages", {
         p_user_id: userA.id,
       });
       expect(error).toBeNull();
@@ -86,7 +91,8 @@ describe("messages RPCs", () => {
         });
       expect(upsertError).toBeNull();
 
-      const { data, error } = await adminClient.rpc("has_unread_messages", {
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc("has_unread_messages", {
         p_user_id: userA.id,
       });
       expect(error).toBeNull();

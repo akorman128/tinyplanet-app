@@ -1,4 +1,5 @@
 import { adminClient } from "../utils/supabase-test-client";
+import { authedClientFor } from "../utils/auth-helpers";
 import {
   createTestUser,
   createFriendship,
@@ -55,7 +56,8 @@ describe("friends RPCs", () => {
 
   describe("get_friend_locations", () => {
     it("returns direct friend locations", async () => {
-      const { data, error } = await adminClient.rpc("get_friend_locations", {
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc("get_friend_locations", {
         p_user_id: userA.id,
       });
       expect(error).toBeNull();
@@ -69,11 +71,15 @@ describe("friends RPCs", () => {
     });
 
     it("does not return non-friends", async () => {
-      const { data, error } = await adminClient.rpc("get_friend_locations", {
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc("get_friend_locations", {
         p_user_id: userA.id,
       });
       expect(error).toBeNull();
-      const ids = data.map((r: { id: string }) => r.id);
+      const ids = data!.map((r: { id: string }) => r.id);
+      // Must actually return A's friend (B) — otherwise an empty response would
+      // pass the exclusion checks vacuously.
+      expect(ids).toContain(userB.id);
       expect(ids).not.toContain(userC.id);
       expect(ids).not.toContain(userD.id);
     });
@@ -81,7 +87,8 @@ describe("friends RPCs", () => {
 
   describe("get_mutual_locations_with_connections", () => {
     it("returns friend-of-friend locations with connecting_friend_id", async () => {
-      const { data, error } = await adminClient.rpc(
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc(
         "get_mutual_locations_with_connections",
         { p_user_id: userA.id }
       );
@@ -99,7 +106,8 @@ describe("friends RPCs", () => {
 
   describe("search_friends", () => {
     it("finds friends by case-insensitive name search", async () => {
-      const { data, error } = await adminClient.rpc("search_friends", {
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc("search_friends", {
         p_user_id: userA.id,
         p_query: "bob",
       });
@@ -110,7 +118,8 @@ describe("friends RPCs", () => {
     });
 
     it("does not return non-friends", async () => {
-      const { data, error } = await adminClient.rpc("search_friends", {
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc("search_friends", {
         p_user_id: userA.id,
         p_query: "charlie",
       });
@@ -119,7 +128,8 @@ describe("friends RPCs", () => {
     });
 
     it("returns empty for empty query", async () => {
-      const { data, error } = await adminClient.rpc("search_friends", {
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc("search_friends", {
         p_user_id: userA.id,
         p_query: "  ",
       });
@@ -131,7 +141,8 @@ describe("friends RPCs", () => {
   describe("get_mutual_friends_between_users", () => {
     it("returns shared friends between two users", async () => {
       // A↔B and B↔C, so B is mutual friend between A and C
-      const { data, error } = await adminClient.rpc(
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc(
         "get_mutual_friends_between_users",
         { p_user_id: userA.id, p_target_user_id: userC.id }
       );
@@ -142,7 +153,8 @@ describe("friends RPCs", () => {
     });
 
     it("returns empty when no shared friends", async () => {
-      const { data, error } = await adminClient.rpc(
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc(
         "get_mutual_friends_between_users",
         { p_user_id: userA.id, p_target_user_id: userD.id }
       );
@@ -153,7 +165,8 @@ describe("friends RPCs", () => {
 
   describe("count_mutual_friends", () => {
     it("counts shared friends between two users", async () => {
-      const { data, error } = await adminClient.rpc("count_mutual_friends", {
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc("count_mutual_friends", {
         p_user_id: userA.id,
         p_target_user_id: userC.id,
       });
@@ -162,7 +175,8 @@ describe("friends RPCs", () => {
     });
 
     it("returns 0 when no shared friends", async () => {
-      const { data, error } = await adminClient.rpc("count_mutual_friends", {
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc("count_mutual_friends", {
         p_user_id: userA.id,
         p_target_user_id: userD.id,
       });
@@ -173,7 +187,8 @@ describe("friends RPCs", () => {
 
   describe("get_platform_statistics", () => {
     it("returns total users and connection count", async () => {
-      const { data, error } = await adminClient.rpc("get_platform_statistics", {
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc("get_platform_statistics", {
         p_user_id: userA.id,
       });
       expect(error).toBeNull();
@@ -188,13 +203,14 @@ describe("friends RPCs", () => {
 
   describe("get_friend_hometown_locations", () => {
     it("returns friends with hometown_location set", async () => {
-      const { data, error } = await adminClient.rpc(
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc(
         "get_friend_hometown_locations",
         { p_user_id: userA.id }
       );
       expect(error).toBeNull();
       // B is A's friend with hometown_location set
-      const friendHometowns = data.filter(
+      const friendHometowns = data!.filter(
         (r: { type: string }) => r.type === "friend_hometown"
       );
       expect(friendHometowns).toHaveLength(1);

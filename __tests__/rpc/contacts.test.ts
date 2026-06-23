@@ -1,4 +1,4 @@
-import { adminClient } from "../utils/supabase-test-client";
+import { authedClientFor } from "../utils/auth-helpers";
 import {
   createTestUser,
   createTestContact,
@@ -42,7 +42,8 @@ describe("get_contacts_ordered RPC", () => {
   });
 
   it("returns contacts ordered by latitude (north to south)", async () => {
-    const { data, error } = await adminClient.rpc("get_contacts_ordered", {
+    const client = await authedClientFor(user.email);
+    const { data, error } = await client.rpc("get_contacts_ordered", {
       p_user_id: user.id,
     });
     expect(error).toBeNull();
@@ -61,7 +62,8 @@ describe("get_contacts_ordered RPC", () => {
   });
 
   it("includes contacts without locations (sorted last)", async () => {
-    const { data, error } = await adminClient.rpc("get_contacts_ordered", {
+    const client = await authedClientFor(user.email);
+    const { data, error } = await client.rpc("get_contacts_ordered", {
       p_user_id: user.id,
     });
     expect(error).toBeNull();
@@ -78,7 +80,8 @@ describe("get_contacts_ordered RPC", () => {
       full_name: "No Contacts User",
     });
     try {
-      const { data, error } = await adminClient.rpc("get_contacts_ordered", {
+      const client = await authedClientFor(noContactsUser.email);
+      const { data, error } = await client.rpc("get_contacts_ordered", {
         p_user_id: noContactsUser.id,
       });
       expect(error).toBeNull();

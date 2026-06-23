@@ -1,4 +1,5 @@
 import { adminClient } from "../utils/supabase-test-client";
+import { authedClientFor } from "../utils/auth-helpers";
 import {
   createTestUser,
   createFriendship,
@@ -188,22 +189,24 @@ describe("blocks RPCs", () => {
     });
 
     it("shows friend before block", async () => {
-      const { data } = await adminClient.rpc("get_friend_locations", {
+      const aliceClient = await authedClientFor(alice.email);
+      const { data } = await aliceClient.rpc("get_friend_locations", {
         p_user_id: alice.id,
       });
-      const ids = data.map((r: { id: string }) => r.id);
+      const ids = data!.map((r: { id: string }) => r.id);
       expect(ids).toContain(bob.id);
     });
 
     it("hides friend after block", async () => {
+      const aliceClient = await authedClientFor(alice.email);
       await adminClient
         .from("blocks")
         .insert({ blocker_id: alice.id, blocked_id: bob.id });
 
-      const { data } = await adminClient.rpc("get_friend_locations", {
+      const { data } = await aliceClient.rpc("get_friend_locations", {
         p_user_id: alice.id,
       });
-      const ids = (data ?? []).map((r: { id: string }) => r.id);
+      const ids = data!.map((r: { id: string }) => r.id);
       expect(ids).not.toContain(bob.id);
 
       // Clean up
@@ -232,28 +235,28 @@ describe("blocks RPCs", () => {
     });
 
     it("shows post before block", async () => {
-      const { data } = await adminClient.rpc("get_feed_posts", {
+      const aliceClient = await authedClientFor(alice.email);
+      const { data } = await aliceClient.rpc("get_feed_posts", {
         user_id_param: alice.id,
         limit_param: 50,
         offset_param: 0,
       });
-      const authorIds = data.map((r: { author_id: string }) => r.author_id);
+      const authorIds = data!.map((r: { author_id: string }) => r.author_id);
       expect(authorIds).toContain(bob.id);
     });
 
     it("hides post after block", async () => {
+      const aliceClient = await authedClientFor(alice.email);
       await adminClient
         .from("blocks")
         .insert({ blocker_id: alice.id, blocked_id: bob.id });
 
-      const { data } = await adminClient.rpc("get_feed_posts", {
+      const { data } = await aliceClient.rpc("get_feed_posts", {
         user_id_param: alice.id,
         limit_param: 50,
         offset_param: 0,
       });
-      const authorIds = (data ?? []).map(
-        (r: { author_id: string }) => r.author_id
-      );
+      const authorIds = data!.map((r: { author_id: string }) => r.author_id);
       expect(authorIds).not.toContain(bob.id);
 
       // Clean up
@@ -268,25 +271,59 @@ describe("blocks RPCs", () => {
 
   describe("get_mutual_locations_with_connections excludes blocked users", () => {
     it("shows mutual before block", async () => {
-      const { data } = await adminClient.rpc(
+      const aliceClient = await authedClientFor(alice.email);
+      const { data } = await aliceClient.rpc(
         "get_mutual_locations_with_connections",
         { p_user_id: alice.id }
       );
-      const ids = data.map((r: { id: string }) => r.id);
+      const ids = data!.map((r: { id: string }) => r.id);
       expect(ids).toContain(charlie.id);
     });
 
     it("hides mutual after block", async () => {
+      const aliceClient = await authedClientFor(alice.email);
       await adminClient
         .from("blocks")
         .insert({ blocker_id: alice.id, blocked_id: charlie.id });
 
-      const { data } = await adminClient.rpc(
+      const { data } = await aliceClient.rpc(
         "get_mutual_locations_with_connections",
         { p_user_id: alice.id }
       );
-      const ids = (data ?? []).map((r: { id: string }) => r.id);
+      const ids = data!.map((r: { id: string }) => r.id);
       expect(ids).not.toContain(charlie.id);
+
+      // Clean up
+      await adminClient
+        .from("blocks")
+        .delete()
+        .eq("blocker_id", alice.id)
+        .eq("blocked_id", charlie.id);
+    });
+  });
+
+  describe("get_mutual_locations excludes blocked users", () => {
+    // get_mutual_locations is SECURITY DEFINER and IDOR-guarded
+    // (p_user_id must equal auth.uid()), so it must be called as the acting
+    // user — not via the service-role adminClient (which has no auth.uid()).
+    it("shows mutual before block, hides after block", async () => {
+      const aliceClient = await authedClientFor(alice.email);
+
+      const before = await aliceClient.rpc("get_mutual_locations", {
+        p_user_id: alice.id,
+      });
+      const idsBefore = before.data!.map((r: { id: string }) => r.id);
+      expect(idsBefore).toContain(charlie.id);
+
+      await adminClient
+        .from("blocks")
+        .insert({ blocker_id: alice.id, blocked_id: charlie.id });
+
+      const after = await aliceClient.rpc("get_mutual_locations", {
+        p_user_id: alice.id,
+      });
+      const idsAfter = after.data!.map((r: { id: string }) => r.id);
+      expect(idsAfter).not.toContain(charlie.id);
 
       // Clean up
       await adminClient
@@ -299,14 +336,15 @@ describe("blocks RPCs", () => {
 
   describe("get_friend_hometown_locations excludes blocked users", () => {
     it("hides hometown after block", async () => {
+      const aliceClient = await authedClientFor(alice.email);
       await adminClient
         .from("blocks")
         .insert({ blocker_id: alice.id, blocked_id: bob.id });
 
-      const { data } = await adminClient.rpc("get_friend_hometown_locations", {
+      const { data } = await aliceClient.rpc("get_friend_hometown_locations", {
         p_user_id: alice.id,
       });
-      const ids = (data ?? []).map((r: { id: string }) => r.id);
+      const ids = data!.map((r: { id: string }) => r.id);
       expect(ids).not.toContain(bob.id);
 
       // Clean up
@@ -336,14 +374,15 @@ describe("blocks RPCs", () => {
     });
 
     it("hides list after block", async () => {
+      const aliceClient = await authedClientFor(alice.email);
       await adminClient
         .from("blocks")
         .insert({ blocker_id: alice.id, blocked_id: bob.id });
 
-      const { data } = await adminClient.rpc("get_viewable_list_locations", {
+      const { data } = await aliceClient.rpc("get_viewable_list_locations", {
         p_user_id: alice.id,
       });
-      const ids = (data ?? []).map((r: { id: string }) => r.id);
+      const ids = data!.map((r: { id: string }) => r.id);
       expect(ids).not.toContain(bobListId);
 
       // Clean up

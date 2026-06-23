@@ -1,4 +1,4 @@
-import { adminClient } from "../utils/supabase-test-client";
+import { authedClientFor } from "../utils/auth-helpers";
 import {
   createTestUser,
   createFriendship,
@@ -54,7 +54,8 @@ describe("Feed RPCs", () => {
 
   describe("get_feed_posts", () => {
     it("returns posts with correct shape", async () => {
-      const { data, error } = await adminClient.rpc("get_feed_posts", {
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc("get_feed_posts", {
         user_id_param: userA.id,
         limit_param: 50,
         offset_param: 0,
@@ -96,14 +97,15 @@ describe("Feed RPCs", () => {
     });
 
     it("respects pagination (limit/offset)", async () => {
-      const { data: page1 } = await adminClient.rpc("get_feed_posts", {
+      const client = await authedClientFor(userA.email);
+      const { data: page1 } = await client.rpc("get_feed_posts", {
         user_id_param: userA.id,
         limit_param: 1,
         offset_param: 0,
       });
       expect(page1).toHaveLength(1);
 
-      const { data: page2 } = await adminClient.rpc("get_feed_posts", {
+      const { data: page2 } = await client.rpc("get_feed_posts", {
         user_id_param: userA.id,
         limit_param: 1,
         offset_param: 1,
@@ -115,11 +117,18 @@ describe("Feed RPCs", () => {
     });
 
     it("excludes posts from non-friends", async () => {
-      const { data } = await adminClient.rpc("get_feed_posts", {
+      const client = await authedClientFor(userA.email);
+      const { data } = await client.rpc("get_feed_posts", {
         user_id_param: userA.id,
         limit_param: 100,
         offset_param: 0,
       });
+
+      // The feed must actually contain A's friend's post — otherwise an empty
+      // response would pass this exclusion check vacuously.
+      expect(
+        data!.some((p: Record<string, unknown>) => p.id === friendPostId)
+      ).toBe(true);
 
       const strangerPost = data!.find(
         (p: Record<string, unknown>) => p.id === strangerPostId
@@ -128,7 +137,8 @@ describe("Feed RPCs", () => {
     });
 
     it("marks unliked/unsaved posts correctly", async () => {
-      const { data } = await adminClient.rpc("get_feed_posts", {
+      const client = await authedClientFor(userA.email);
+      const { data } = await client.rpc("get_feed_posts", {
         user_id_param: userA.id,
         limit_param: 100,
         offset_param: 0,
@@ -148,7 +158,8 @@ describe("Feed RPCs", () => {
 
   describe("get_user_posts", () => {
     it("returns only posts by target user", async () => {
-      const { data, error } = await adminClient.rpc("get_user_posts", {
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc("get_user_posts", {
         user_id_param: userA.id,
         target_user_id: userB.id,
         limit_param: 50,
@@ -171,7 +182,8 @@ describe("Feed RPCs", () => {
     });
 
     it("returns engagement metrics", async () => {
-      const { data } = await adminClient.rpc("get_user_posts", {
+      const client = await authedClientFor(userA.email);
+      const { data } = await client.rpc("get_user_posts", {
         user_id_param: userA.id,
         target_user_id: userB.id,
         limit_param: 50,

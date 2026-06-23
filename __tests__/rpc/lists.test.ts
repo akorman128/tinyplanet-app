@@ -1,4 +1,5 @@
 import { adminClient } from "../utils/supabase-test-client";
+import { authedClientFor } from "../utils/auth-helpers";
 import {
   createTestUser,
   createFriendship,
@@ -89,14 +90,15 @@ describe("Lists RPCs", () => {
 
   describe("get_lists_with_places", () => {
     it("returns lists with aggregated places JSONB", async () => {
-      const { data, error } = await adminClient.rpc("get_lists_with_places", {
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc("get_lists_with_places", {
         p_user_id: userA.id,
       });
       expect(error).toBeNull();
       expect(data).toHaveLength(2);
 
       // Ordered by created_at DESC, so empty list comes first (created second)
-      const listWithPlaces = data.find(
+      const listWithPlaces = data!.find(
         (l: { id: string; [key: string]: unknown }) => l.id === listAWithPlaces
       );
       expect(listWithPlaces).toBeDefined();
@@ -112,12 +114,13 @@ describe("Lists RPCs", () => {
     });
 
     it("returns empty places array for list with no places", async () => {
-      const { data, error } = await adminClient.rpc("get_lists_with_places", {
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc("get_lists_with_places", {
         p_user_id: userA.id,
       });
       expect(error).toBeNull();
 
-      const emptyList = data.find(
+      const emptyList = data!.find(
         (l: { id: string; [key: string]: unknown }) => l.id === listAEmpty
       );
       expect(emptyList).toBeDefined();
@@ -125,7 +128,8 @@ describe("Lists RPCs", () => {
     });
 
     it("supports pagination with p_limit and p_offset", async () => {
-      const { data, error } = await adminClient.rpc("get_lists_with_places", {
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc("get_lists_with_places", {
         p_user_id: userA.id,
         p_limit: 1,
         p_offset: 0,
@@ -164,28 +168,30 @@ describe("Lists RPCs", () => {
 
   describe("get_viewable_list_locations", () => {
     it("returns both own and friend lists with coordinates", async () => {
-      const { data, error } = await adminClient.rpc(
-        "get_viewable_list_locations",
-        { p_user_id: userA.id }
-      );
+      const client = await authedClientFor(userA.email);
+      const { data, error } = await client.rpc("get_viewable_list_locations", {
+        p_user_id: userA.id,
+      });
       expect(error).toBeNull();
 
       // A's list with location + B's list with location (both have coordinates)
       // A's empty list has no location so it's excluded
-      const ids = data.map((l: { id: string; [key: string]: unknown }) => l.id);
+      const ids = data!.map(
+        (l: { id: string; [key: string]: unknown }) => l.id
+      );
       expect(ids).toContain(listAWithPlaces);
       expect(ids).toContain(listB);
       // Empty list has no location, should not appear
       expect(ids).not.toContain(listAEmpty);
 
-      const ownList = data.find(
+      const ownList = data!.find(
         (l: { id: string; [key: string]: unknown }) => l.id === listAWithPlaces
       );
       expect(ownList.owner_name).toBe("You");
       expect(ownList.longitude).toBeCloseTo(-74.006, 2);
       expect(ownList.latitude).toBeCloseTo(40.7128, 2);
 
-      const friendList = data.find(
+      const friendList = data!.find(
         (l: { id: string; [key: string]: unknown }) => l.id === listB
       );
       expect(friendList.owner_name).toBe("Lists User B");
