@@ -36,7 +36,8 @@ export function buildMessage(token: string, n: ResolvedNotification): ExpoMessag
 
 export async function fetchTokens(client: Db, userIds: string[]): Promise<string[]> {
   if (userIds.length === 0) return [];
-  const { data } = await client.from("push_tokens").select("token").in("user_id", userIds);
+  const { data, error } = await client.from("push_tokens").select("token").in("user_id", userIds);
+  if (error) console.error("fetchTokens error:", error.message ?? error);
   return (data ?? []).map((t: { token: string }) => t.token);
 }
 
@@ -44,11 +45,12 @@ export async function profileName(
   client: Db,
   userId: string
 ): Promise<{ full_name: string; avatar_url: string | null }> {
-  const { data } = await client
+  const { data, error } = await client
     .from("profiles")
     .select("full_name, avatar_url")
     .eq("id", userId)
     .single();
+  if (error) console.error("profileName error:", error.message ?? error);
   return { full_name: data?.full_name ?? "Someone", avatar_url: data?.avatar_url ?? null };
 }
 
