@@ -1,4 +1,5 @@
 import { adminClient } from "../utils/supabase-test-client";
+import { authedClientFor } from "../utils/auth-helpers";
 import {
   createTestUser,
   createFriendship,
@@ -82,7 +83,8 @@ describe("get_profile RPC", () => {
 
   it("computes mutual friends when p_current_user_id provided", async () => {
     // B viewing C: A is mutual friend (A↔B, A↔C)
-    const { data, error } = await adminClient.rpc("get_profile", {
+    const client = await authedClientFor(userB.email);
+    const { data, error } = await client.rpc("get_profile", {
       p_user_id: userC.id,
       p_current_user_id: userB.id,
     });
