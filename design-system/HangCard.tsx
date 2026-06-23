@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { View, Pressable, Image, Alert } from "react-native";
 import { useRouter, Link } from "expo-router";
 import { Text } from "./Text";
@@ -55,20 +55,13 @@ export function HangCard({
     { disabled: isOwnHang }
   );
 
-  const bannerUrl = useMemo(
-    () =>
-      hang
-        ? buildStaticMapUrl(hang.longitude, hang.latitude, {
-            width: 780,
-            height: 304,
-          })
-        : null,
-    [hang?.longitude, hang?.latitude]
-  );
-  const whenLabel = useMemo(
-    () => (hang ? formatHangWhen(hang.starts_at) : ""),
-    [hang?.starts_at]
-  );
+  const bannerUrl = hang
+    ? buildStaticMapUrl(hang.longitude, hang.latitude, {
+        width: 780,
+        height: 304,
+      })
+    : null;
+  const whenLabel = hang ? formatHangWhen(hang.starts_at) : "";
 
   if (!hang) return null;
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import { View, FlatList, Alert, Pressable, RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -31,26 +31,20 @@ export default function SearchScreen() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const handleAddFriend = useCallback(
-    async (userId: string) => {
-      try {
-        await sendFriendRequest.mutateAsync({ targetUserId: userId });
-        Alert.alert("Success", "Friend request sent!");
-      } catch (error) {
-        logger.error("Error sending friend request:", error);
-        Alert.alert("Error", "Failed to send friend request");
-      }
-    },
-    [sendFriendRequest]
-  );
+  const handleAddFriend = async (userId: string) => {
+    try {
+      await sendFriendRequest.mutateAsync({ targetUserId: userId });
+      Alert.alert("Success", "Friend request sent!");
+    } catch (error) {
+      logger.error("Error sending friend request:", error);
+      Alert.alert("Error", "Failed to send friend request");
+    }
+  };
 
-  const handleUserPress = useCallback(
-    (userId: string) => {
-      router.back();
-      router.push({ pathname: "/profile", params: { userId } });
-    },
-    [router]
-  );
+  const handleUserPress = (userId: string) => {
+    router.back();
+    router.push({ pathname: "/profile", params: { userId } });
+  };
 
   return (
     <View className="flex-1">

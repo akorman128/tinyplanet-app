@@ -73,26 +73,21 @@ export function UserListsSection({ userId }: UserListsSectionProps) {
   }, [lists]);
 
   // Filter lists based on selected filters
-  const filteredLists = useMemo(() => {
-    return lists.filter((list) => {
-      const matchesCategory =
-        selectedCategory === "all" || list.category === selectedCategory;
-      const matchesLocation =
-        selectedLocation === "all" || list.location_name === selectedLocation;
-      return matchesCategory && matchesLocation;
-    });
-  }, [lists, selectedCategory, selectedLocation]);
+  const filteredLists = lists.filter((list) => {
+    const matchesCategory =
+      selectedCategory === "all" || list.category === selectedCategory;
+    const matchesLocation =
+      selectedLocation === "all" || list.location_name === selectedLocation;
+    return matchesCategory && matchesLocation;
+  });
 
   // Build location options dynamically
-  const locationOptions: SelectOption<string>[] = useMemo(() => {
-    const options: SelectOption<string>[] = [
-      { value: "all", label: "All Locations" },
-    ];
-    uniqueLocations.forEach((location) => {
-      options.push({ value: location, label: location });
-    });
-    return options;
-  }, [uniqueLocations]);
+  const locationOptions: SelectOption<string>[] = [
+    { value: "all", label: "All Locations" },
+  ];
+  uniqueLocations.forEach((location) => {
+    locationOptions.push({ value: location, label: location });
+  });
 
   // Subscribe to realtime list creation events so new lists appear automatically
   useEffect(() => {

@@ -54,10 +54,7 @@ export default function ListDetailScreen() {
       ? "List not found"
       : null;
 
-  const isOwnList = useMemo(
-    () => list?.user_id === profile.id,
-    [list, profile.id]
-  );
+  const isOwnList = list?.user_id === profile.id;
 
   const handleDelete = () => {
     Alert.alert(

@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { View, FlatList, Alert, ActivityIndicator } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useQueryClient, InfiniteData } from "@tanstack/react-query";
@@ -244,124 +238,110 @@ export default function ChatScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [friendId, isLoaded]);
 
-  const handleSendMessage = useCallback(
-    async (text: string) => {
-      if (!friendId || !session?.user?.id || !currentUserProfile.data) return;
+  const handleSendMessage = async (text: string) => {
+    if (!friendId || !session?.user?.id || !currentUserProfile.data) return;
 
-      if (editingMessage) {
-        await updateMessage.mutateAsync({ messageId: editingMessage.id, text });
-        setEditingMessage(null);
-      } else {
-        const tempId = `temp-${Date.now()}`;
-        const [user_a, user_b] = orderUserIds(session.user.id, friendId);
-        const optimisticMessage: MessageWithSender = {
-          id: tempId,
-          user_id_a: user_a,
-          user_id_b: user_b,
-          sender_id: session.user.id,
-          text: text.trim(),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          edited_at: null,
-          deleted_at: null,
-          sender: {
-            id: currentUserProfile.data.id,
-            full_name: currentUserProfile.data.full_name,
-            avatar_url: currentUserProfile.data.avatar_url,
-          },
-        };
+    if (editingMessage) {
+      await updateMessage.mutateAsync({ messageId: editingMessage.id, text });
+      setEditingMessage(null);
+    } else {
+      const tempId = `temp-${Date.now()}`;
+      const [user_a, user_b] = orderUserIds(session.user.id, friendId);
+      const optimisticMessage: MessageWithSender = {
+        id: tempId,
+        user_id_a: user_a,
+        user_id_b: user_b,
+        sender_id: session.user.id,
+        text: text.trim(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        edited_at: null,
+        deleted_at: null,
+        sender: {
+          id: currentUserProfile.data.id,
+          full_name: currentUserProfile.data.full_name,
+          avatar_url: currentUserProfile.data.avatar_url,
+        },
+      };
 
-        // Optimistic: prepend to first page
+      // Optimistic: prepend to first page
+      queryClient.setQueryData(
+        queryKeys.messages.conversation(friendId),
+        (oldData: InfiniteData<MessageWithSender[]> | undefined) => {
+          if (!oldData?.pages)
+            return { pages: [[optimisticMessage]], pageParams: [0] };
+          return {
+            ...oldData,
+            pages: [
+              [optimisticMessage, ...oldData.pages[0]],
+              ...oldData.pages.slice(1),
+            ],
+          };
+        }
+      );
+
+      setTimeout(() => {
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+      }, 100);
+
+      try {
+        const result = await sendMessage.mutateAsync({ friendId, text });
+        // Replace temp message with real one
         queryClient.setQueryData(
           queryKeys.messages.conversation(friendId),
           (oldData: InfiniteData<MessageWithSender[]> | undefined) => {
-            if (!oldData?.pages)
-              return { pages: [[optimisticMessage]], pageParams: [0] };
+            if (!oldData?.pages) return oldData;
             return {
               ...oldData,
-              pages: [
-                [optimisticMessage, ...oldData.pages[0]],
-                ...oldData.pages.slice(1),
-              ],
+              pages: oldData.pages.map((page) =>
+                page.map((msg) =>
+                  msg.id === tempId
+                    ? { ...optimisticMessage, id: result.data.id }
+                    : msg
+                )
+              ),
             };
           }
         );
-
-        setTimeout(() => {
-          flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
-        }, 100);
-
-        try {
-          const result = await sendMessage.mutateAsync({ friendId, text });
-          // Replace temp message with real one
-          queryClient.setQueryData(
-            queryKeys.messages.conversation(friendId),
-            (oldData: InfiniteData<MessageWithSender[]> | undefined) => {
-              if (!oldData?.pages) return oldData;
-              return {
-                ...oldData,
-                pages: oldData.pages.map((page) =>
-                  page.map((msg) =>
-                    msg.id === tempId
-                      ? { ...optimisticMessage, id: result.data.id }
-                      : msg
-                  )
-                ),
-              };
-            }
-          );
-        } catch (err) {
-          Alert.alert("Error", "Failed to send message");
-          // Remove optimistic message on error
-          queryClient.setQueryData(
-            queryKeys.messages.conversation(friendId),
-            (oldData: InfiniteData<MessageWithSender[]> | undefined) => {
-              if (!oldData?.pages) return oldData;
-              return {
-                ...oldData,
-                pages: oldData.pages.map((page) =>
-                  page.filter((msg) => !msg.id.startsWith("temp-"))
-                ),
-              };
-            }
-          );
-        }
+      } catch (err) {
+        Alert.alert("Error", "Failed to send message");
+        // Remove optimistic message on error
+        queryClient.setQueryData(
+          queryKeys.messages.conversation(friendId),
+          (oldData: InfiniteData<MessageWithSender[]> | undefined) => {
+            if (!oldData?.pages) return oldData;
+            return {
+              ...oldData,
+              pages: oldData.pages.map((page) =>
+                page.filter((msg) => !msg.id.startsWith("temp-"))
+              ),
+            };
+          }
+        );
       }
-    },
-    [
-      friendId,
-      session?.user?.id,
-      currentUserProfile.data,
-      editingMessage,
-      sendMessage,
-      updateMessage,
-      queryClient,
-    ]
-  );
+    }
+  };
 
-  const handleTyping = useCallback(() => {
+  const handleTyping = () => {
     if (!friendId) return;
     sendTypingIndicator({ friendId });
-  }, [friendId, sendTypingIndicator]);
+  };
 
-  const handleEditMessage = useCallback((message: MessageWithSender) => {
+  const handleEditMessage = (message: MessageWithSender) => {
     setEditingMessage({ id: message.id, text: message.text });
-  }, []);
+  };
 
-  const handleDeleteMessage = useCallback(
-    async (messageId: string) => {
-      try {
-        await deleteMessage.mutateAsync({ messageId });
-      } catch (err) {
-        Alert.alert("Error", "Failed to delete message");
-      }
-    },
-    [deleteMessage]
-  );
+  const handleDeleteMessage = async (messageId: string) => {
+    try {
+      await deleteMessage.mutateAsync({ messageId });
+    } catch (err) {
+      Alert.alert("Error", "Failed to delete message");
+    }
+  };
 
-  const handleCancelEdit = useCallback(() => {
+  const handleCancelEdit = () => {
     setEditingMessage(null);
-  }, []);
+  };
 
   const renderLoadingMore = () => {
     return (

@@ -40,7 +40,7 @@ export function MemberCardOverlay() {
   const dragX = useSharedValue(0);
   const dragY = useSharedValue(0);
 
-  const reveal = useCallback(() => {
+  const reveal = () => {
     dragX.value = 0;
     dragY.value = 0;
     setVisible(true);
@@ -48,18 +48,18 @@ export function MemberCardOverlay() {
       ? 1
       : withTiming(1, { duration: 800, easing: Easing.out(Easing.cubic) });
     hapticSuccess();
-  }, [progress, dragX, dragY, reducedMotion]);
+  };
 
   const finishDismiss = useCallback(() => {
     setVisible(false);
     setCooling(true);
   }, []);
 
-  const dismiss = useCallback(() => {
+  const dismiss = () => {
     progress.value = withTiming(0, { duration: 220 }, (done) => {
       if (done) runOnJS(finishDismiss)();
     });
-  }, [progress, finishDismiss]);
+  };
 
   // Cooldown after dismiss before shakes can re-trigger.
   useEffect(() => {

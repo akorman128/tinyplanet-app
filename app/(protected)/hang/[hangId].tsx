@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import {
   View,
   ScrollView,
@@ -117,14 +117,10 @@ function HangDetailContent({
   onEdit: () => void;
   onDelete: () => void;
 }) {
-  const heroUrl = useMemo(
-    () =>
-      buildStaticMapUrl(hang.longitude, hang.latitude, {
-        width: 800,
-        height: 620,
-      }),
-    [hang.longitude, hang.latitude]
-  );
+  const heroUrl = buildStaticMapUrl(hang.longitude, hang.latitude, {
+    width: 800,
+    height: 620,
+  });
 
   const {
     going,
