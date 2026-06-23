@@ -4,6 +4,7 @@ import { memberJoined } from "./resolvers/member-joined.ts";
 import { friendRequest } from "./resolvers/friend-request.ts";
 import { comment } from "./resolvers/comment.ts";
 import { like } from "./resolvers/like.ts";
+import { newPost } from "./resolvers/new-post.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -36,6 +37,9 @@ Deno.serve(async (req) => {
         break;
       case "likes":
         resolved = await like(client, record);
+        break;
+      case "posts":
+        resolved = await newPost(client, record);
         break;
       default:
         return json({ message: `Ignored table: ${table}` }, 200);
