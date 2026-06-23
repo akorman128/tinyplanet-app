@@ -15,8 +15,6 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const client = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY) as unknown as Db;
 
-    let resolved = null;
-
     if (body.type === "invites_refreshed") {
       const resolved = await invitesRefreshed(client);
       const sent = resolved ? await deliver(client, resolved) : 0;
@@ -27,6 +25,7 @@ Deno.serve(async (req) => {
     const record = body.record;
     if (!record) return json({ error: "Invalid payload" }, 400);
 
+    let resolved = null;
     switch (table) {
       case "profiles":
         resolved = await memberJoined(client, record);

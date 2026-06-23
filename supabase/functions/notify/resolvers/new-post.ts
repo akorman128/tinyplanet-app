@@ -9,17 +9,29 @@ export async function newPost(
   client: Db,
   record: PostRecord
 ): Promise<ResolvedNotification | null> {
-  // Exclude Hang-carrier posts — Hangs already emit their own push. Post + hang
-  // are created in one transaction (create_hang_with_post), so by the time this
-  // post-commit webhook runs, the hangs row is visible.
-  const { data: hang } = await client.from("hangs").select("id").eq("post_id", record.id).maybeSingle();
+  // Skip Hang-carrier posts — Hangs emit their own push. On a lookup error, skip
+  // rather than risk a duplicate push alongside the Hang notification.
+  const { data: hang, error: hangError } = await client
+    .from("hangs")
+    .select("id")
+    .eq("post_id", record.id)
+    .maybeSingle();
+  if (hangError) {
+    console.error("newPost hang-check error:", hangError.message ?? hangError);
+    return null;
+  }
   if (hang) return null;
 
-  const { data: rows } = await client.rpc("get_post_notification_recipients", { p_post_id: record.id });
-  const recipients = (rows ?? []).map((r: { user_id: string }) => r.user_id);
+  const [recipientsRes, author] = await Promise.all([
+    client.rpc("get_post_notification_recipients", { p_post_id: record.id }),
+    profileName(client, record.author_id),
+  ]);
+  if (recipientsRes.error) {
+    console.error("newPost recipients error:", recipientsRes.error.message ?? recipientsRes.error);
+  }
+  const recipients = (recipientsRes.data ?? []).map((r: { user_id: string }) => r.user_id);
   if (recipients.length === 0) return null;
 
-  const author = await profileName(client, record.author_id);
   return {
     recipients,
     title: author.full_name,
