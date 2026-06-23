@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
       const hostId: string = record.user_id;
       const [host, recipientsRes] = await Promise.all([
         profileName(client, hostId),
-        client.rpc("get_friends_and_mutuals_of", { p_user_id: hostId }),
+        client.rpc("get_hang_notification_recipients", { p_host_id: hostId }),
       ]);
       const recipients = (recipientsRes.data ?? []).map((r: { user_id: string }) => r.user_id);
       const n: ResolvedNotification = {
