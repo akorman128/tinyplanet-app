@@ -20,20 +20,54 @@ export function usePushNotifications() {
 
     registerPushToken(userId);
 
-    // Handle notification taps → navigate to chat
+    // Handle notification taps → route by type discriminator
     responseListenerRef.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        const data = response.notification.request.content.data ?? {};
+        const data = (response.notification.request.content.data ?? {}) as {
+          type?: string;
+          hangId?: string;
+          friendId?: string;
+          postId?: string;
+          memberId?: string;
+        };
 
-        const hangId = data?.hangId as string | undefined;
-        if (hangId) {
-          router.push({ pathname: "/hang/[hangId]", params: { hangId } });
-          return;
+        switch (data.type) {
+          case "friend_request":
+            router.push("/friends");
+            return;
+          case "member_joined":
+            if (data.memberId) {
+              router.push({
+                pathname: "/profile",
+                params: { userId: data.memberId },
+              });
+            }
+            return;
+          case "post":
+          case "comment":
+          case "like":
+            if (data.postId) {
+              router.push({
+                pathname: "/comments",
+                params: { postId: data.postId },
+              });
+            }
+            return;
+          case "invites_refreshed":
+            router.push("/friends");
+            return;
         }
 
-        const friendId = data?.friendId as string | undefined;
-        if (friendId) {
-          router.push(`/chat/${friendId}`);
+        // Existing routes (new-message / hang notifications carry no `type`).
+        if (data.hangId) {
+          router.push({
+            pathname: "/hang/[hangId]",
+            params: { hangId: data.hangId },
+          });
+          return;
+        }
+        if (data.friendId) {
+          router.push(`/chat/${data.friendId}`);
         }
       });
 
