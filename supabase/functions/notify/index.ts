@@ -2,6 +2,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.35.0";
 import { deliver, type Db } from "../_shared/expo-push.ts";
 import { memberJoined } from "./resolvers/member-joined.ts";
 import { friendRequest } from "./resolvers/friend-request.ts";
+import { comment } from "./resolvers/comment.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -28,6 +29,9 @@ Deno.serve(async (req) => {
         break;
       case "friendships":
         resolved = await friendRequest(client, record);
+        break;
+      case "comments":
+        resolved = await comment(client, record);
         break;
       default:
         return json({ message: `Ignored table: ${table}` }, 200);
