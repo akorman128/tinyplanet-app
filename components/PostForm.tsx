@@ -88,9 +88,7 @@ export function PostForm({
               className="flex-row items-center mt-1"
             >
               <Icons.addImage size={20} color={colors.hex.blue500} />
-              <Text className="ml-2 text-blue-500 font-medium">
-                Add photo
-              </Text>
+              <Text className="ml-2 text-blue-500 font-medium">Add photo</Text>
             </Pressable>
           )}
         </View>
