@@ -1,6 +1,6 @@
 import { Image } from "https://deno.land/x/imagescript@1.3.0/mod.ts";
 
-export const MAX_INPUT_BYTES = 10 * 1024 * 1024;
+export const MAX_INPUT_BYTES = 8 * 1024 * 1024;
 export const MAX_PIXELS = 50_000_000;
 
 // Read width*height from a JPEG's SOF marker without fully decoding it.
@@ -35,6 +35,12 @@ export function jpegPixelCount(bytes: Uint8Array): number | null {
 export async function stripToCleanJpeg(input: Uint8Array): Promise<Uint8Array> {
   if (input.byteLength > MAX_INPUT_BYTES) {
     throw new Error("Image too large");
+  }
+  // Only decode JPEG. Rejecting other formats (by magic bytes, not the
+  // client-controlled content-type) keeps the megapixel guard below meaningful
+  // and blocks e.g. PNG/zlib decompression bombs from reaching the decoder.
+  if (input[0] !== 0xff || input[1] !== 0xd8) {
+    throw new Error("Unsupported format (expected JPEG)");
   }
   const pixels = jpegPixelCount(input);
   if (pixels !== null && pixels > MAX_PIXELS) {

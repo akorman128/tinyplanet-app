@@ -97,7 +97,10 @@ export default function CreatePostScreen() {
           photos={photos.photos}
           onAddPhoto={photos.pick}
           onRemovePhoto={photos.removeAt}
-          canAddPhoto={photos.photos.length < photos.MAX_PHOTOS}
+          canAddPhoto={
+            photos.photos.length < photos.MAX_PHOTOS && !photos.isPublishing
+          }
+          photosBusy={photos.isPublishing}
         />
 
         <OptionSelector

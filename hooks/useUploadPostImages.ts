@@ -2,8 +2,10 @@ import { useState, useCallback } from "react";
 import { Alert } from "react-native";
 
 import { useSupabase } from "./useSupabase";
+import { postMediaPathsFromUrls } from "@/utils/postMedia";
 
-export const MAX_PHOTOS = 4;
+const MAX_PHOTOS = 4;
+const MAX_BYTES = 8 * 1024 * 1024;
 
 interface PickedPhoto {
   localUri: string;
@@ -12,11 +14,9 @@ interface PickedPhoto {
 export function useUploadPostImages() {
   const { supabase, session } = useSupabase();
   const [photos, setPhotos] = useState<PickedPhoto[]>([]);
-  const [isPicking, setIsPicking] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
 
   const pick = useCallback(async () => {
-    setIsPicking(true);
     try {
       const ImagePicker = await import("expo-image-picker");
       const ImageManipulator = await import("expo-image-manipulator");
@@ -48,8 +48,6 @@ export function useUploadPostImages() {
       setPhotos((prev) => [...prev, ...manipulated].slice(0, MAX_PHOTOS));
     } catch (err) {
       Alert.alert("Couldn't add photo", String(err));
-    } finally {
-      setIsPicking(false);
     }
   }, [photos.length]);
 
@@ -57,13 +55,11 @@ export function useUploadPostImages() {
     setPhotos((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  const reset = useCallback(() => setPhotos([]), []);
-
   const publishOne = useCallback(
     async (photo: PickedPhoto, userId: string): Promise<string> => {
       const response = await fetch(photo.localUri);
       const arrayBuffer = await response.arrayBuffer();
-      if (arrayBuffer.byteLength > 10 * 1024 * 1024) {
+      if (arrayBuffer.byteLength > MAX_BYTES) {
         throw new Error("Photo is too large. Please choose a smaller one.");
       }
 
@@ -93,19 +89,42 @@ export function useUploadPostImages() {
 
     setIsPublishing(true);
     try {
-      return await Promise.all(photos.map((p) => publishOne(p, userId)));
+      const results = await Promise.allSettled(
+        photos.map((p) => publishOne(p, userId))
+      );
+      const urls = results
+        .filter(
+          (r): r is PromiseFulfilledResult<string> => r.status === "fulfilled"
+        )
+        .map((r) => r.value);
+
+      const failure = results.find((r) => r.status === "rejected");
+      if (failure) {
+        // Remove any photos that already published so one failure can't strand
+        // them as orphans in the public bucket.
+        if (urls.length > 0) {
+          try {
+            await supabase.storage
+              .from("post-media")
+              .remove(postMediaPathsFromUrls(urls));
+          } catch {
+            // best-effort
+          }
+        }
+        throw (failure as PromiseRejectedResult).reason;
+      }
+
+      return urls;
     } finally {
       setIsPublishing(false);
     }
-  }, [photos, session?.user?.id, publishOne]);
+  }, [photos, session?.user?.id, publishOne, supabase]);
 
   return {
     photos,
     pick,
     removeAt,
-    reset,
     publishAll,
-    isPicking,
     isPublishing,
     MAX_PHOTOS,
   };

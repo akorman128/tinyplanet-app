@@ -23,6 +23,7 @@ interface PostFormProps {
   onAddPhoto?: () => void;
   onRemovePhoto?: (index: number) => void;
   canAddPhoto?: boolean;
+  photosBusy?: boolean;
 }
 
 export function PostForm({
@@ -35,6 +36,7 @@ export function PostForm({
   onAddPhoto,
   onRemovePhoto,
   canAddPhoto = true,
+  photosBusy = false,
 }: PostFormProps) {
   return (
     <View>
@@ -67,13 +69,15 @@ export function PostForm({
                     style={{ width: 72, height: 72, borderRadius: 8 }}
                     contentFit="cover"
                   />
-                  <Pressable
-                    onPress={() => onRemovePhoto?.(index)}
-                    hitSlop={8}
-                    className="absolute -top-1.5 -right-1.5 bg-gray-900 rounded-full p-0.5"
-                  >
-                    <Icons.close size={14} color={colors.hex.cream} />
-                  </Pressable>
+                  {!photosBusy && (
+                    <Pressable
+                      onPress={() => onRemovePhoto?.(index)}
+                      hitSlop={8}
+                      className="absolute -top-1.5 -right-1.5 bg-gray-900 rounded-full p-0.5"
+                    >
+                      <Icons.close size={14} color={colors.hex.cream} />
+                    </Pressable>
+                  )}
                 </View>
               ))}
             </View>

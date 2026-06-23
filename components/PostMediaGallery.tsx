@@ -27,7 +27,7 @@ export function PostMediaGallery({ urls }: PostMediaGalleryProps) {
         <Image
           key={url}
           source={{ uri: url }}
-          style={{ width: "49%", aspectRatio: 1, borderRadius: 8 }}
+          style={{ width: "48%", aspectRatio: 1, borderRadius: 8 }}
           contentFit="cover"
         />
       ))}

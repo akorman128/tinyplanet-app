@@ -35,7 +35,7 @@ const injectExif = (base: Uint8Array): Uint8Array => {
     ...content,
   ]);
   const out = new Uint8Array(base.length + segment.length);
-  out.set(base.subarray(0, 2), 0); // SOI
+  out.set(base.subarray(0, 2), 0);
   out.set(segment, 2);
   out.set(base.subarray(2), 2 + segment.length);
   return out;
@@ -89,7 +89,6 @@ describe("strip-image-metadata edge function", () => {
     expect(dlErr).toBeNull();
     const out = new Uint8Array(await blob!.arrayBuffer());
 
-    // Valid JPEG.
     expect(out[0]).toBe(0xff);
     expect(out[1]).toBe(0xd8);
     // The whole point: no EXIF marker, no GPS sentinel survives.
@@ -109,5 +108,29 @@ describe("strip-image-metadata edge function", () => {
     });
     expect(error).not.toBeNull();
     await cleanupTestData([other.id]);
+  });
+
+  it("rejects a non-JPEG payload (decompression-bomb guard)", async () => {
+    // PNG magic bytes, declared as image/jpeg — the content-type is
+    // client-controlled, so the edge function must reject on the real bytes.
+    const pngBytes = new Uint8Array([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+    ]);
+    const notJpegPath = `${user.id}/${Date.now()}-notjpeg.jpg`;
+    const { error: upErr } = await adminClient.storage
+      .from("post-media-staging")
+      .upload(notJpegPath, pngBytes, {
+        contentType: "image/jpeg",
+        upsert: true,
+      });
+    expect(upErr).toBeNull();
+
+    const client = await authedClientFor(user.email);
+    const { error } = await client.functions.invoke("strip-image-metadata", {
+      body: { stagingPath: notJpegPath },
+    });
+    expect(error).not.toBeNull();
+
+    await adminClient.storage.from("post-media-staging").remove([notJpegPath]);
   });
 });

@@ -70,7 +70,11 @@ Deno.serve(async (req) => {
     const outPath = `${userId}/${crypto.randomUUID()}.jpg`;
     const { error: upError } = await service.storage
       .from("post-media")
-      .upload(outPath, cleaned, { contentType: "image/jpeg", upsert: false });
+      .upload(outPath, cleaned, {
+        contentType: "image/jpeg",
+        upsert: false,
+        cacheControl: "31536000",
+      });
     if (upError) {
       return json({ error: "Publish failed", details: upError.message }, 500);
     }
@@ -80,7 +84,7 @@ Deno.serve(async (req) => {
     try {
       await service.storage.from("post-media-staging").remove([stagingPath]);
     } catch (_err) {
-      // ignore
+      /* best-effort */
     }
 
     const {

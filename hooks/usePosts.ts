@@ -201,22 +201,16 @@ export const useDeletePost = () => {
 
   return useMutation({
     mutationFn: async (postId: string) => {
-      const { data: existing } = await supabase
-        .from("posts")
-        .select("media_urls")
-        .eq("id", postId)
-        .eq("author_id", profile.id)
-        .maybeSingle();
-
-      const { error } = await supabase
+      const { data: deleted, error } = await supabase
         .from("posts")
         .delete()
         .eq("id", postId)
-        .eq("author_id", profile.id);
+        .eq("author_id", profile.id)
+        .select("media_urls");
 
       if (error) throw error;
 
-      const paths = postMediaPathsFromUrls(existing?.media_urls ?? []);
+      const paths = postMediaPathsFromUrls(deleted?.[0]?.media_urls ?? []);
       if (paths.length > 0) {
         try {
           await supabase.storage.from("post-media").remove(paths);

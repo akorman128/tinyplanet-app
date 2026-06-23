@@ -1,6 +1,8 @@
 -- Private staging bucket: clients upload originals here; never publicly served.
-INSERT INTO storage.buckets (id, name, public, file_size_limit)
-VALUES ('post-media-staging', 'post-media-staging', false, 8388608)
+-- allowed_mime_types is defense-in-depth (the edge function re-checks JPEG magic
+-- bytes, since the declared content-type is client-controlled).
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('post-media-staging', 'post-media-staging', false, 8388608, ARRAY['image/jpeg'])
 ON CONFLICT (id) DO NOTHING;
 
 -- Public delivery bucket: ONLY the edge function (service role) writes here.
@@ -34,7 +36,9 @@ USING (
   AND (storage.foldername(name))[1] = auth.uid()::text
 );
 
--- Defense in depth: cap media_urls at 4 at the database boundary.
+-- Defense in depth: cap media_urls at 4 at the database boundary. NOT VALID so
+-- the migration can't abort on any pre-existing row; it still enforces on every
+-- insert/update going forward.
 ALTER TABLE public.posts
   ADD CONSTRAINT posts_media_urls_max_four
-  CHECK (coalesce(array_length(media_urls, 1), 0) <= 4);
+  CHECK (coalesce(array_length(media_urls, 1), 0) <= 4) NOT VALID;
