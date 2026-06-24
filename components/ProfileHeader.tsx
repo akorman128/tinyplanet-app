@@ -1,8 +1,8 @@
 import React from "react";
-import { View, Pressable } from "react-native";
+import { View } from "react-native";
 import {
   Avatar,
-  Badge,
+  Button,
   Caption,
   Heading,
   SocialMediaLinks,
@@ -93,18 +93,20 @@ export function ProfileHeader({
 
       <View className="flex-row items-center justify-center gap-2 mb-6">
         {!isViewingOwnProfile && userId && (
-          <FriendStatusSection
-            userId={userId}
-            onError={(errorMessage) => onError(errorMessage)}
-          />
+          <View className="flex-1">
+            <FriendStatusSection
+              userId={userId}
+              onError={(errorMessage) => onError(errorMessage)}
+            />
+          </View>
         )}
 
         {!isViewingOwnProfile && userId && !isBlocked && (
-          <Pressable onPress={onMessagePress}>
-            <Badge variant="default" size="small">
+          <View className="flex-1">
+            <Button variant="secondary" size="sm" onPress={onMessagePress}>
               Message
-            </Badge>
-          </Pressable>
+            </Button>
+          </View>
         )}
       </View>
     </>
