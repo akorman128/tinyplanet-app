@@ -67,8 +67,10 @@ export const useUpdateContact = () => {
         updateData.company = updates.company || null;
       if (updates.note !== undefined) updateData.note = updates.note || null;
       if (updates.location !== undefined) {
-        updateData.location = `POINT(${updates.location.longitude} ${updates.location.latitude})`;
-        updateData.location_name = updates.location.name;
+        updateData.location = updates.location
+          ? `POINT(${updates.location.longitude} ${updates.location.latitude})`
+          : null;
+        updateData.location_name = updates.location?.name ?? null;
       }
 
       const { data, error } = await supabase

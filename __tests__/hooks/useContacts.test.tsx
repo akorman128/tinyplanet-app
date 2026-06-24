@@ -20,9 +20,8 @@ vi.mock("@/stores/profileStore", () => ({
   useProfileStore: () => ({ profileState: { id: "user-a" } }),
 }));
 
-const { useCreateContact, useGetContacts, useDeleteContact } = await import(
-  "@/hooks/useContacts"
-);
+const { useCreateContact, useUpdateContact, useGetContacts, useDeleteContact } =
+  await import("@/hooks/useContacts");
 
 describe("useCreateContact", () => {
   beforeEach(() => {
@@ -60,6 +59,113 @@ describe("useCreateContact", () => {
     });
     expect(chain?.select).toHaveBeenCalled();
     expect(chain?.single).toHaveBeenCalled();
+  });
+});
+
+describe("useUpdateContact", () => {
+  beforeEach(() => {
+    mockSupabase = createMockSupabase();
+  });
+
+  it("updates only the provided fields, scoped by id + owner", async () => {
+    mockSupabase.configureFrom("contacts", {
+      data: { id: "contact-1", name: "Jane" },
+      error: null,
+    });
+
+    const { Wrapper } = createTestWrapper(mockSupabase);
+    const { result } = renderHook(() => useUpdateContact(), {
+      wrapper: Wrapper,
+    });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        contact_id: "contact-1",
+        name: "Jane",
+        phone: "",
+      });
+    });
+
+    const chain = mockSupabase.getLastChain("contacts");
+    expect(chain?.update).toHaveBeenCalledWith({ name: "Jane", phone: null });
+    expect(chain?.eq).toHaveBeenCalledWith("id", "contact-1");
+    expect(chain?.eq).toHaveBeenCalledWith("user_id", "user-a");
+    expect(chain?.select).toHaveBeenCalled();
+    expect(chain?.single).toHaveBeenCalled();
+  });
+
+  it("sets a new location as a POINT with its name", async () => {
+    mockSupabase.configureFrom("contacts", {
+      data: { id: "contact-1" },
+      error: null,
+    });
+
+    const { Wrapper } = createTestWrapper(mockSupabase);
+    const { result } = renderHook(() => useUpdateContact(), {
+      wrapper: Wrapper,
+    });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        contact_id: "contact-1",
+        location: { latitude: 40.5, longitude: -73.9, name: "Brooklyn, NY" },
+      });
+    });
+
+    const chain = mockSupabase.getLastChain("contacts");
+    expect(chain?.update).toHaveBeenCalledWith({
+      location: "POINT(-73.9 40.5)",
+      location_name: "Brooklyn, NY",
+    });
+  });
+
+  it("clears the location when location is null", async () => {
+    mockSupabase.configureFrom("contacts", {
+      data: { id: "contact-1" },
+      error: null,
+    });
+
+    const { Wrapper } = createTestWrapper(mockSupabase);
+    const { result } = renderHook(() => useUpdateContact(), {
+      wrapper: Wrapper,
+    });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        contact_id: "contact-1",
+        location: null,
+      });
+    });
+
+    const chain = mockSupabase.getLastChain("contacts");
+    expect(chain?.update).toHaveBeenCalledWith({
+      location: null,
+      location_name: null,
+    });
+  });
+
+  it("leaves the location untouched when omitted", async () => {
+    mockSupabase.configureFrom("contacts", {
+      data: { id: "contact-1" },
+      error: null,
+    });
+
+    const { Wrapper } = createTestWrapper(mockSupabase);
+    const { result } = renderHook(() => useUpdateContact(), {
+      wrapper: Wrapper,
+    });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        contact_id: "contact-1",
+        note: "Met at the conference",
+      });
+    });
+
+    const chain = mockSupabase.getLastChain("contacts");
+    expect(chain?.update).toHaveBeenCalledWith({
+      note: "Met at the conference",
+    });
   });
 });
 

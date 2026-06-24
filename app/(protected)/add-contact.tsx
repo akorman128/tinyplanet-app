@@ -2,55 +2,37 @@ import { useState } from "react";
 import { View, Alert, Pressable, Platform } from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Input, Button, Icons, colors } from "@/design-system";
+import { Button, Icons, colors } from "@/design-system";
 import { useContactPicker } from "@/hooks/useContactPicker";
 import { useCreateContact } from "@/hooks/useContacts";
 import {
-  LocationSearchInput,
-  LocationSearchValue,
-} from "@/components/LocationSearchInput";
-
-const addContactSchema = z.object({
-  name: z.string().min(1, "Name is required").trim(),
-  phone: z.string().trim().optional(),
-  email: z
-    .string()
-    .trim()
-    .optional()
-    .refine(
-      (val) => !val || val === "" || z.string().email().safeParse(val).success,
-      { message: "Invalid email address" }
-    ),
-  company: z.string().trim().optional(),
-  note: z.string().trim().optional(),
-});
-
-type AddContactForm = z.infer<typeof addContactSchema>;
+  ContactForm,
+  contactSchema,
+  ContactFormData,
+} from "@/components/ContactForm";
 
 export default function AddContactScreen() {
   const router = useRouter();
   const { pickFullContact } = useContactPicker();
   const createContact = useCreateContact();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [contactLocation, setContactLocation] =
-    useState<LocationSearchValue | null>(null);
 
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
     setValue,
-  } = useForm<AddContactForm>({
-    resolver: zodResolver(addContactSchema),
+  } = useForm<ContactFormData>({
+    resolver: zodResolver(contactSchema),
     defaultValues: {
       name: "",
       phone: "",
       email: "",
       company: "",
       note: "",
+      location: null,
     },
     mode: "all",
   });
@@ -66,7 +48,7 @@ export default function AddContactScreen() {
     }
   };
 
-  const onSubmit = async (data: AddContactForm) => {
+  const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
     try {
       await createContact.mutateAsync({
@@ -75,13 +57,7 @@ export default function AddContactScreen() {
         email: data.email || undefined,
         company: data.company || undefined,
         note: data.note || undefined,
-        location: contactLocation
-          ? {
-              latitude: contactLocation.latitude,
-              longitude: contactLocation.longitude,
-              name: contactLocation.name,
-            }
-          : undefined,
+        location: data.location ?? undefined,
       });
 
       Alert.alert("Success", "Contact added successfully", [
@@ -129,100 +105,7 @@ export default function AddContactScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View className="gap-5">
-            {/* Name */}
-            <Controller
-              control={control}
-              name="name"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label="Name*"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="Contact name"
-                  autoCapitalize="words"
-                  error={errors.name?.message}
-                />
-              )}
-            />
-
-            {/* Phone */}
-            <Controller
-              control={control}
-              name="phone"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label="Phone"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="(555) 123-4567"
-                  keyboardType="phone-pad"
-                  error={errors.phone?.message}
-                />
-              )}
-            />
-
-            {/* Email */}
-            <Controller
-              control={control}
-              name="email"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label="Email"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="email@example.com"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  error={errors.email?.message}
-                />
-              )}
-            />
-
-            {/* Company */}
-            <Controller
-              control={control}
-              name="company"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label="Company"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="Company or organization"
-                  autoCapitalize="words"
-                  error={errors.company?.message}
-                />
-              )}
-            />
-
-            {/* Note */}
-            <Controller
-              control={control}
-              name="note"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label="Note"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  placeholder="Additional notes"
-                  multiline
-                  numberOfLines={4}
-                  error={errors.note?.message}
-                />
-              )}
-            />
-
-            {/* Location */}
-            <LocationSearchInput
-              label="Location"
-              value={contactLocation}
-              onChange={setContactLocation}
-              placeholder="Search for a place..."
-            />
+            <ContactForm control={control} errors={errors} />
 
             {/* Save Button */}
             <View className="mt-3">
