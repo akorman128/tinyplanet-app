@@ -1,3 +1,53 @@
+# Edit Contact (reuse the create form)
+
+Goal: let a user edit one of their own contacts, reusing the create form. Mirror the
+existing `TravelPlanForm` / `create-travel-plan` / `edit-travel-plan` precedent.
+
+## Plan
+
+- [x] 1. **Types** — extend `UpdateContactInput.location` to allow `null` (clear) in `types/contact.ts`.
+- [x] 2. **Hook** — `useUpdateContact` in `hooks/useContacts.ts`: handle `location: null` by
+      nulling `location` + `location_name`. Keep `undefined` = leave untouched.
+- [x] 3. **Test (TDD)** — added 4 `useUpdateContact` tests to `__tests__/hooks/useContacts.test.tsx`
+      (clear-location test written red first). Query/mutation tests only — no UI tests, per repo convention.
+- [x] 4. **Shared form** — new `components/ContactForm.tsx`: exports `contactSchema` + `ContactFormData`
+      (location folded into schema), renders all fields + `LocationSearchInput`. Props: `control`, `errors`.
+- [x] 5. **Refactor create** — `add-contact.tsx` now consumes `ContactForm`; location moved from
+      `useState` into the form; import-from-phone + `useCreateContact` behavior unchanged.
+- [x] 6. **Edit screen** — new `app/(protected)/edit-contact.tsx` (flat route, `?contactId=`).
+- [x] 7. **Entry point** — pencil button in the contact detail header/toolbar, next to trash, `isOwnContact`-gated.
+- [x] 8. **Verify** — `tsc --noEmit` clean; ESLint clean on changed files; 73/73 hook tests pass; prettier clean.
+
+## Review
+
+### What changed (7 files)
+- **`types/contact.ts`** — `UpdateContactInput.location` widened to `{...} | null` (undefined=untouched,
+  null=clear, object=set).
+- **`hooks/useContacts.ts`** — `useUpdateContact` now nulls both `location` + `location_name` on
+  `location: null`; unchanged otherwise.
+- **`components/ContactForm.tsx`** (new) — shared form mirroring `TravelPlanForm`: owns `contactSchema`
+  (location folded in as an optional nullable `{name,latitude,longitude}`), renders the 5 inputs +
+  `LocationSearchInput` via `Controller`, takes only `control` + `errors`.
+- **`app/(protected)/add-contact.tsx`** — replaced inline schema + field JSX + `contactLocation`
+  `useState` with `<ContactForm/>`; location now flows through the form. Behavior identical.
+- **`app/(protected)/edit-contact.tsx`** (new) — loads the contact via `useGetContacts()` find-by-id
+  (the only query exposing lat/lng), `reset()`-prefills, submits via `useUpdateContact`, `router.back()`.
+- **`app/(protected)/contact/[contactId].tsx`** — pencil edit button next to trash (Android headerRight
+  row + iOS toolbar), gated by `isOwnContact`, routes to `/edit-contact`.
+- **`__tests__/hooks/useContacts.test.tsx`** — 4 new `useUpdateContact` tests.
+
+### Notable decisions
+- **Location coords on edit** sourced from `useGetContacts()` (RPC returns `ST_X/ST_Y`) rather than
+  `useGetContact` (raw PostGIS, no coords) — avoids a new migration and WKB parsing.
+- **Prefill gated on coordinates, not name** — so legacy contacts with coords but a null
+  `location_name` (pre-`location_name`-column data) don't get their location silently cleared on save.
+
+### Not mine — left untouched
+- Pre-existing ESLint warning `'err' is defined but never used` in the contact detail delete handler
+  (unrelated to this change; minimal-impact).
+
+---
+
 # Design System Hardening — 4 Slices
 
 Goal: tighten the boundary between the published design system (RN-web-renderable,

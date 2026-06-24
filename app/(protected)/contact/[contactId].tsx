@@ -40,6 +40,14 @@ export default function ContactDetailScreen() {
     }
   };
 
+  const handleEdit = () => {
+    if (!contact) return;
+    router.push({
+      pathname: "/edit-contact",
+      params: { contactId: contact.id },
+    });
+  };
+
   const handleDelete = () => {
     if (!contact) return;
 
@@ -94,15 +102,21 @@ export default function ContactDetailScreen() {
           headerRight:
             Platform.OS === "android" && isOwnContact
               ? () => (
-                  <Pressable onPress={handleDelete}>
-                    <Icons.trash size={24} color={colors.hex.error} />
-                  </Pressable>
+                  <View className="flex-row items-center gap-4">
+                    <Pressable onPress={handleEdit}>
+                      <Icons.edit size={24} color={colors.black} />
+                    </Pressable>
+                    <Pressable onPress={handleDelete}>
+                      <Icons.trash size={24} color={colors.hex.error} />
+                    </Pressable>
+                  </View>
                 )
               : undefined,
         }}
       />
       {Platform.OS === "ios" && isOwnContact && (
         <Stack.Toolbar placement="right">
+          <Stack.Toolbar.Button icon="pencil" onPress={handleEdit} />
           <Stack.Toolbar.Button
             icon="trash"
             tintColor={colors.hex.error}

@@ -41,7 +41,8 @@ export interface UpdateContactInput {
   email?: string;
   company?: string;
   note?: string;
-  location?: { latitude: number; longitude: number; name: string };
+  // undefined = leave untouched; null = clear; object = set new location
+  location?: { latitude: number; longitude: number; name: string } | null;
 }
 
 // Output DTOs
