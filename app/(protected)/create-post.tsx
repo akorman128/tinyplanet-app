@@ -56,7 +56,7 @@ export default function CreatePostScreen() {
         media_urls: mediaUrls,
         list_id: selectedList?.id || null,
       });
-      router.back();
+      router.dismissTo("/feed");
     } catch (err) {
       logger.error("Error creating post:", err);
       if (mediaUrls.length > 0) {
