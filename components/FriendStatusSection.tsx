@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { ActionSheetIOS, Platform, Alert, Pressable } from "react-native";
-import { Badge, Button, Icons } from "@/design-system";
+import { ActionSheetIOS, Platform, Alert, View } from "react-native";
+import { Badge, Button } from "@/design-system";
 import { FriendshipDisplayStatus } from "@/types/friendship";
 import {
   useGetFriendshipStatus,
@@ -163,20 +163,24 @@ export function FriendStatusSection({
         return {
           text: "Follow",
           onPress: handleFollow,
+          variant: "primary" as const,
         };
       case FriendshipDisplayStatus.PENDING_SENT:
         return {
           text: "Pending",
           onPress: handlePending,
+          variant: "secondary" as const,
         };
       case FriendshipDisplayStatus.FRIENDS:
         return {
           text: "Friends",
           onPress: handleFriends,
+          variant: "secondary" as const,
         };
       case FriendshipDisplayStatus.PENDING_RECEIVED:
         return {
           text: "Respond",
+          variant: "primary" as const,
           onPress: () => {
             if (Platform.OS === "ios") {
               ActionSheetIOS.showActionSheetWithOptions(
@@ -210,17 +214,31 @@ export function FriendStatusSection({
         return {
           text: "Hidden",
           onPress: () => {},
+          variant: "blocked" as const,
         };
     }
   };
 
   const buttonConfig = getButtonConfig();
 
+  if (buttonConfig.variant === "blocked") {
+    return (
+      <View className="items-center">
+        <Badge variant="default" size="small">
+          {buttonConfig.text}
+        </Badge>
+      </View>
+    );
+  }
+
   return (
-    <Pressable onPress={buttonConfig.onPress}>
-      <Badge variant="default" size="small">
-        {buttonConfig.text}
-      </Badge>
-    </Pressable>
+    <Button
+      variant={buttonConfig.variant}
+      size="sm"
+      onPress={buttonConfig.onPress}
+      disabled={actionLoading}
+    >
+      {buttonConfig.text}
+    </Button>
   );
 }
