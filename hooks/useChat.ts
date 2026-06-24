@@ -222,50 +222,44 @@ export const useSendTypingIndicator = () => {
   const { isLoaded, supabase } = useSupabase();
   const profile = useRequireProfile();
 
-  return useCallback(
-    async (input: SendTypingIndicatorInput): Promise<void> => {
-      if (!isLoaded) return;
+  return async (input: SendTypingIndicatorInput): Promise<void> => {
+    if (!isLoaded) return;
 
-      const { friendId } = input;
-      const [user_a, user_b] = orderUserIds(profile.id, friendId);
-      const channelName = `chat:${user_a}:${user_b}_presence`;
+    const { friendId } = input;
+    const [user_a, user_b] = orderUserIds(profile.id, friendId);
+    const channelName = `chat:${user_a}:${user_b}_presence`;
 
-      const channel = supabase.channel(channelName);
-      await channel.send({
-        type: "broadcast",
-        event: "typing",
-        payload: { userId: profile.id, isTyping: true },
-      });
-    },
-    [isLoaded, supabase, profile.id]
-  );
+    const channel = supabase.channel(channelName);
+    await channel.send({
+      type: "broadcast",
+      event: "typing",
+      payload: { userId: profile.id, isTyping: true },
+    });
+  };
 };
 
 export const useSubscribeToTypingIndicators = () => {
   const { isLoaded, supabase } = useSupabase();
   const profile = useRequireProfile();
 
-  return useCallback(
-    (
-      friendId: string,
-      onTyping: (event: TypingIndicatorEvent) => void
-    ): (() => void) => {
-      if (!isLoaded) return () => {};
+  return (
+    friendId: string,
+    onTyping: (event: TypingIndicatorEvent) => void
+  ): (() => void) => {
+    if (!isLoaded) return () => {};
 
-      const [user_a, user_b] = orderUserIds(profile.id, friendId);
-      const channelName = `chat:${user_a}:${user_b}_presence`;
+    const [user_a, user_b] = orderUserIds(profile.id, friendId);
+    const channelName = `chat:${user_a}:${user_b}_presence`;
 
-      const channel = supabase
-        .channel(channelName)
-        .on("broadcast", { event: "typing" }, (payload) => {
-          onTyping(payload.payload as TypingIndicatorEvent);
-        })
-        .subscribe();
+    const channel = supabase
+      .channel(channelName)
+      .on("broadcast", { event: "typing" }, (payload) => {
+        onTyping(payload.payload as TypingIndicatorEvent);
+      })
+      .subscribe();
 
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    },
-    [isLoaded, supabase, profile.id]
-  );
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
 };

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { View, Image, Pressable, StyleSheet } from "react-native";
 import { MarkerView } from "@rnmapbox/maps";
 import { colors, Text, Icons } from "@/design-system";
@@ -24,11 +24,8 @@ export const HangMarker = React.memo<HangMarkerProps>(
     const [selected, setSelected] = useState(false);
     const [imageError, setImageError] = useState(false);
 
-    const togglePreview = useCallback(() => setSelected((s) => !s), []);
-    const openDetail = useCallback(
-      () => onOpenDetail(hang.id),
-      [hang.id, onOpenDetail]
-    );
+    const togglePreview = () => setSelected((s) => !s);
+    const openDetail = () => onOpenDetail(hang.id);
 
     const showImage = hang.avatar_url && !imageError;
 

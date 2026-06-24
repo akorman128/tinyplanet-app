@@ -92,10 +92,10 @@ export const MapView: React.FC<MapViewProps> = React.memo(({ mapFilter }) => {
   }, [travelPlanLocations]);
 
   // Event handlers
-  const handleLayout = useCallback((event: LayoutChangeEvent) => {
+  const handleLayout = (event: LayoutChangeEvent) => {
     const { width, height } = event.nativeEvent.layout;
     setMapDimensions({ width, height });
-  }, []);
+  };
 
   const handleFriendMarkerPress = (userId: string) => {
     router.push({ pathname: "/profile", params: { userId } });

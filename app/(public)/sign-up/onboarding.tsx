@@ -64,30 +64,27 @@ export default function OnboardingScreen() {
     [W, reducedMotion]
   );
 
-  const handleBack = useCallback(() => {
+  const handleBack = () => {
     if (activeIndex > 0) {
       goTo(activeIndex - 1);
     } else {
       router.back();
     }
-  }, [activeIndex, goTo]);
+  };
 
-  const togglePledge = useCallback(
-    (key: PledgeKey) => {
-      const turningOn = !consents[key];
-      setConsents((c) => ({ ...c, [key]: !c[key] }));
-      // Accepting the location terms triggers the OS location prompt and
-      // captures coords for the profile (no-op re-confirm if already granted).
-      if (key === "pledgeLocation" && turningOn) {
-        void getCurrentLocation().then((coords) => {
-          if (coords.latitude !== 0 || coords.longitude !== 0) {
-            setSignupData({ location: coords });
-          }
-        });
-      }
-    },
-    [consents, getCurrentLocation, setSignupData]
-  );
+  const togglePledge = (key: PledgeKey) => {
+    const turningOn = !consents[key];
+    setConsents((c) => ({ ...c, [key]: !c[key] }));
+    // Accepting the location terms triggers the OS location prompt and
+    // captures coords for the profile (no-op re-confirm if already granted).
+    if (key === "pledgeLocation" && turningOn) {
+      void getCurrentLocation().then((coords) => {
+        if (coords.latitude !== 0 || coords.longitude !== 0) {
+          setSignupData({ location: coords });
+        }
+      });
+    }
+  };
 
   const handleEnter = useCallback(() => {
     if (navigated.current || !isEnterEnabled(consents)) return;
@@ -97,31 +94,28 @@ export default function OnboardingScreen() {
     router.push("/sign-up/phone-number");
   }, [consents, setSignupData]);
 
-  const handleAdvance = useCallback(() => {
+  const handleAdvance = () => {
     if (isLastIndex(activeIndex)) {
       handleEnter();
     } else {
       goTo(activeIndex + 1);
     }
-  }, [activeIndex, goTo, handleEnter]);
+  };
 
-  const onMomentumScrollEnd = useCallback(
-    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const landed = activeIndexFromOffset(
-        e.nativeEvent.contentOffset.x,
-        W,
-        COUNT
-      );
-      // Don't let a forward swipe slip past an un-toggled Deal screen.
-      const max = maxReachableIndex(consents);
-      if (landed > max) {
-        goTo(max);
-        return;
-      }
-      setActiveIndex(landed);
-    },
-    [W, consents, goTo]
-  );
+  const onMomentumScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const landed = activeIndexFromOffset(
+      e.nativeEvent.contentOffset.x,
+      W,
+      COUNT
+    );
+    // Don't let a forward swipe slip past an un-toggled Deal screen.
+    const max = maxReachableIndex(consents);
+    if (landed > max) {
+      goTo(max);
+      return;
+    }
+    setActiveIndex(landed);
+  };
 
   // Android hardware back mirrors the in-screen chevron.
   useEffect(() => {

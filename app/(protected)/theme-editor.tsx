@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState } from "react";
 import {
   View,
   Pressable,
@@ -137,10 +137,7 @@ export default function ThemeEditorScreen() {
   const { width: windowWidth } = useWindowDimensions();
   const cardWidth = (windowWidth - HORIZONTAL_PADDING * 2 - CARD_GAP) / 2;
 
-  const selectedPresetId = useMemo(
-    () => deriveSelectedPresetId(draftTheme),
-    [draftTheme]
-  );
+  const selectedPresetId = deriveSelectedPresetId(draftTheme);
 
   const selectedFontDisplay =
     CURATED_FONTS.find((f) => f.family === draftTheme.fontFamily)
@@ -148,14 +145,11 @@ export default function ThemeEditorScreen() {
 
   const emojiBorder = draftTheme.emojiBorder ?? DEFAULT_EMOJI_BORDER;
 
-  const updateEmojiBorder = useCallback(
-    (partial: Partial<EmojiBorderSettings>) => {
-      updateDraft({
-        emojiBorder: { ...emojiBorder, ...partial },
-      });
-    },
-    [emojiBorder, updateDraft]
-  );
+  const updateEmojiBorder = (partial: Partial<EmojiBorderSettings>) => {
+    updateDraft({
+      emojiBorder: { ...emojiBorder, ...partial },
+    });
+  };
 
   const applyPreset = (preset: PresetTheme) => {
     updateDraft({
@@ -166,10 +160,10 @@ export default function ThemeEditorScreen() {
     });
   };
 
-  const handleSave = useCallback(async () => {
+  const handleSave = async () => {
     await save();
     router.back();
-  }, [save, router]);
+  };
 
   return (
     <>

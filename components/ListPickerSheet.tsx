@@ -1,4 +1,4 @@
-import React, { forwardRef, useState, useCallback } from "react";
+import React, { forwardRef, useState } from "react";
 import { View, Pressable } from "react-native";
 import BottomSheet, {
   BottomSheetView,
@@ -39,13 +39,10 @@ export const ListPickerSheet = forwardRef<BottomSheet, ListPickerSheetProps>(
       (ref as React.RefObject<BottomSheet>).current?.close();
     };
 
-    const handleSheetChange = useCallback(
-      (index: number) => {
-        setSheetIndex(index);
-        onSheetChange?.(index);
-      },
-      [onSheetChange]
-    );
+    const handleSheetChange = (index: number) => {
+      setSheetIndex(index);
+      onSheetChange?.(index);
+    };
 
     const renderItem = ({ item }: { item: ViewableList }) => (
       <Pressable

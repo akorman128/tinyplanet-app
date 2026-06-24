@@ -188,9 +188,9 @@ export const useLocation = (): UseLocationReturn => {
    * Useful for pull-to-refresh or periodic updates
    * Always forces a fresh location fetch
    */
-  const refreshLocation = useCallback(async (): Promise<void> => {
+  const refreshLocation = async (): Promise<void> => {
     await getCurrentLocation(true);
-  }, [getCurrentLocation]);
+  };
 
   /**
    * Check the current permission status without requesting permission
