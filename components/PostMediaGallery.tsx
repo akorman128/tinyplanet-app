@@ -1,36 +1,45 @@
-import React from "react";
-import { View } from "react-native";
-import { Image } from "expo-image";
+import React, { useState } from "react";
+import { View, Image } from "react-native";
 
 interface PostMediaGalleryProps {
   urls: string[];
 }
 
 export function PostMediaGallery({ urls }: PostMediaGalleryProps) {
+  const [width, setWidth] = useState(0);
+
   if (!urls || urls.length === 0) return null;
 
-  if (urls.length === 1) {
-    return (
-      <View className="mb-2">
-        <Image
-          source={{ uri: urls[0] }}
-          style={{ width: "100%", aspectRatio: 4 / 3, borderRadius: 12 }}
-          contentFit="cover"
-        />
-      </View>
-    );
-  }
+  const gridItemSize = (width - 4) / 2;
 
   return (
-    <View className="mb-2 flex-row flex-wrap" style={{ gap: 4 }}>
-      {urls.map((url) => (
-        <Image
-          key={url}
-          source={{ uri: url }}
-          style={{ width: "48%", aspectRatio: 1, borderRadius: 8 }}
-          contentFit="cover"
-        />
-      ))}
+    <View
+      className="mb-2"
+      onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+    >
+      {width > 0 &&
+        (urls.length === 1 ? (
+          <Image
+            source={{ uri: urls[0] }}
+            style={{ width, height: width * 0.75, borderRadius: 12 }}
+            resizeMode="cover"
+          />
+        ) : (
+          <View className="flex-row flex-wrap" style={{ gap: 4 }}>
+            {urls.map((url) => (
+              <Image
+                key={url}
+                source={{ uri: url }}
+                style={{
+                  width: gridItemSize,
+                  height: gridItemSize,
+                  borderRadius: 8,
+                }}
+                resizeMode="cover"
+              />
+            ))}
+          </View>
+        ))}
     </View>
   );
 }
