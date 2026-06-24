@@ -1,6 +1,9 @@
+import { adminClient } from "../utils/supabase-test-client";
 import { authedClientFor } from "../utils/auth-helpers";
+import { expectAuthzRejected } from "../utils/authz-helpers";
 import {
   createTestUser,
+  createFriendship,
   createTestContact,
   cleanupTestData,
   TestUser,
@@ -88,6 +91,82 @@ describe("get_contacts_ordered RPC", () => {
       expect(data).toHaveLength(0);
     } finally {
       await cleanupTestData([noContactsUser.id]);
+    }
+  });
+});
+
+describe("get_contacts_ordered cross-user visibility", () => {
+  // owner — friend (direct) — mutual (friend-of-friend of owner); stranger has
+  // no connection to owner.
+  let owner: TestUser;
+  let friend: TestUser;
+  let mutual: TestUser;
+  let stranger: TestUser;
+
+  beforeAll(async () => {
+    owner = await createTestUser({ full_name: "Contacts Owner X" });
+    friend = await createTestUser({ full_name: "Contacts Direct Friend" });
+    mutual = await createTestUser({ full_name: "Contacts Mutual" });
+    stranger = await createTestUser({ full_name: "Contacts Stranger" });
+
+    await createFriendship(owner.id, friend.id);
+    await createFriendship(friend.id, mutual.id);
+
+    await createTestContact(owner.id, {
+      name: "Owner's Contact",
+      location_lat: 40.7128,
+      location_lng: -74.006,
+      location_name: "New York, USA",
+    });
+  });
+
+  afterAll(async () => {
+    await cleanupTestData([owner.id, friend.id, mutual.id, stranger.id]);
+  });
+
+  it("lets a direct friend view the owner's contacts", async () => {
+    const client = await authedClientFor(friend.email);
+    const { data, error } = await client.rpc("get_contacts_ordered", {
+      p_user_id: owner.id,
+    });
+    expect(error).toBeNull();
+    expect(data).toHaveLength(1);
+    expect(data[0].name).toBe("Owner's Contact");
+  });
+
+  it("lets a mutual (friend-of-friend) view the owner's contacts", async () => {
+    const client = await authedClientFor(mutual.email);
+    const { data, error } = await client.rpc("get_contacts_ordered", {
+      p_user_id: owner.id,
+    });
+    expect(error).toBeNull();
+    expect(data).toHaveLength(1);
+  });
+
+  it("rejects an unconnected stranger", async () => {
+    const client = await authedClientFor(stranger.email);
+    const result = await client.rpc("get_contacts_ordered", {
+      p_user_id: owner.id,
+    });
+    expectAuthzRejected(result);
+  });
+
+  it("rejects a mutual the owner has blocked", async () => {
+    await adminClient
+      .from("blocks")
+      .insert({ blocker_id: owner.id, blocked_id: mutual.id });
+    try {
+      const client = await authedClientFor(mutual.email);
+      const result = await client.rpc("get_contacts_ordered", {
+        p_user_id: owner.id,
+      });
+      expectAuthzRejected(result);
+    } finally {
+      await adminClient
+        .from("blocks")
+        .delete()
+        .eq("blocker_id", owner.id)
+        .eq("blocked_id", mutual.id);
     }
   });
 });

@@ -1,4 +1,5 @@
 import { adminClient, anonClient } from "../utils/supabase-test-client";
+import { expectAuthzRejected } from "../utils/authz-helpers";
 import {
   createTestUser,
   createFriendship,
@@ -13,9 +14,14 @@ import {
  * Negative-authorization tests for the SECURITY DEFINER RPCs.
  *
  * Contract (from issue #1's fix): each RPC keeps its existing signature, but now
- * RAISEs EXCEPTION (ERRCODE 42501) when the acting-user parameter does not match
- * auth.uid(). So, authenticated as user A, calling an RPC with user B's id as the
- * acting param MUST error (or return no rows). Passing your OWN id still works.
+ * RAISEs EXCEPTION (ERRCODE 42501) when the *acting/viewer* parameter does not
+ * match auth.uid(). So, authenticated as user A, calling such an RPC with user
+ * B's id as the acting param MUST error (or return no rows). Passing your OWN id
+ * still works.
+ *
+ * Exception: functions whose single param is the *target* user being viewed
+ * (get_lists_with_places, get_contacts_ordered) intentionally allow friends and
+ * mutuals to read the target's data; they reject only unconnected/blocked users.
  *
  * These checks require a real JWT (so auth.uid() is populated), so we sign in as
  * each user rather than using the service-role adminClient.
@@ -51,34 +57,14 @@ async function signInAsUser(email: string) {
   );
 }
 
-/**
- * Assert that an RPC call performed on behalf of someone else is rejected.
- * The contract allows either of two equivalent outcomes: a raised authorization
- * exception (ERRCODE 42501), or no rows leaked.
- */
-function expectAuthzRejected(result: { data: unknown; error: unknown }) {
-  const { data, error } = result as {
-    data: unknown;
-    error: { code?: string; message?: string } | null;
-  };
-
-  if (error) {
-    // RAISE EXCEPTION ... ERRCODE = 42501 (insufficient_privilege)
-    const matchesContract =
-      error.code === "42501" ||
-      /42501|not authorized|unauthor|insufficient|access denied|permission/i.test(
-        error.message ?? ""
-      );
-    expect(matchesContract).toBe(true);
-  } else {
-    // If it didn't raise, it must at least not have leaked another user's rows.
-    expect(Array.isArray(data) ? data.length : (data ?? 0)).toBeFalsy();
-  }
-}
-
 describe.skipIf(!hasSupabaseEnv)("RPC negative authorization", () => {
   let userA: TestUser;
   let userB: TestUser;
+  // Unconnected to A (not a friend, not a mutual): used to prove the target-param
+  // RPCs still reject strangers. Seeded here, before signInAsUser clobbers the
+  // shared GoTrue session — creating users mid-test would make adminClient act as
+  // A and fail profiles RLS.
+  let userStranger: TestUser;
   let clientA: Awaited<ReturnType<typeof signInAsUser>>;
 
   beforeAll(async () => {
@@ -92,6 +78,7 @@ describe.skipIf(!hasSupabaseEnv)("RPC negative authorization", () => {
       location_lat: 34.0522,
       location_lng: -118.2437,
     });
+    userStranger = await createTestUser({ full_name: "Authz Stranger" });
 
     // A and B are friends so each genuinely has data the other could try to read.
     await createFriendship(userA.id, userB.id);
@@ -111,7 +98,9 @@ describe.skipIf(!hasSupabaseEnv)("RPC negative authorization", () => {
   });
 
   afterAll(async () => {
-    const ids = [userA?.id, userB?.id].filter(Boolean) as string[];
+    const ids = [userA?.id, userB?.id, userStranger?.id].filter(
+      Boolean
+    ) as string[];
     if (ids.length) await cleanupTestData(ids);
   });
 
@@ -170,16 +159,26 @@ describe.skipIf(!hasSupabaseEnv)("RPC negative authorization", () => {
     });
   });
 
-  // ── get_contacts_ordered (p_user_id) ──────────────────────────────
+  // ── get_contacts_ordered (p_user_id is the TARGET user) ───────────
+  // Unlike the functions above, p_user_id here is the user being viewed, not the
+  // acting param: friends and mutuals may read it; strangers may not.
   describe("get_contacts_ordered", () => {
-    it("rejects acting on another user's behalf", async () => {
-      const result = await clientA.rpc("get_contacts_ordered", {
+    it("allows viewing a friend's contacts", async () => {
+      // userA and userB are friends (seeded above).
+      const { error } = await clientA.rpc("get_contacts_ordered", {
         p_user_id: userB.id,
+      });
+      expect(error).toBeNull();
+    });
+
+    it("rejects viewing an unconnected user's contacts", async () => {
+      const result = await clientA.rpc("get_contacts_ordered", {
+        p_user_id: userStranger.id,
       });
       expectAuthzRejected(result);
     });
 
-    it("allows acting on your own behalf", async () => {
+    it("allows viewing your own contacts", async () => {
       const { error } = await clientA.rpc("get_contacts_ordered", {
         p_user_id: userA.id,
       });
