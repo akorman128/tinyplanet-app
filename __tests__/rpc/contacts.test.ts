@@ -141,6 +141,10 @@ describe("get_contacts_ordered cross-user visibility", () => {
     });
     expect(error).toBeNull();
     expect(data).toHaveLength(1);
+    // Prove the rows belong to the owner, not the viewer (guards against a
+    // body that filters on auth.uid() instead of p_user_id).
+    expect(data[0].user_id).toBe(owner.id);
+    expect(data[0].name).toBe("Owner's Contact");
   });
 
   it("rejects an unconnected stranger", async () => {
@@ -168,5 +172,28 @@ describe("get_contacts_ordered cross-user visibility", () => {
         .eq("blocker_id", owner.id)
         .eq("blocked_id", mutual.id);
     }
+  });
+
+  // The contact-detail screen reads the contacts table directly (RLS), so that
+  // path must agree with the summary RPC.
+  it("lets a mutual read the owner's contacts via direct table query (RLS)", async () => {
+    const client = await authedClientFor(mutual.email);
+    const { data, error } = await client
+      .from("contacts")
+      .select("id, name")
+      .eq("user_id", owner.id);
+    expect(error).toBeNull();
+    expect(data).toHaveLength(1);
+    expect(data![0].name).toBe("Owner's Contact");
+  });
+
+  it("hides the owner's contacts from a stranger's direct table query (RLS)", async () => {
+    const client = await authedClientFor(stranger.email);
+    const { data, error } = await client
+      .from("contacts")
+      .select("id")
+      .eq("user_id", owner.id);
+    expect(error).toBeNull();
+    expect(data).toHaveLength(0);
   });
 });

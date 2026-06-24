@@ -191,6 +191,17 @@ describe("Lists RPCs", () => {
         location_lng: -74.006,
         location_lat: 40.7128,
       });
+
+      const { error: placeErr } = await adminClient.from("list_places").insert({
+        list_id: ownerListId,
+        original_text: "Owner Place",
+        resolved_name: "Owner Place",
+        location: "POINT(-74.006 40.7128)",
+        confidence: 0.9,
+        status: "resolved",
+        position: 0,
+      });
+      if (placeErr) throw placeErr;
     });
 
     afterAll(async () => {
@@ -240,6 +251,57 @@ describe("Lists RPCs", () => {
           .eq("blocker_id", owner.id)
           .eq("blocked_id", mutual.id);
       }
+    });
+
+    // The detail screens read the lists/list_places tables directly (RLS) and
+    // the list-detail RPC, so those paths must agree with the summary RPC.
+    it("lets a mutual read the owner's lists via direct table query (RLS)", async () => {
+      const client = await authedClientFor(mutual.email);
+      const { data, error } = await client
+        .from("lists")
+        .select("id")
+        .eq("user_id", owner.id);
+      expect(error).toBeNull();
+      expect(data!.map((l: { id: string }) => l.id)).toContain(ownerListId);
+    });
+
+    it("hides the owner's lists from a stranger's direct table query (RLS)", async () => {
+      const client = await authedClientFor(stranger.email);
+      const { data, error } = await client
+        .from("lists")
+        .select("id")
+        .eq("user_id", owner.id);
+      expect(error).toBeNull();
+      expect(data).toHaveLength(0);
+    });
+
+    it("lets a mutual fetch the owner's list places via get_list_places_with_coordinates", async () => {
+      const client = await authedClientFor(mutual.email);
+      const { data, error } = await client.rpc(
+        "get_list_places_with_coordinates",
+        { p_list_id: ownerListId }
+      );
+      expect(error).toBeNull();
+      expect(data!.length).toBeGreaterThan(0);
+      expect(data![0].resolved_name).toBe("Owner Place");
+    });
+
+    it("rejects a stranger from get_list_places_with_coordinates", async () => {
+      const client = await authedClientFor(stranger.email);
+      const { error } = await client.rpc("get_list_places_with_coordinates", {
+        p_list_id: ownerListId,
+      });
+      expect(error).not.toBeNull();
+      expect(error!.message).toContain("access denied");
+    });
+
+    it("includes the owner's list on a mutual's map (get_viewable_list_locations)", async () => {
+      const client = await authedClientFor(mutual.email);
+      const { data, error } = await client.rpc("get_viewable_list_locations", {
+        p_user_id: mutual.id,
+      });
+      expect(error).toBeNull();
+      expect(data!.map((l: { id: string }) => l.id)).toContain(ownerListId);
     });
   });
 

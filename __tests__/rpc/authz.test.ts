@@ -92,6 +92,14 @@ describe.skipIf(!hasSupabaseEnv)("RPC negative authorization", () => {
       location_lng: -0.1278,
       location_name: "London",
     });
+    // The stranger must own data too, otherwise "rejects viewing a stranger"
+    // would pass on an empty result even if the guard were removed.
+    await createTestContact(userStranger.id, {
+      name: "Stranger's contact",
+      location_lat: 48.8566,
+      location_lng: 2.3522,
+      location_name: "Paris",
+    });
 
     // Act as user A.
     clientA = await signInAsUser(userA.email);
