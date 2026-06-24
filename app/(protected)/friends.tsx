@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import { View, FlatList, Alert, RefreshControl } from "react-native";
 import { Stack } from "expo-router";
 import { useForm } from "react-hook-form";
@@ -81,30 +81,24 @@ export default function FriendsScreen() {
   const sendInviteCode = useSendInviteCode();
   const { pickContact: pickContactFromDevice } = useContactPicker();
 
-  const handleAcceptRequest = useCallback(
-    async (userId: string) => {
-      try {
-        await acceptFriendRequest.mutateAsync({ fromUserId: userId });
-        Alert.alert("Success", "Friend request accepted!");
-      } catch (error) {
-        logger.error("Error accepting friend request:", error);
-        Alert.alert("Error", "Failed to accept friend request");
-      }
-    },
-    [acceptFriendRequest]
-  );
+  const handleAcceptRequest = async (userId: string) => {
+    try {
+      await acceptFriendRequest.mutateAsync({ fromUserId: userId });
+      Alert.alert("Success", "Friend request accepted!");
+    } catch (error) {
+      logger.error("Error accepting friend request:", error);
+      Alert.alert("Error", "Failed to accept friend request");
+    }
+  };
 
-  const handleDeclineRequest = useCallback(
-    async (userId: string) => {
-      try {
-        await declineFriendRequest.mutateAsync({ targetUserId: userId });
-      } catch (error) {
-        logger.error("Error declining friend request:", error);
-        Alert.alert("Error", "Failed to decline friend request");
-      }
-    },
-    [declineFriendRequest]
-  );
+  const handleDeclineRequest = async (userId: string) => {
+    try {
+      await declineFriendRequest.mutateAsync({ targetUserId: userId });
+    } catch (error) {
+      logger.error("Error declining friend request:", error);
+      Alert.alert("Error", "Failed to decline friend request");
+    }
+  };
 
   const pickContact = async () => {
     const phoneNumber = await pickContactFromDevice();
@@ -170,11 +164,11 @@ export default function FriendsScreen() {
     }
   };
 
-  const handleRefresh = useCallback(async () => {
+  const handleRefresh = async () => {
     if (activeTab === "requests") {
       await refetchPending();
     }
-  }, [activeTab, refetchPending]);
+  };
 
   const renderRequestsTab = () => (
     <View className="flex-1">

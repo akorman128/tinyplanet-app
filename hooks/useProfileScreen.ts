@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useRequireProfile } from "@/hooks/useRequireProfile";
 import { useGetProfile } from "@/hooks/useProfile";
 import { useGetTopVibes } from "@/hooks/useVibe";
@@ -18,10 +18,8 @@ export function useProfileScreen(userId?: string) {
   );
 
   // The display profile: prefer the fetched profile, fall back to store for own profile
-  const displayProfile = useMemo(
-    () => profileQuery.data ?? (isViewingOwnProfile ? profile : null),
-    [profileQuery.data, isViewingOwnProfile, profile]
-  );
+  const displayProfile =
+    profileQuery.data ?? (isViewingOwnProfile ? profile : null);
 
   // Derived from query results
   const topVibes = topVibesQuery.data?.data ?? [];

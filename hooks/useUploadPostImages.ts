@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { Alert } from "react-native";
 
 import { useSupabase } from "./useSupabase";
@@ -17,7 +17,7 @@ export function useUploadPostImages() {
   const [photos, setPhotos] = useState<PickedPhoto[]>([]);
   const [isPublishing, setIsPublishing] = useState(false);
 
-  const pick = useCallback(async () => {
+  const pick = async () => {
     try {
       const ImagePicker = await import("expo-image-picker");
       const ImageManipulator = await import("expo-image-manipulator");
@@ -53,36 +53,33 @@ export function useUploadPostImages() {
     } catch (err) {
       Alert.alert("Couldn't add photo", String(err));
     }
-  }, [photos.length]);
+  };
 
-  const removeAt = useCallback((index: number) => {
+  const removeAt = (index: number) => {
     setPhotos((prev) => prev.filter((_, i) => i !== index));
-  }, []);
+  };
 
-  const publishOne = useCallback(
-    async (photo: PickedPhoto, userId: string): Promise<string> => {
-      const arrayBuffer = await readImageAsArrayBuffer(
-        photo.localUri,
-        MAX_BYTES
-      );
+  const publishOne = async (
+    photo: PickedPhoto,
+    userId: string
+  ): Promise<string> => {
+    const arrayBuffer = await readImageAsArrayBuffer(photo.localUri, MAX_BYTES);
 
-      const path = `${userId}/${Date.now()}-${Math.random()
-        .toString(36)
-        .slice(2)}.jpg`;
-      const { error } = await supabase.storage
-        .from("post-media")
-        .upload(path, arrayBuffer, { contentType: "image/jpeg" });
-      if (error) throw error;
+    const path = `${userId}/${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2)}.jpg`;
+    const { error } = await supabase.storage
+      .from("post-media")
+      .upload(path, arrayBuffer, { contentType: "image/jpeg" });
+    if (error) throw error;
 
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("post-media").getPublicUrl(path);
-      return publicUrl;
-    },
-    [supabase]
-  );
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("post-media").getPublicUrl(path);
+    return publicUrl;
+  };
 
-  const publishAll = useCallback(async (): Promise<string[]> => {
+  const publishAll = async (): Promise<string[]> => {
     const userId = session?.user?.id;
     if (!userId) throw new Error("Not authenticated");
     if (photos.length === 0) return [];
@@ -118,7 +115,7 @@ export function useUploadPostImages() {
     } finally {
       setIsPublishing(false);
     }
-  }, [photos, session?.user?.id, publishOne, supabase]);
+  };
 
   return {
     photos,

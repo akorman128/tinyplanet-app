@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { View, Image, Pressable, StyleSheet } from "react-native";
 import { MarkerView } from "@rnmapbox/maps";
 import { colors, Text } from "@/design-system";
@@ -19,9 +19,9 @@ export const MapMarker = React.memo<MapMarkerProps>(
   ({ id, coordinate, name, avatarUrl, type, onPress }) => {
     const [imageError, setImageError] = useState(false);
 
-    const handlePress = useCallback(() => {
+    const handlePress = () => {
       onPress?.(id);
-    }, [id, onPress]);
+    };
 
     const showImage = avatarUrl && !imageError;
 

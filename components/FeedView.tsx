@@ -68,17 +68,14 @@ export function FeedView() {
   // hooks (useLikes, useSavedPosts, usePosts), so the cards drive those edits
   // directly. These no-op callbacks satisfy the card props without duplicating
   // cache logic in the view.
-  const noop = useCallback(() => {}, []);
+  const noop = () => {};
 
-  const handleOpenComments = useCallback(
-    (postId: string, commentCount: number) => {
-      router.push({
-        pathname: "/comments",
-        params: { postId, commentCount: String(commentCount) },
-      });
-    },
-    [router]
-  );
+  const handleOpenComments = (postId: string, commentCount: number) => {
+    router.push({
+      pathname: "/comments",
+      params: { postId, commentCount: String(commentCount) },
+    });
+  };
 
   const handleRefresh = async () => {
     await refetch();

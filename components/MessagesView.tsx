@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { FlatList, RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -43,18 +43,15 @@ export function MessagesView() {
     return unsubscribe;
   }, [session?.user?.id, subscribeToAllMessages]);
 
-  const handleChannelPress = useCallback(
-    async (friendId: string) => {
-      try {
-        await markChannelAsRead.mutateAsync({ friendId });
-      } catch (err) {
-        logger.error("Error marking channel as read:", err);
-        // Continue navigation even if marking as read fails
-      }
-      router.push(`/chat/${friendId}`);
-    },
-    [markChannelAsRead, router]
-  );
+  const handleChannelPress = async (friendId: string) => {
+    try {
+      await markChannelAsRead.mutateAsync({ friendId });
+    } catch (err) {
+      logger.error("Error marking channel as read:", err);
+      // Continue navigation even if marking as read fails
+    }
+    router.push(`/chat/${friendId}`);
+  };
 
   if (!session?.user) return <LoadingState />;
   if (loading && !refreshing) return <LoadingState />;

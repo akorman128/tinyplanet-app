@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import {
   View,
   Pressable,
@@ -67,15 +67,12 @@ export function FontSelector({
     onClose();
   };
 
-  const renderItem = useCallback(
-    ({ item }: { item: CuratedFont }) => (
-      <FontRow
-        font={item}
-        selected={selectedFont === item.family}
-        onSelect={() => handleSelect(item.family)}
-      />
-    ),
-    [selectedFont]
+  const renderItem = ({ item }: { item: CuratedFont }) => (
+    <FontRow
+      font={item}
+      selected={selectedFont === item.family}
+      onSelect={() => handleSelect(item.family)}
+    />
   );
 
   return (
