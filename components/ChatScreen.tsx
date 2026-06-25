@@ -9,6 +9,8 @@ import {
   TypingIndicator,
   IntroBanner,
   DateSeparator,
+  Avatar,
+  Text,
   colors,
 } from "@/design-system";
 import { MessageBubble } from "@/components";
@@ -40,6 +42,23 @@ type ChatListItem =
 const orderUserIds = (userId1: string, userId2: string): [string, string] => {
   return userId1 < userId2 ? [userId1, userId2] : [userId2, userId1];
 };
+
+function ChatHeaderTitle({
+  fullName,
+  avatarUrl,
+}: {
+  fullName: string;
+  avatarUrl?: string;
+}) {
+  return (
+    <View className="items-center">
+      <Avatar fullName={fullName} avatarUrl={avatarUrl} size="small" />
+      <Text className="text-sm font-semibold text-gray-900 mt-0.5">
+        {fullName.split(" ")[0]}
+      </Text>
+    </View>
+  );
+}
 
 export default function ChatScreen() {
   const { friendId } = useLocalSearchParams<{ friendId: string }>();
@@ -73,6 +92,16 @@ export default function ChatScreen() {
     [messagesQuery.data]
   );
   const friendName = friendProfile.data?.full_name ?? "";
+  const headerOptions = friendName
+    ? {
+        headerTitle: () => (
+          <ChatHeaderTitle
+            fullName={friendName}
+            avatarUrl={friendProfile.data?.avatar_url || undefined}
+          />
+        ),
+      }
+    : { title: "Chat" };
 
   // Build mixed array with date separators between day boundaries
   const chatItems = useMemo((): ChatListItem[] => {
@@ -365,7 +394,7 @@ export default function ChatScreen() {
   if (messagesQuery.isPending) {
     return (
       <>
-        <Stack.Screen options={{ title: friendName || "Chat" }} />
+        <Stack.Screen options={headerOptions} />
         <View className="flex-1 bg-cream">
           <LoadingState />
         </View>
@@ -376,7 +405,7 @@ export default function ChatScreen() {
   if (messagesQuery.isError) {
     return (
       <>
-        <Stack.Screen options={{ title: friendName || "Chat" }} />
+        <Stack.Screen options={headerOptions} />
         <View className="flex-1 bg-cream">
           <ErrorState message="Failed to load messages" />
         </View>
@@ -386,7 +415,7 @@ export default function ChatScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: friendName || "Chat" }} />
+      <Stack.Screen options={headerOptions} />
       <View className="flex-1 bg-cream">
         <FlatList<ChatListItem>
           ref={flatListRef}
