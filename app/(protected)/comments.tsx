@@ -23,7 +23,13 @@ import {
   ScreenHeader,
 } from "@/design-system";
 import { CommentItem } from "@/design-system/CommentItem";
-import { useGetComments, useCreateComment } from "@/hooks/useComments";
+import {
+  useGetComments,
+  useCreateComment,
+  useUpdateComment,
+  useDeleteComment,
+} from "@/hooks/useComments";
+import { useRequireProfile } from "@/hooks/useRequireProfile";
 import { useLikeComment, useUnlikeComment } from "@/hooks/useLikes";
 import { useListSelectionStore } from "@/stores/listSelectionStore";
 import { useCommentCountStore } from "@/stores/commentCountStore";
@@ -49,8 +55,11 @@ export default function CommentsScreen() {
 
   const initialCommentCount = Number(commentCountParam) || 0;
 
+  const profile = useRequireProfile();
   const { data: commentsData, isPending: loading } = useGetComments(postId);
   const createComment = useCreateComment();
+  const updateComment = useUpdateComment();
+  const deleteComment = useDeleteComment();
   const likeComment = useLikeComment();
   const unlikeComment = useUnlikeComment();
   const { selectedList, clear: clearListSelection } = useListSelectionStore();
@@ -211,6 +220,76 @@ export default function CommentsScreen() {
     setReplyingTo(comment);
   }, []);
 
+  const handleEditComment = useCallback(
+    async (commentId: string, newBody: string) => {
+      const editedAt = new Date().toISOString();
+      const applyEdit = (list: CommentWithAuthor[]): CommentWithAuthor[] =>
+        list.map((comment) => {
+          if (comment.id === commentId) {
+            return { ...comment, body: newBody, edited_at: editedAt };
+          }
+          if (comment.replies && comment.replies.length > 0) {
+            return { ...comment, replies: applyEdit(comment.replies) };
+          }
+          return comment;
+        });
+
+      const snapshot = comments;
+      setComments(applyEdit(comments));
+
+      try {
+        await updateComment.mutateAsync({
+          commentId,
+          input: { body: newBody },
+        });
+      } catch (err) {
+        setComments(snapshot);
+        logger.error("Error editing comment:", err);
+        Alert.alert("Error", "Failed to edit comment");
+        throw err;
+      }
+    },
+    [comments, updateComment]
+  );
+
+  const handleDeleteComment = useCallback(
+    async (comment: CommentWithAuthor) => {
+      // Deleting a comment cascade-deletes its replies, so the post's
+      // comment_count drops by the whole subtree, not just one row.
+      const countSubtree = (c: CommentWithAuthor): number =>
+        1 + (c.replies?.reduce((sum, r) => sum + countSubtree(r), 0) ?? 0);
+      const removed = countSubtree(comment);
+
+      const prune = (list: CommentWithAuthor[]): CommentWithAuthor[] =>
+        list
+          .filter((c) => c.id !== comment.id)
+          .map((c) =>
+            c.replies && c.replies.length > 0
+              ? { ...c, replies: prune(c.replies) }
+              : c
+          );
+
+      const snapshot = comments;
+      const prevCount = currentCount;
+      const newCount = Math.max(0, prevCount - removed);
+
+      setComments(prune(comments));
+      setCurrentCount(newCount);
+      setCommentCount(postId, newCount);
+
+      try {
+        await deleteComment.mutateAsync(comment.id);
+      } catch (err) {
+        setComments(snapshot);
+        setCurrentCount(prevCount);
+        setCommentCount(postId, prevCount);
+        logger.error("Error deleting comment:", err);
+        Alert.alert("Error", "Failed to delete comment");
+      }
+    },
+    [comments, currentCount, postId, deleteComment, setCommentCount]
+  );
+
   const handleCancelReply = () => {
     setReplyingTo(null);
   };
@@ -220,11 +299,20 @@ export default function CommentsScreen() {
       <CommentItem
         comment={item}
         depth={0}
+        currentUserId={profile.id}
         onReply={handleReply}
         onLikeToggle={handleLikeToggle}
+        onEdit={handleEditComment}
+        onDelete={handleDeleteComment}
       />
     ),
-    [handleReply, handleLikeToggle]
+    [
+      profile.id,
+      handleReply,
+      handleLikeToggle,
+      handleEditComment,
+      handleDeleteComment,
+    ]
   );
 
   return (
