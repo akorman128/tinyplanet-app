@@ -7,6 +7,7 @@ export default function TabsLayout() {
       tintColor={colors.black}
       minimizeBehavior="onScrollDown"
       labelVisibilityMode="unlabeled"
+      backBehavior="history"
     >
       <NativeTabs.Trigger name="map">
         <NativeTabs.Trigger.Icon sf="globe" md="public" />

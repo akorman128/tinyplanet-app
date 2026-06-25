@@ -7,7 +7,7 @@ import { reverseGeocode } from "@/utils/reverseGeocode";
 
 export function useProfileScreen(userId?: string) {
   const profile = useRequireProfile();
-  const isViewingOwnProfile = !userId;
+  const isViewingOwnProfile = !userId || userId === profile.id;
   const targetId = userId || profile.id;
 
   // Declarative queries
