@@ -44,3 +44,20 @@ Decisions: **inline edit**; **cascade delete** (matches DB `ON DELETE CASCADE`).
   setting it is idempotent (no double-decrement with the invalidation).
 - **Not done autonomously**: a live simulator run. Logic is covered by typecheck + the 79-test hook suite and
   reuses already-proven components (`Input`, `Alert`).
+
+## Post-review fixes (xhigh code-review findings 1, 2, 4, 10)
+
+- **#4 (root cause)** — Removed the parallel local `comments` mirror + its sync `useEffect`. The screen now
+  renders directly from the `useGetComments` react-query cache, and create/like/edit/delete write optimistic
+  updates to that single source of truth via `queryClient.setQueryData(comments.byPost)`. The tree mutations
+  are now small pure module-level fns (`insertComment`/`removeComment`/`editCommentBody`/`toggleCommentLike`/
+  `countSubtree`). Kept optimism in the screen (not dispersed into the 5 shared mutation hooks) to limit blast
+  radius; the hooks' existing `onSuccess` invalidations reconcile the cache.
+- **#2** — folded into #4: optimistic updates use functional `setQueryData((old) => …)` (composes over live
+  cache, no stale render-closure base) with a `getQueryData` snapshot restored on error.
+- **#1** — optimistic comment now carries the real `profile.id` (+ name/avatar) and a `temp-` id; `CommentItem`
+  gates the menu on `canModify = isOwn && !id.startsWith("temp-")`, so a just-posted (unsaved) comment shows no
+  edit/delete until the create round-trip lands the real row.
+- **#10** — hoisted `trimmedDraft` / `saveDisabled` in `CommentItem` (computed once instead of 3×).
+- Verify: `tsc --noEmit` clean; eslint clean on changed files; 79/79 hook tests pass. Pure tree helpers are
+  screen-internal (not exported), so covered by typecheck + reasoning rather than unit tests; live run still TODO.

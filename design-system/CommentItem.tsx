@@ -35,7 +35,12 @@ export function CommentItem({
   const [draft, setDraft] = useState(comment.body);
   const [isSaving, setIsSaving] = useState(false);
 
-  const isOwn = comment.author_id === currentUserId;
+  // A just-posted comment still has a temp id, so it can't be edited or deleted
+  // until the create round-trip replaces it with the saved row.
+  const canModify =
+    comment.author_id === currentUserId && !comment.id.startsWith("temp-");
+  const trimmedDraft = draft.trim();
+  const saveDisabled = isSaving || trimmedDraft.length === 0;
 
   const handleLikeToggle = async () => {
     if (isLiking) return;
@@ -64,15 +69,14 @@ export function CommentItem({
   };
 
   const saveEdit = async () => {
-    const trimmed = draft.trim();
-    if (!trimmed || trimmed === comment.body) {
+    if (!trimmedDraft || trimmedDraft === comment.body) {
       cancelEdit();
       return;
     }
 
     setIsSaving(true);
     try {
-      await onEdit(comment.id, trimmed);
+      await onEdit(comment.id, trimmedDraft);
       setIsEditing(false);
     } catch {
       // onEdit surfaces its own error alert; keep the editor open to retry.
@@ -133,7 +137,7 @@ export function CommentItem({
             {comment.edited_at && (
               <Text className="text-xs text-gray-500 ml-1">(edited)</Text>
             )}
-            {isOwn && !isEditing && (
+            {canModify && !isEditing && (
               <Pressable
                 onPress={handleOptions}
                 hitSlop={8}
@@ -163,11 +167,9 @@ export function CommentItem({
                 </Pressable>
                 <Pressable
                   onPress={saveEdit}
-                  disabled={isSaving || draft.trim().length === 0}
+                  disabled={saveDisabled}
                   className={`px-4 py-2 rounded-lg ${
-                    isSaving || draft.trim().length === 0
-                      ? "bg-gray-300"
-                      : "bg-blue-500"
+                    saveDisabled ? "bg-gray-300" : "bg-blue-500"
                   }`}
                 >
                   <Text className="text-sm font-semibold text-white">
