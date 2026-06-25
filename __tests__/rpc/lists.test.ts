@@ -1,5 +1,6 @@
 import { adminClient } from "../utils/supabase-test-client";
 import { authedClientFor } from "../utils/auth-helpers";
+import { expectAuthzRejected } from "../utils/authz-helpers";
 import {
   createTestUser,
   createFriendship,
@@ -163,6 +164,144 @@ describe("Lists RPCs", () => {
       expect(data[0].latitude).toBeCloseTo(place1Lat, 2);
       expect(data[1].longitude).toBeCloseTo(place2Lng, 2);
       expect(data[1].latitude).toBeCloseTo(place2Lat, 2);
+    });
+  });
+
+  describe("get_lists_with_places cross-user visibility", () => {
+    // owner — friend (direct) — mutual (friend-of-friend of owner); stranger
+    // has no connection to owner.
+    let owner: TestUser;
+    let friend: TestUser;
+    let mutual: TestUser;
+    let stranger: TestUser;
+    let ownerListId: string;
+
+    beforeAll(async () => {
+      owner = await createTestUser({ full_name: "Visibility Owner" });
+      friend = await createTestUser({ full_name: "Visibility Direct Friend" });
+      mutual = await createTestUser({ full_name: "Visibility Mutual" });
+      stranger = await createTestUser({ full_name: "Visibility Stranger" });
+
+      await createFriendship(owner.id, friend.id);
+      await createFriendship(friend.id, mutual.id);
+
+      ownerListId = await createTestList(owner.id, {
+        title: "Owner List",
+        location_name: "Somewhere",
+        location_lng: -74.006,
+        location_lat: 40.7128,
+      });
+
+      const { error: placeErr } = await adminClient.from("list_places").insert({
+        list_id: ownerListId,
+        original_text: "Owner Place",
+        resolved_name: "Owner Place",
+        location: "POINT(-74.006 40.7128)",
+        confidence: 0.9,
+        status: "resolved",
+        position: 0,
+      });
+      if (placeErr) throw placeErr;
+    });
+
+    afterAll(async () => {
+      await cleanupTestData([owner.id, friend.id, mutual.id, stranger.id]);
+    });
+
+    it("lets a direct friend view the owner's lists", async () => {
+      const client = await authedClientFor(friend.email);
+      const { data, error } = await client.rpc("get_lists_with_places", {
+        p_user_id: owner.id,
+      });
+      expect(error).toBeNull();
+      expect(data!.map((l: { id: string }) => l.id)).toContain(ownerListId);
+    });
+
+    it("lets a mutual (friend-of-friend) view the owner's lists", async () => {
+      const client = await authedClientFor(mutual.email);
+      const { data, error } = await client.rpc("get_lists_with_places", {
+        p_user_id: owner.id,
+      });
+      expect(error).toBeNull();
+      expect(data!.map((l: { id: string }) => l.id)).toContain(ownerListId);
+    });
+
+    it("rejects an unconnected stranger", async () => {
+      const client = await authedClientFor(stranger.email);
+      const result = await client.rpc("get_lists_with_places", {
+        p_user_id: owner.id,
+      });
+      expectAuthzRejected(result);
+    });
+
+    it("rejects a mutual the owner has blocked", async () => {
+      await adminClient
+        .from("blocks")
+        .insert({ blocker_id: owner.id, blocked_id: mutual.id });
+      try {
+        const client = await authedClientFor(mutual.email);
+        const result = await client.rpc("get_lists_with_places", {
+          p_user_id: owner.id,
+        });
+        expectAuthzRejected(result);
+      } finally {
+        await adminClient
+          .from("blocks")
+          .delete()
+          .eq("blocker_id", owner.id)
+          .eq("blocked_id", mutual.id);
+      }
+    });
+
+    // The detail screens read the lists/list_places tables directly (RLS) and
+    // the list-detail RPC, so those paths must agree with the summary RPC.
+    it("lets a mutual read the owner's lists via direct table query (RLS)", async () => {
+      const client = await authedClientFor(mutual.email);
+      const { data, error } = await client
+        .from("lists")
+        .select("id")
+        .eq("user_id", owner.id);
+      expect(error).toBeNull();
+      expect(data!.map((l: { id: string }) => l.id)).toContain(ownerListId);
+    });
+
+    it("hides the owner's lists from a stranger's direct table query (RLS)", async () => {
+      const client = await authedClientFor(stranger.email);
+      const { data, error } = await client
+        .from("lists")
+        .select("id")
+        .eq("user_id", owner.id);
+      expect(error).toBeNull();
+      expect(data).toHaveLength(0);
+    });
+
+    it("lets a mutual fetch the owner's list places via get_list_places_with_coordinates", async () => {
+      const client = await authedClientFor(mutual.email);
+      const { data, error } = await client.rpc(
+        "get_list_places_with_coordinates",
+        { p_list_id: ownerListId }
+      );
+      expect(error).toBeNull();
+      expect(data!.length).toBeGreaterThan(0);
+      expect(data![0].resolved_name).toBe("Owner Place");
+    });
+
+    it("rejects a stranger from get_list_places_with_coordinates", async () => {
+      const client = await authedClientFor(stranger.email);
+      const { error } = await client.rpc("get_list_places_with_coordinates", {
+        p_list_id: ownerListId,
+      });
+      expect(error).not.toBeNull();
+      expect(error!.message).toContain("access denied");
+    });
+
+    it("includes the owner's list on a mutual's map (get_viewable_list_locations)", async () => {
+      const client = await authedClientFor(mutual.email);
+      const { data, error } = await client.rpc("get_viewable_list_locations", {
+        p_user_id: mutual.id,
+      });
+      expect(error).toBeNull();
+      expect(data!.map((l: { id: string }) => l.id)).toContain(ownerListId);
     });
   });
 
