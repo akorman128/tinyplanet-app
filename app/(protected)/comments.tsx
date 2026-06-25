@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Icons,
   colors,
@@ -23,10 +24,18 @@ import {
   ScreenHeader,
 } from "@/design-system";
 import { CommentItem } from "@/design-system/CommentItem";
-import { useGetComments, useCreateComment } from "@/hooks/useComments";
+import {
+  useGetComments,
+  useCreateComment,
+  useUpdateComment,
+  useDeleteComment,
+  GetCommentsOutput,
+} from "@/hooks/useComments";
+import { useRequireProfile } from "@/hooks/useRequireProfile";
 import { useLikeComment, useUnlikeComment } from "@/hooks/useLikes";
 import { useListSelectionStore } from "@/stores/listSelectionStore";
 import { useCommentCountStore } from "@/stores/commentCountStore";
+import { queryKeys } from "@/lib/queryKeys";
 import { CommentWithAuthor } from "@/types/comment";
 import { logger } from "@/utils/logger";
 
@@ -40,6 +49,74 @@ const commentSchema = z.object({
 
 type CommentForm = z.infer<typeof commentSchema>;
 
+// Pure tree transforms applied to the react-query cache (single source of truth).
+const insertComment = (
+  list: CommentWithAuthor[],
+  comment: CommentWithAuthor
+): CommentWithAuthor[] => {
+  if (!comment.parent_comment_id) return [...list, comment];
+  return list.map((c) =>
+    c.id === comment.parent_comment_id
+      ? { ...c, replies: [...(c.replies ?? []), comment] }
+      : c.replies?.length
+        ? { ...c, replies: insertComment(c.replies, comment) }
+        : c
+  );
+};
+
+const removeComment = (
+  list: CommentWithAuthor[],
+  commentId: string
+): CommentWithAuthor[] =>
+  list
+    .filter((c) => c.id !== commentId)
+    .map((c) =>
+      c.replies?.length
+        ? { ...c, replies: removeComment(c.replies, commentId) }
+        : c
+    );
+
+const editCommentBody = (
+  list: CommentWithAuthor[],
+  commentId: string,
+  body: string,
+  editedAt: string
+): CommentWithAuthor[] =>
+  list.map((c) =>
+    c.id === commentId
+      ? { ...c, body, edited_at: editedAt }
+      : c.replies?.length
+        ? {
+            ...c,
+            replies: editCommentBody(c.replies, commentId, body, editedAt),
+          }
+        : c
+  );
+
+const toggleCommentLike = (
+  list: CommentWithAuthor[],
+  commentId: string,
+  currentlyLiked: boolean
+): CommentWithAuthor[] =>
+  list.map((c) =>
+    c.id === commentId
+      ? {
+          ...c,
+          liked_by_user: !currentlyLiked,
+          like_count: currentlyLiked ? c.like_count - 1 : c.like_count + 1,
+        }
+      : c.replies?.length
+        ? {
+            ...c,
+            replies: toggleCommentLike(c.replies, commentId, currentlyLiked),
+          }
+        : c
+  );
+
+// A delete cascade-removes the whole reply subtree, so comment_count drops by it.
+const countSubtree = (comment: CommentWithAuthor): number =>
+  1 + (comment.replies?.reduce((sum, r) => sum + countSubtree(r), 0) ?? 0);
+
 export default function CommentsScreen() {
   const router = useRouter();
   const { postId, commentCount: commentCountParam } = useLocalSearchParams<{
@@ -49,17 +126,22 @@ export default function CommentsScreen() {
 
   const initialCommentCount = Number(commentCountParam) || 0;
 
+  const profile = useRequireProfile();
+  const queryClient = useQueryClient();
   const { data: commentsData, isPending: loading } = useGetComments(postId);
   const createComment = useCreateComment();
+  const updateComment = useUpdateComment();
+  const deleteComment = useDeleteComment();
   const likeComment = useLikeComment();
   const unlikeComment = useUnlikeComment();
   const { selectedList, clear: clearListSelection } = useListSelectionStore();
   const setCommentCount = useCommentCountStore((s) => s.set);
 
-  const [comments, setComments] = useState<CommentWithAuthor[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [replyingTo, setReplyingTo] = useState<CommentWithAuthor | null>(null);
   const [currentCount, setCurrentCount] = useState(initialCommentCount);
+
+  const comments = commentsData?.data ?? [];
 
   const {
     control,
@@ -77,13 +159,6 @@ export default function CommentsScreen() {
     return () => clearListSelection();
   }, [clearListSelection]);
 
-  // Sync local comments state from query data
-  useEffect(() => {
-    if (commentsData?.data) {
-      setComments(commentsData.data);
-    }
-  }, [commentsData]);
-
   const onSubmit = async (data: CommentForm) => {
     setIsSubmitting(true);
 
@@ -91,16 +166,16 @@ export default function CommentsScreen() {
       id: `temp-${Date.now()}`,
       post_id: postId,
       parent_comment_id: replyingTo?.id || null,
-      author_id: "current-user",
+      author_id: profile.id,
       body: data.body,
       list_id: selectedList?.id || null,
       edited_at: null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       author: {
-        id: "current-user",
-        full_name: "You",
-        avatar_url: "",
+        id: profile.id,
+        full_name: profile.full_name,
+        avatar_url: profile.avatar_url,
       },
       like_count: 0,
       liked_by_user: false,
@@ -108,21 +183,10 @@ export default function CommentsScreen() {
       attached_list: selectedList,
     };
 
-    // Optimistic update
-    if (replyingTo) {
-      setComments((prev) =>
-        prev.map((comment) =>
-          comment.id === replyingTo.id
-            ? {
-                ...comment,
-                replies: [...(comment.replies || []), optimisticComment],
-              }
-            : comment
-        )
-      );
-    } else {
-      setComments((prev) => [...prev, optimisticComment]);
-    }
+    const key = queryKeys.comments.byPost(postId);
+    queryClient.setQueryData<GetCommentsOutput>(key, (old) => ({
+      data: insertComment(old?.data ?? [], optimisticComment),
+    }));
 
     try {
       await createComment.mutateAsync({
@@ -140,26 +204,11 @@ export default function CommentsScreen() {
       setReplyingTo(null);
       clearListSelection();
     } catch (err) {
-      // Revert optimistic update on error
-      if (replyingTo) {
-        setComments((prev) =>
-          prev.map((comment) =>
-            comment.id === replyingTo.id
-              ? {
-                  ...comment,
-                  replies: (comment.replies || []).filter(
-                    (r) => r.id !== optimisticComment.id
-                  ),
-                }
-              : comment
-          )
-        );
-      } else {
-        setComments((prev) =>
-          prev.filter((c) => c.id !== optimisticComment.id)
-        );
-      }
-
+      queryClient.setQueryData<GetCommentsOutput>(key, (old) =>
+        old
+          ? { ...old, data: removeComment(old.data, optimisticComment.id) }
+          : old
+      );
       logger.error("Error creating comment:", err);
       Alert.alert("Error", "Failed to post comment");
     } finally {
@@ -169,47 +218,90 @@ export default function CommentsScreen() {
 
   const handleLikeToggle = useCallback(
     async (commentId: string, currentState: boolean) => {
-      const updateCommentLike = (
-        comments: CommentWithAuthor[]
-      ): CommentWithAuthor[] =>
-        comments.map((comment) => {
-          if (comment.id === commentId) {
-            return {
-              ...comment,
-              liked_by_user: !currentState,
-              like_count: currentState
-                ? comment.like_count - 1
-                : comment.like_count + 1,
-            };
-          }
-          if (comment.replies && comment.replies.length > 0) {
-            return {
-              ...comment,
-              replies: updateCommentLike(comment.replies),
-            };
-          }
-          return comment;
-        });
+      const key = queryKeys.comments.byPost(postId);
+      const previous = queryClient.getQueryData<GetCommentsOutput>(key);
 
-      setComments((prev) => updateCommentLike(prev));
+      queryClient.setQueryData<GetCommentsOutput>(key, (old) =>
+        old
+          ? {
+              ...old,
+              data: toggleCommentLike(old.data, commentId, currentState),
+            }
+          : old
+      );
 
       try {
-        if (currentState) {
-          await unlikeComment.mutateAsync(commentId);
-        } else {
-          await likeComment.mutateAsync(commentId);
-        }
+        if (currentState) await unlikeComment.mutateAsync(commentId);
+        else await likeComment.mutateAsync(commentId);
       } catch (err) {
-        setComments((prev) => updateCommentLike(prev));
+        if (previous) queryClient.setQueryData(key, previous);
         logger.error("Error toggling like:", err);
       }
     },
-    [likeComment, unlikeComment]
+    [postId, queryClient, likeComment, unlikeComment]
   );
 
   const handleReply = useCallback((comment: CommentWithAuthor) => {
     setReplyingTo(comment);
   }, []);
+
+  const handleEditComment = useCallback(
+    async (commentId: string, newBody: string) => {
+      const key = queryKeys.comments.byPost(postId);
+      const previous = queryClient.getQueryData<GetCommentsOutput>(key);
+      const editedAt = new Date().toISOString();
+
+      queryClient.setQueryData<GetCommentsOutput>(key, (old) =>
+        old
+          ? {
+              ...old,
+              data: editCommentBody(old.data, commentId, newBody, editedAt),
+            }
+          : old
+      );
+
+      try {
+        await updateComment.mutateAsync({
+          commentId,
+          input: { body: newBody },
+        });
+      } catch (err) {
+        if (previous) queryClient.setQueryData(key, previous);
+        logger.error("Error editing comment:", err);
+        Alert.alert("Error", "Failed to edit comment");
+        throw err;
+      }
+    },
+    [postId, queryClient, updateComment]
+  );
+
+  const handleDeleteComment = useCallback(
+    async (comment: CommentWithAuthor) => {
+      const key = queryKeys.comments.byPost(postId);
+      const previous = queryClient.getQueryData<GetCommentsOutput>(key);
+      const removed = countSubtree(comment);
+
+      queryClient.setQueryData<GetCommentsOutput>(key, (old) =>
+        old ? { ...old, data: removeComment(old.data, comment.id) } : old
+      );
+
+      const prevCount = currentCount;
+      const newCount = Math.max(0, prevCount - removed);
+      setCurrentCount(newCount);
+      setCommentCount(postId, newCount);
+
+      try {
+        await deleteComment.mutateAsync(comment.id);
+      } catch (err) {
+        if (previous) queryClient.setQueryData(key, previous);
+        setCurrentCount(prevCount);
+        setCommentCount(postId, prevCount);
+        logger.error("Error deleting comment:", err);
+        Alert.alert("Error", "Failed to delete comment");
+      }
+    },
+    [postId, currentCount, queryClient, deleteComment, setCommentCount]
+  );
 
   const handleCancelReply = () => {
     setReplyingTo(null);
@@ -220,11 +312,20 @@ export default function CommentsScreen() {
       <CommentItem
         comment={item}
         depth={0}
+        currentUserId={profile.id}
         onReply={handleReply}
         onLikeToggle={handleLikeToggle}
+        onEdit={handleEditComment}
+        onDelete={handleDeleteComment}
       />
     ),
-    [handleReply, handleLikeToggle]
+    [
+      profile.id,
+      handleReply,
+      handleLikeToggle,
+      handleEditComment,
+      handleDeleteComment,
+    ]
   );
 
   return (
