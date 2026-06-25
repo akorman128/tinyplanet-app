@@ -38,7 +38,6 @@ export const useLikePost = () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.posts.detail(postId),
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
     },
   });
 };
@@ -72,7 +71,6 @@ export const useUnlikePost = () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.posts.detail(postId),
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
     },
   });
 };
