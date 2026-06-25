@@ -74,23 +74,10 @@ export function UserPostsSection({
     }
   };
 
-  const handleLike = (postId: string, updates: Partial<PostWithAuthor>) => {
-    const key = isPostsTab
-      ? queryKeys.posts.userPosts(userId)
-      : queryKeys.posts.saved();
-    queryClient.setQueryData(
-      key,
-      (oldData: InfiniteData<PostWithAuthor[]> | undefined) => {
-        if (!oldData?.pages) return oldData;
-        return {
-          ...oldData,
-          pages: oldData.pages.map((page) =>
-            page.map((p) => (p.id === postId ? { ...p, ...updates } : p))
-          ),
-        };
-      }
-    );
-  };
+  // Like cache updates are owned by useLikePost/useUnlikePost (their onMutate
+  // patches every posts.* list cache), so onLike is a no-op here — wiring a
+  // second handler back in would double-increment like_count on these tabs.
+  const noop = () => {};
 
   const handleSave = (postId: string, updates: Partial<PostWithAuthor>) => {
     const key = isPostsTab
@@ -226,7 +213,7 @@ export function UserPostsSection({
           isTravelPlanPost(item) ? (
             <TravelPlanCard
               post={item}
-              onLike={handleLike}
+              onLike={noop}
               onSave={handleSave}
               onDelete={handleDelete}
               onOpenComments={handleOpenCommentsInternal}
@@ -234,7 +221,7 @@ export function UserPostsSection({
           ) : (
             <PostCard
               post={item}
-              onLike={handleLike}
+              onLike={noop}
               onSave={handleSave}
               onDelete={handleDelete}
               onOpenComments={handleOpenCommentsInternal}

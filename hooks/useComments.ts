@@ -9,6 +9,11 @@ import { useSupabase } from "./useSupabase";
 import { useRequireProfile } from "./useRequireProfile";
 import { queryKeys } from "@/lib/queryKeys";
 import {
+  optimisticallyPatchPost,
+  restorePostListCaches,
+  type PostListCacheSnapshot,
+} from "./usePosts";
+import {
   Comment,
   CommentWithAuthor,
   CreateCommentInput,
@@ -55,11 +60,24 @@ export const useCreateComment = () => {
       if (error) throw error;
       return { data };
     },
+    onMutate: (input): { snapshot: PostListCacheSnapshot } => {
+      const snapshot = optimisticallyPatchPost(
+        queryClient,
+        input.post_id,
+        (post) => ({ ...post, comment_count: post.comment_count + 1 })
+      );
+      return { snapshot };
+    },
+    onError: (_err, _input, context) => {
+      restorePostListCaches(queryClient, context?.snapshot);
+    },
     onSuccess: (_data, input) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.comments.byPost(input.post_id),
       });
-      queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.posts.detail(input.post_id),
+      });
     },
   });
 };

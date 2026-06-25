@@ -44,7 +44,7 @@ export const useSavePost = () => {
       restorePostListCaches(queryClient, context?.snapshot);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.posts.saved() });
     },
   });
 };
@@ -74,7 +74,7 @@ export const useUnsavePost = () => {
       restorePostListCaches(queryClient, context?.snapshot);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.posts.saved() });
     },
   });
 };
